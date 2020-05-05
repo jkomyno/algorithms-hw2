@@ -1,6 +1,8 @@
 #pragma once
 
-#include <iostream>
+#include <iostream> // std::istream
+#include <stdexcept> // std::runtime_error
+#include <string> // std::string_literals
 
 // enumeration of the supported metric distances
 enum class EdgeWeightType {
@@ -18,7 +20,8 @@ std::istream& operator>>(std::istream& is, EdgeWeightType& edge_weight_type) {
     } else if (name == "GEO") {
         edge_weight_type = EdgeWeightType::GEO;
     } else {
-        throw std::exception("Unsupported EDGE_WEIGHT_TYPE");
+        using namespace std::string_literals;
+        throw std::runtime_error("Unsupported EDGE_WEIGHT_TYPE"s);
     }
 
     return is;

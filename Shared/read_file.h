@@ -1,10 +1,10 @@
 #pragma once
 
-#include <fstream>  // std::fstream
-#include <limits>   // std::numeric_limits
-#include <string>   // std::string
+#include <fstream>    // std::fstream
+#include <limits>     // std::numeric_limits
+#include <stdexcept>  // std::exception
+#include <string>     // std::string, std::string_literals
 
-#include "DistanceMatrix.h"
 #include "EdgeWeightType.h"
 #include "point_reader_factory.h"
 #include "utils.h"
@@ -23,9 +23,11 @@ inline void skip_line(std::fstream& file) {
 
 // read a TSP file definition, skipping the unimportant header parts
 inline std::unique_ptr<point_reader::PointReader> read_file(const char* filename) {
+    using namespace std::string_literals;
+
     std::fstream file(filename);
     if (!file.good()) {
-        throw std::exception("File doesn't exist");
+        throw std::runtime_error("File doesn't exist"s);
     }
 
     skip_line(file);  // skip NAME line
