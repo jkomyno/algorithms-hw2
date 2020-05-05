@@ -9,7 +9,7 @@
 #include "PriorityQueue.h"
 
 namespace mst {
-    std::vector<Edge> prim_binary_heap_mst(DistanceMatrix<double>&& distance_matrix) noexcept {
+    std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<double>& distance_matrix) noexcept {
         auto vertexes = distance_matrix.get_vertexes();
 
         const size_t n_stop = vertexes.size();
