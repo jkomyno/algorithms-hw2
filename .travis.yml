@@ -1,0 +1,87 @@
+language: cpp
+
+sudo: required
+
+cache:
+  directories:
+    - /tmp/texlive
+    - $HOME/.texlive
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+stages:
+  - name: test
+  # temporarily commented out, the LaTeX committee has been fiddling with GPG keys on May 3th 2020,
+  # which breaks our CI for building LaTeX sources
+  # - name: report
+  - name: deploy
+    if: tag IS present
+
+jobs:
+  include:
+    - stage: test
+      os: linux
+      dist: xenial
+      before_script: g++-9 --version
+      script:
+        - make all
+        # - make testall
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env:
+        - MATRIX_EVAL="CXX=g++-9"
+        - CC="g++-9"
+
+    # - stage: report
+    #   os: linux
+    #   dist: bionic
+    #   before_install:
+    #     # support minted LaTeX package
+    #     - sudo apt-get install python-pygments
+    #   install:
+    #     - source ./.ci/texlive/texlive_install.sh
+    #     - sudo apt-get install texlive-latex-base texlive-latex-recommended texlive-pictures texlive-latex-extra \
+    #       texlive-fonts-recommended texlive-lang-european texlive-lang-italian
+    #   script:
+    #     # build PDF report from LaTeX sources
+    #     - (cd report && texliveonfly --arguments='-shell-escape' main.tex)
+
+    - stage: deploy
+      os: linux
+      dist: xenial
+      before_script: g++-9 --version
+      script:
+        - make all
+      install: skip
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      before_deploy:
+        # prepare release folder
+        - exes=(*.out)
+        - args=("HeldKarp" "MST2Approximation" "Shared" "tsp_dataset" "README.md"
+                "Makefile" "HW2.sln" "${csvs[@]}" "${exes[@]}")
+        - tar -czf ./algorithms-hw2.tar.gz "${args[@]}"
+        - export DEPLOY_PACKAGE=./algorithms-hw2.tar.gz
+        - echo "DEPLOY_PACKAGE is ${DEPLOY_PACKAGE}"
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file:
+        - README.md
+        - $DEPLOY_PACKAGE
+        skip_cleanup: true
+        overwrite: true
+        on:
+          # Releases deployment will trigger if and only if the build is tagged
+          tags: true
