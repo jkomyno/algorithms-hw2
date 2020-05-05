@@ -1,5 +1,5 @@
 CXX=g++-9
-CXXFLAGS=-O3 -Wall -Wextra -std=c++17 -I Shared
+CXXFLAGS=-O3 -Wall -Wextra -std=c++17 -I Shared -Wno-return-type
 MAINFILE=main.cpp
 
 HELD_KARP=HeldKarp
