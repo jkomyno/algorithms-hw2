@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeldKarp", "HeldKarp\HeldKarp.vcxproj", "{55996426-AF7B-44D1-88DE-54B30ACBEDD5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MST2Approximation", "MST2Approximation\MST2Approximation.vcxproj", "{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C0EB85E8-4BBA-461E-A7FA-D101E8C7AE5A}"
+	ProjectSection(SolutionItems) = preProject
+		Shared\DistanceMatrix.h = Shared\DistanceMatrix.h
+		Shared\Edge.h = Shared\Edge.h
+		Shared\EdgeWeightType.h = Shared\EdgeWeightType.h
+		Shared\euclidean_distance.h = Shared\euclidean_distance.h
+		Shared\EuclideanPointReader.h = Shared\EuclideanPointReader.h
+		Shared\geodesic_distance.h = Shared\geodesic_distance.h
+		Shared\GeodesicPointReader.h = Shared\GeodesicPointReader.h
+		Shared\point.h = Shared\point.h
+		Shared\point_reader_factory.h = Shared\point_reader_factory.h
+		Shared\PointReader.h = Shared\PointReader.h
+		Shared\read_file.h = Shared\read_file.h
+		Shared\utils.h = Shared\utils.h
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Debug|x64.ActiveCfg = Debug|x64
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Debug|x64.Build.0 = Debug|x64
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Debug|x86.ActiveCfg = Debug|Win32
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Debug|x86.Build.0 = Debug|Win32
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Release|x64.ActiveCfg = Release|x64
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Release|x64.Build.0 = Release|x64
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Release|x86.ActiveCfg = Release|Win32
+		{55996426-AF7B-44D1-88DE-54B30ACBEDD5}.Release|x86.Build.0 = Release|Win32
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Debug|x64.ActiveCfg = Debug|x64
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Debug|x64.Build.0 = Debug|x64
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Debug|x86.ActiveCfg = Debug|Win32
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Debug|x86.Build.0 = Debug|Win32
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x64.ActiveCfg = Release|x64
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x64.Build.0 = Release|x64
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x86.ActiveCfg = Release|Win32
+		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DF8597F4-C006-470A-ADF6-6E992AF47E10}
+	EndGlobalSection
+EndGlobal
