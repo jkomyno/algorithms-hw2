@@ -149,6 +149,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="approx_tsp.h" />
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="Heap.h" />
     <ClInclude Include="KHeap.h" />

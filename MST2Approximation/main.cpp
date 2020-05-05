@@ -1,8 +1,7 @@
 #include <iostream>  // std::cout, std::endl
-#include <string>    // std::string
 
 #include "DistanceMatrix.h"
-#include "prim_binary_heap_mst.h"
+#include "approx_tsp.h"
 #include "read_file.h"
 
 int main(int argc, char** argv) {
@@ -12,17 +11,16 @@ int main(int argc, char** argv) {
     }
 
     const char* filename = argv[1];
+
+    // read the complete weighted undirected graph
     auto point_reader(read_file(filename));
+
+    // create the symmetric distance matrix using either the Euclidean or Geodesic distances
     auto&& distance_matrix = point_reader->create_distance_matrix();
 
-    // std::cout << distance_matrix << std::endl;
+    // calculate the weight of the 2-approximate solution, which uses Prim's MST algorithm
+    const auto total_weight = approx_tsp(std::forward<decltype(distance_matrix)>(distance_matrix));
 
-    const auto mst(mst::prim_binary_heap_mst(std::move(distance_matrix)));
-
-    std::cout << "MST" << std::endl;
-    for (const auto& [from, to, weight] : mst) {
-        std::cout << from << ", " << to << " (" << weight << ");" << std::endl;
-    }
-
-    std::cin.get();
+    // use std::fixed to avoid displaying numbers in scientific notation
+    std::cout << std::fixed << total_weight << std::endl;
 }

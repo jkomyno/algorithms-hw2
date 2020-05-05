@@ -32,5 +32,8 @@
     <ClInclude Include="prim_binary_heap_mst.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="approx_tsp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
