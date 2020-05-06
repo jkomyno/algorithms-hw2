@@ -12,7 +12,7 @@ namespace mst {
     std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<double>& distance_matrix) noexcept {
         auto vertexes = distance_matrix.get_vertexes();
 
-        const size_t n_stop = vertexes.size();
+        const size_t n_stop = vertexes.size() - 1;
         std::vector<Edge> mst(n_stop);
 
         // Keys are used to pick the lightest edge in cut.
@@ -47,11 +47,12 @@ namespace mst {
                     min_pq.update_key(weight, v);
 
                     // add the edge (u, v) to the Minimum Spanning Tree
-                    mst.at(v) = Edge(u, v, weight);
+                    mst.at(v - 1) = Edge(u, v, weight);
                 }
             }
         }
 
+        // mst.erase(mst.begin());
         return mst;
     }
 }  // namespace mst

@@ -1,17 +1,18 @@
 #pragma once
 
-#include <cmath>     // std::sqrt
 #include <iomanip>   // std::setw
 #include <iostream>  // std::ostream
 #include <numeric>   // std::iota
 #include <vector>    // std::vector
+
+#include "Edge.h"
 
 /**
  * DistanceMatrix represents a distance matrix for a complete, weighted, undirected graph.
  * It's a symmetric matrix which main diagonal is filled with 0s.
  * It stores its values in a 1D vector.
  */
-template <typename T>
+template <typename T = double>
 class DistanceMatrix {
     size_t n_vertexes;
     std::vector<T> data;
@@ -23,7 +24,7 @@ class DistanceMatrix {
 
     // initialize the distance matrix according to the distance(i, j) function
     template <typename Distance>
-    void init(const Distance& distance) {
+    void init(const Distance& distance) noexcept {
         const size_t dimension = size();
 
         // the vector data is already filles with 0, so we don't have to
@@ -45,6 +46,13 @@ class DistanceMatrix {
         }
     }
 
+    void init_from_mst(const std::vector<Edge>& mst) noexcept {
+        for (const auto& [i, j, weight] : mst) {
+            at(i, j) = weight;
+            at(j, i) = weight;
+        }
+    }
+
 public:
     // create a new square matrix with n_vertexes rows initialized to all 0s.
     // distance(i, j) returns the distance between the i-th and j-th point.
@@ -54,16 +62,14 @@ public:
         init(std::forward<Distance>(distance));
     }
 
-    template <typename Distance>
-    explicit DistanceMatrix(const std::vector<T>& data, Distance&& distance) noexcept :
-        n_vertexes(std::sqrt(data.size())), data(data) {
-        init(std::forward<Distance>(distance));
+    explicit DistanceMatrix(std::vector<Edge>&& mst) noexcept :
+        n_vertexes(mst.size() + 1), data(n_vertexes * n_vertexes, 0) {
+        init_from_mst(std::move(mst));
     }
 
-    template <typename Distance>
-    explicit DistanceMatrix(std::vector<T>&& data, Distance&& distance) noexcept :
-        n_vertexes(std::sqrt(data.size())), data(std::move(data)) {
-        init(std::forward<Distance>(distance));
+    explicit DistanceMatrix(const std::vector<Edge>& mst) noexcept :
+        n_vertexes(mst.size() + 1), data(n_vertexes * n_vertexes, 0) {
+        init_from_mst(mst);
     }
 
     // return number of rows/columns of the matrix
