@@ -1,9 +1,10 @@
 #pragma once
 
-#include <iomanip>   // std::setw
-#include <iostream>  // std::ostream
-#include <numeric>   // std::iota
-#include <vector>    // std::vector
+#include <algorithm>  // std::max_element
+#include <iomanip>    // std::setw
+#include <iostream>   // std::ostream
+#include <numeric>    // std::iota
+#include <vector>     // std::vector
 
 #include "Edge.h"
 
@@ -21,9 +22,20 @@ class DistanceMatrix {
     size_t n_vertexes;
     std::vector<T> data;
 
+    using ForwardIt = decltype(data.cbegin());
+
     // maps a matrix index pair to a vector index
     [[nodiscard]] size_t get_index(size_t row, size_t column) const {
         return row * n_vertexes + column;
+    }
+
+    // returns the begin and end iterator to the required row
+    [[nodiscard]] std::pair<ForwardIt, ForwardIt> get_row_at(size_t row) const {
+        const size_t begin = get_index(row, 0);
+        const size_t end = get_index(row, this->size() - 1);
+        const auto it_begin = data.cbegin() + begin;
+        const auto it_end = data.cbegin() + end + 1;
+        return {it_begin, it_end};
     }
 
     // initialize the distance matrix according to the distance(i, j) function
@@ -113,6 +125,33 @@ public:
         }
 
         return adj_v;
+    }
+
+    // retrieves the node which is closest to the given node i
+    [[nodiscard]] size_t get_closest_node(const size_t i) const {
+        const auto& [it_begin, it_end] = get_row_at(i);
+
+        T min = std::numeric_limits<T>::max();
+        size_t min_index = 0;
+        size_t index = 0;
+        for (auto it = it_begin; it != it_end; ++it) {
+            T curr_distance = *it;
+            if (curr_distance != 0 && curr_distance < min) {
+                min = curr_distance;
+                min_index = index;
+            }
+            ++index;
+        }
+
+        return min_index;
+    }
+
+    // retrieves the node which is farthest to the given node i
+    [[nodiscard]] size_t get_farthest_node(const size_t i) const {
+        const auto& [it_begin, it_end] = get_row_at(i);
+        const auto it_max = std::max_element(it_begin, it_end);
+        const size_t max_index = std::distance(it_begin, it_max);
+        return max_index;
     }
 
     // pretty-print distance matrix, useful for debugging/visualization purposes
