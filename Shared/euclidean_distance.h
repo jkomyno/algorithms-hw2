@@ -1,19 +1,23 @@
 #pragma once
 
-#include <cmath>  // std::pow, std::sqrt
-#include <math.h>
+#include <cmath>  // std::pow, std::sqrt, std::round
 
 #include "point.h"
 
 namespace distance {
-    // return the euclidean distance between point i and point j
-    [[nodiscard]] inline int euclidean_distance(const point::point_2D& i, const point::point_2D& j) noexcept {
+    // return the Euclidean distance between point i and point j
+    [[nodiscard]] inline int euclidean_distance(const point::point_2D& i,
+                                                const point::point_2D& j) noexcept {
         const auto& [x_i, y_i] = i;
         const auto& [x_j, y_j] = j;
 
         const double x = x_i - x_j;
         const double y = y_i - y_j;
 
-        return static_cast<int>(round(std::sqrt(std::pow(x, 2) + std::pow(y, 2))));
+        // distance is the Euclidean distance between points i and j
+        const double distance = std::sqrt(std::pow(x, 2) + std::pow(y, 2));
+
+        // round to the nearest integer value
+        return static_cast<int>(std::round(distance));
     }
-}
+}  // namespace distance

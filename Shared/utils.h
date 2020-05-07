@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 namespace utils {
     // determine length of string at compile time
     template <size_t N>
@@ -14,7 +16,8 @@ namespace utils {
 
     // converts x to radians 
     [[nodiscard]] inline double to_radians(const double x) noexcept {
-        const int deg = static_cast<int>(x);
+        // deg is the integer part of x
+        const long deg = static_cast<long>(std::floor(x));
         const double min = x - deg;
         return pi<double> * (deg + 5.0 * min / 3.0) / 180.0;
     }
