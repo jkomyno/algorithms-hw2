@@ -2,6 +2,7 @@
 
 #include "DistanceMatrix.h"
 #include "read_file.h"
+#include "HealdKarp.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -11,9 +12,12 @@ int main(int argc, char** argv) {
 
     const char* filename = argv[1];
     auto point_reader(read_file(filename));
-    const auto distance_matrix = point_reader->create_distance_matrix();
+    auto distance_matrix = point_reader->create_distance_matrix();
 
-    std::cout << distance_matrix << std::endl;
+    HealdKarp heald_karp(std::move(distance_matrix));
+    double distance = heald_karp.execute();
+
+    std::cout << distance << std::endl;
 
     std::cin.get();
 }
