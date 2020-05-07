@@ -154,7 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HKVectors.h" />
-    <ClInclude Include="HealdKarp.h" />
+    <ClInclude Include="HeldKarpBryan.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

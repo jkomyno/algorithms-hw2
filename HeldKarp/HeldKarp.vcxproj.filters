@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HealdKarp.h">
+    <ClInclude Include="HKVectors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HKVectors.h">
+    <ClInclude Include="HeldKarpBryan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
