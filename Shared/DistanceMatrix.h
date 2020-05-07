@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>  // std::max_element
+#include <cmath>      // std::sqrt
 #include <iomanip>    // std::setw
 #include <iostream>   // std::ostream
 #include <numeric>    // std::iota
@@ -36,6 +37,13 @@ class DistanceMatrix {
         const auto it_begin = data.cbegin() + begin;
         const auto it_end = data.cbegin() + end + 1;
         return {it_begin, it_end};
+    }
+
+    // given a matrix index, return the corresponding row and column indexes
+    [[nodiscard]] std::pair<size_t, size_t> get_row_column_by_index(size_t mat_index) const {
+        const size_t row = mat_index / n_vertexes;
+        const size_t column = mat_index % n_vertexes;
+        return {row, column};
     }
 
     // initialize the distance matrix according to the distance(i, j) function
@@ -78,14 +86,18 @@ public:
         init(std::forward<Distance>(distance));
     }
 
+    // TODO: this should probably belong to an AdjacentList implementation
     explicit DistanceMatrix(std::vector<Edge>&& mst) noexcept :
         n_vertexes(mst.size() + 1), data(n_vertexes * n_vertexes, 0) {
-        init_from_mst(std::move(mst));
+        init_from_mst(std::forward<decltype(mst)>(mst));
     }
 
-    explicit DistanceMatrix(const std::vector<Edge>& mst) noexcept :
-        n_vertexes(mst.size() + 1), data(n_vertexes * n_vertexes, 0) {
-        init_from_mst(mst);
+    // this constructor reads an arbitrary square matrix in input.
+    // This can be useful for debugging purposes.
+    // TODO: remove this constructor before submitting the project.
+    DistanceMatrix(std::initializer_list<T>&& debug_matrix) noexcept :
+        n_vertexes(static_cast<size_t>(std::sqrt(debug_matrix.size()))),
+        data(std::move(debug_matrix)) {
     }
 
     // return number of rows/columns of the matrix
@@ -152,6 +164,14 @@ public:
         const auto it_max = std::max_element(it_begin, it_end);
         const size_t max_index = std::distance(it_begin, it_max);
         return max_index;
+    }
+
+    // retrieves the 2 farthest nodes in the graph
+    [[nodiscard]] std::pair<size_t, size_t> get_2_farthest_nodes() const {
+        // TODO: we can optimize this operation by creating an upper-triangle iterator
+        const auto it_max = std::max_element(data.cbegin(), data.cend());
+        const size_t max_matrix_index = std::distance(data.cbegin(), it_max);
+        return get_row_column_by_index(max_matrix_index);
     }
 
     // pretty-print distance matrix, useful for debugging/visualization purposes

@@ -7,7 +7,7 @@
 
 #include "EdgeWeightType.h"
 #include "point_reader_factory.h"
-#include "utils.h"
+#include "shared_utils.h"
 
 // skip n_skip chars while reading from file
 inline void skip_chars(std::fstream& file,
