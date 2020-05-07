@@ -13,8 +13,8 @@
  */
 template <typename It, typename = typename std::enable_if<std::is_same<
                            typename std::iterator_traits<It>::value_type, Edge>::value>::type>
-double sum_weights(const It& cbegin, const It& cend) noexcept {
-    return std::accumulate(cbegin, cend, 0, [](const double acc, const Edge& elem) {
+int sum_weights(const It& cbegin, const It& cend) noexcept {
+    return std::accumulate(cbegin, cend, 0, [](const int acc, const Edge& elem) {
         return acc + elem.weight;
     });
 }

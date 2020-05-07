@@ -17,7 +17,7 @@ namespace point_reader {
         size_t dimension;
 
         // calculate the distance between the i-th and the j-th points
-        virtual double distance(size_t i, size_t j) const = 0;
+        virtual int distance(size_t i, size_t j) const = 0;
 
     public:
         PointReader(std::fstream& file, size_t dimension) : file(file), dimension(dimension) {
@@ -30,13 +30,13 @@ namespace point_reader {
 
         // create a distance matrix after reading the points. It uses the distance method
         // implemented by the child classes as an higher-order function
-        DistanceMatrix<double> create_distance_matrix() {
+        DistanceMatrix<int> create_distance_matrix() {
             using namespace std::placeholders;
 
             // _1 and _2 indicate that the function receives 2 arguments.
             auto distance_fun(std::bind(&PointReader::distance, this, _1, _2));
 
-            return DistanceMatrix<double>(dimension, distance_fun);
+            return DistanceMatrix<int>(dimension, distance_fun);
         }
     };
 

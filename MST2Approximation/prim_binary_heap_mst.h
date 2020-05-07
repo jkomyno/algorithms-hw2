@@ -9,7 +9,7 @@
 #include "PriorityQueue.h"
 
 namespace mst {
-    std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<double>& distance_matrix) noexcept {
+    std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<int>& distance_matrix) noexcept {
         auto vertexes = distance_matrix.get_vertexes();
 
         const size_t n_stop = vertexes.size() - 1;
@@ -17,12 +17,12 @@ namespace mst {
 
         // Keys are used to pick the lightest edge in cut.
         // Initially, keys of all vertexes are set to infinity.
-        constexpr double Infinity = std::numeric_limits<double>::max();
-        std::vector<double> keys(vertexes.size(), Infinity);
+        constexpr int Infinity = std::numeric_limits<int>::max();
+        std::vector<int> keys(vertexes.size(), Infinity);
 
         // the source vertex can be randomly chosen. For simplicity, we choose the first vertex
         // available. the first vertex is distant 0 from itself
-        keys.at(0) = 0.0;
+        keys.at(0) = 0;
 
         // Priority Queue based on a Min Heap ordered by keys, from smaller to larger.
         // We don't need the O(N) first to reorder the vertexes as a heap, since keys is already

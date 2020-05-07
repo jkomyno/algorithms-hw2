@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     auto distance_matrix = point_reader->create_distance_matrix();
 
     HealdKarp heald_karp(std::move(distance_matrix));
-    double distance = heald_karp.execute();
+    int distance = heald_karp.execute();
 
     std::cout << distance << std::endl;
 

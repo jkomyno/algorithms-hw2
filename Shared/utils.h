@@ -10,7 +10,7 @@ namespace utils {
     // fun fact, the constant value of π is only available in C++20, so we have to define it
     // manually in C++17
     template <typename T>
-    constexpr T pi = T(3.1415926535897932385);
+    constexpr T pi = T(3.141592);
 
     // converts x to radians 
     [[nodiscard]] inline double to_radians(const double x) noexcept {

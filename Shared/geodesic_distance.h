@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>  // std::cos, std::acos
+#include <math.h>
 
 #include "point.h"  // point::point_geo
 

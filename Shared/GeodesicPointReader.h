@@ -31,7 +31,7 @@ namespace point_reader {
         }
 
         // calculate the distance between the i-th and the j-th points
-        [[nodiscard]] double distance(size_t i, size_t j) const override {
+        [[nodiscard]] int distance(size_t i, size_t j) const override {
             return distance::geodesic_distance(point_vec[i], point_vec[j]);
         }
     };

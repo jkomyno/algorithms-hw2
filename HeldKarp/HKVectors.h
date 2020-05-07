@@ -3,7 +3,7 @@
 #include <unordered_set>
 
 //class for representing the d vector
-
+template <typename T = int>
 class HKVectors {
 
  
@@ -21,7 +21,7 @@ class HKVectors {
         }
     };
 
-    std::unordered_map<size_t, std::unordered_map<std::unordered_set<size_t>, std::pair<double, size_t>, hash_set>> hk;
+    std::unordered_map<size_t, std::unordered_map<std::unordered_set<size_t>, std::pair<T, size_t>, hash_set>> hk;
 
     
     public:
@@ -34,7 +34,7 @@ class HKVectors {
         return false;
     }
 
-    double get_distance(size_t v, std::unordered_set<size_t> S) {
+    T get_distance(size_t v, std::unordered_set<size_t> S) {
         return hk.at(v).at(S).first;
     }
 
@@ -42,7 +42,7 @@ class HKVectors {
         return hk.at(v).at(S).second;
     }
 
-    void set_distance(size_t v, std::unordered_set<size_t> S, double distance) {
+    void set_distance(size_t v, std::unordered_set<size_t> S, T distance) {
         hk[v][S].first = distance;
     }
 
