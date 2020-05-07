@@ -64,13 +64,13 @@ namespace utils {
     // cbegin and cend are the iterators of the container used to store the circuit.
     // get_distance is the distance function that computes the cost between 2 nodes.
     template <typename It, typename Distance>
-    [[nodiscard]] double sum_weights_in_circuit(const It& cbegin, const It& cend,
+    [[nodiscard]] int sum_weights_in_circuit(const It& cbegin, const It& cend,
                                                 Distance&& get_distance) {
-        double total_weight = 0;
+        int total_weight = 0;
         auto it_prev = cbegin;
 
         for (auto it_curr = std::next(cbegin, 1); it_curr != cend; ++it_curr) {
-            double weight = get_distance(*it_curr, *it_prev);
+            int weight = get_distance(*it_curr, *it_prev);
             total_weight += weight;
             ++it_prev;
         }
@@ -102,11 +102,11 @@ namespace utils {
         // w(0,3) + w(3,4) + w(4,1) + w(1,0).
         auto it_list = circuit_insertion_list.begin();
         it_list = circuit_insertion_list.insert(it_list, k);
-        const double first_weight = utils::sum_weights_in_circuit(
+        const int first_weight = utils::sum_weights_in_circuit(
             circuit_insertion_list.cbegin(), circuit_insertion_list.cend(), get_distance);
 
         // keep track of the minimum weight
-        double min_weight = first_weight;
+        int min_weight = first_weight;
 
         // keep track of the index of the list where the circuit weight is minimized
         size_t index_min_weight = 0;
@@ -118,7 +118,7 @@ namespace utils {
         for (size_t i = 1; i < size; ++i) {
             it_list = circuit_insertion_list.erase(it_list);
             it_list = circuit_insertion_list.insert(std::next(it_list), k);
-            double weight = utils::sum_weights_in_circuit(
+            int weight = utils::sum_weights_in_circuit(
                 circuit_insertion_list.cbegin(), circuit_insertion_list.cend(), get_distance);
 
             if (weight < min_weight) {

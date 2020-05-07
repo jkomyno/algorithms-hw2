@@ -8,8 +8,7 @@
 #include "DistanceMatrix.h"
 #include "utils.h"
 
-[[nodiscard]] inline double farthest_insertion_tsp(
-    DistanceMatrix<double>&& distance_matrix) noexcept {
+[[nodiscard]] inline int farthest_insertion_tsp(DistanceMatrix<int>&& distance_matrix) noexcept {
     const size_t size = distance_matrix.size();
     const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
