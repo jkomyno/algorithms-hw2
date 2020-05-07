@@ -15,7 +15,7 @@ namespace distance {
         const auto& [lat_i, long_i] = i;
         const auto& [lat_j, long_j] = j;
 
-        const double q1 = std::cos(lat_i - long_i);
+        const double q1 = std::cos(long_i - long_j);
         const double q2 = std::cos(lat_i - lat_j);
         const double q3 = std::cos(lat_i + lat_j);
 
