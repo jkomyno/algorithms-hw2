@@ -2,7 +2,7 @@
 
 #include <iostream>  // std::istream
 
-#include "utils.h" // utils::to_radians
+#include "shared_utils.h" // utils::to_radians
 
 namespace point {
     // 2-dimensional point in the Euclidean space
