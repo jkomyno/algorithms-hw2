@@ -21,9 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C0EB85
 		Shared\point_reader_factory.h = Shared\point_reader_factory.h
 		Shared\PointReader.h = Shared\PointReader.h
 		Shared\read_file.h = Shared\read_file.h
+		Shared\shared_utils.h = Shared\shared_utils.h
 		Shared\sum_weights.h = Shared\sum_weights.h
-		Shared\utils.h = Shared\utils.h
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FarthestInsertion", "FarthestInsertion\FarthestInsertion.vcxproj", "{864BF929-64F3-49C2-BF33-F0D376A76ED9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,14 @@ Global
 		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x64.Build.0 = Release|x64
 		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x86.ActiveCfg = Release|Win32
 		{C6E1C5CE-9EBC-4BCE-AC23-8EFCCFBDEC67}.Release|x86.Build.0 = Release|Win32
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Debug|x64.ActiveCfg = Debug|x64
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Debug|x64.Build.0 = Debug|x64
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Debug|x86.ActiveCfg = Debug|Win32
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Debug|x86.Build.0 = Debug|Win32
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Release|x64.ActiveCfg = Release|x64
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Release|x64.Build.0 = Release|x64
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Release|x86.ActiveCfg = Release|Win32
+		{864BF929-64F3-49C2-BF33-F0D376A76ED9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
