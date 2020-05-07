@@ -153,6 +153,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HeldKarpLuca.h" />
     <ClInclude Include="HKVectors.h" />
     <ClInclude Include="HeldKarpBryan.h" />
   </ItemGroup>
