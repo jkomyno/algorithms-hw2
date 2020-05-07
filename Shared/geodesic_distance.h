@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math.h>
+
 #include <cmath>  // std::cos, std::acos
 
 #include "point.h"  // point::point_geo
@@ -19,6 +21,10 @@ namespace distance {
         const double q2 = std::cos(lat_i - lat_j);
         const double q3 = std::cos(lat_i + lat_j);
 
-        return static_cast<int>(RRR * std::acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0);
+        // distance is the geodesic distance between points i and j
+        const double distance = RRR * std::acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0;
+
+        // return the integer part of the geodesic distance
+        return static_cast<int>(std::floor(distance));
     }
 }  // namespace distance

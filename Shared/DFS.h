@@ -9,7 +9,7 @@
 
 class DFS {
     // constant pointer to a non constant graph represented as an Adjacency Map
-    const DistanceMatrix<double> distance_matrix;
+    const DistanceMatrix<int> distance_matrix;
 
 public:
     /**
@@ -17,7 +17,7 @@ public:
      * The unknown distances, i.e. the distances between points not adjacent in the mst, are set to
      * 0. They aren't used anyway.
      */
-    DFS(std::vector<Edge>&& mst) : distance_matrix(DistanceMatrix<double>(std::move(mst))) {
+    DFS(std::vector<Edge>&& mst) : distance_matrix(DistanceMatrix<int>(std::move(mst))) {
     }
 
     // we should not deallocate adj_list_graph_ptr, as it resides on the stack, not the heap

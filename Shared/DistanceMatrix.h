@@ -18,7 +18,7 @@
  * non complete graphs, such as MTSs. In that case, the absence of arcs is represented as
  * 0 distances.
  */
-template <typename T = double>
+template <typename T = int>
 class DistanceMatrix {
     size_t n_vertexes;
     std::vector<T> data;
@@ -123,12 +123,12 @@ public:
     }
 
     // given a vertex i, return the vertexes adjacent to i.
-    [[nodiscard]] std::vector<std::pair<size_t, double>> adjacent_vertexes(const size_t i) const {
-        std::vector<std::pair<size_t, double>> adj_v;
+    [[nodiscard]] std::vector<std::pair<size_t, int>> adjacent_vertexes(const size_t i) const {
+        std::vector<std::pair<size_t, int>> adj_v;
         adj_v.reserve(n_vertexes - 1);
 
         for (size_t j = 0; j < n_vertexes; ++j) {
-            const double weight = at(i, j);
+            const int weight = at(i, j);
 
             // a node j is adjacent to i if the weight of the arc (i, j) is different than 0
             if (weight != 0) {

@@ -7,12 +7,12 @@
 #include "prim_binary_heap_mst.h"
 #include "sum_weights.h"
 
-[[nodiscard]] inline double approx_tsp(DistanceMatrix<double>&& distance_matrix) noexcept {
+[[nodiscard]] inline int approx_tsp(DistanceMatrix<int>&& distance_matrix) noexcept {
     // compute the exact Minimum Spanning Tree of the input graph using Prim's algorithm
     auto mst(mst::prim_binary_heap_mst(distance_matrix));
 
     // we compute the weight of the mst
-    const double mst_weight = sum_weights(mst.cbegin(), mst.cend());
+    const int mst_weight = sum_weights(mst.cbegin(), mst.cend());
 
     // use DFS to perform a preorder traversal of the MST
     DFS dfs(std::move(mst));
@@ -26,7 +26,7 @@
 
     // we use the original distance matrix to compute the distance between the first and the last
     // elements of the preorder traversal
-    const double weight_first_last = distance_matrix.at(first_preorder, last_preorder);
+    const int weight_first_last = distance_matrix.at(first_preorder, last_preorder);
 
     // return the 2-approximated TSP weight
     return mst_weight + weight_first_last;

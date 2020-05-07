@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     auto point_reader(read_file(filename));
 
     // create the symmetric distance matrix using either the Euclidean or Geodesic distances
-    auto&& distance_matrix = point_reader->create_distance_matrix();
+    DistanceMatrix<int>&& distance_matrix = point_reader->create_distance_matrix();
 
     // calculate the weight of the 2-approximate solution, which uses Prim's MST algorithm
     const auto total_weight = approx_tsp(std::forward<decltype(distance_matrix)>(distance_matrix));

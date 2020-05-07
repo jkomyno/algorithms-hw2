@@ -7,7 +7,7 @@ class Edge {
 public:
     size_t from;
     size_t to;
-    double weight;
+    int weight;
 
     /**
      * Default constructor used to represent "null" values when the MST is initialized
@@ -15,7 +15,7 @@ public:
      */
     Edge() noexcept = default;
 
-    explicit Edge(size_t from, size_t to, double weight) noexcept :
+    explicit Edge(size_t from, size_t to, int weight) noexcept :
         from(from), to(to), weight(weight) {
     }
 
