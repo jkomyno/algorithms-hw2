@@ -96,7 +96,7 @@ public:
     // This can be useful for debugging purposes.
     // TODO: remove this constructor before submitting the project.
     DistanceMatrix(std::initializer_list<T>&& debug_matrix) noexcept :
-        n_vertexes(static_cast<size_t>(std::sqrt(debug_matrix.size()))),
+        n_vertexes(static_cast<size_t>(std::sqrt(static_cast<double>(debug_matrix.size())))),
         data(std::move(debug_matrix)) {
     }
 
