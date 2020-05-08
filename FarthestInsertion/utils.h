@@ -1,6 +1,6 @@
 #pragma once
-#include <algorithm>      // std::generate_n, std::max_element
-#include <iterator>       // std::inserter, std::next, std::advance
+#include <algorithm>      // std::max_element
+#include <iterator>       // std::next, std::advance
 #include <limits>         // std::numeric_limits
 #include <list>           // std::list
 #include <unordered_map>  // std::unordered_map
@@ -8,18 +8,6 @@
 #include <vector>         // std::vector
 
 namespace utils {
-    // generate an unorderd set with integer values in range [0, n-1]
-    [[nodiscard]] inline std::unordered_set<size_t> generate_range_set(size_t n) noexcept {
-        std::unordered_set<size_t> set;
-        set.reserve(n);
-
-        std::generate_n(std::inserter(set, set.end()), n, [&set] {
-            return set.size();
-        });
-
-        return set;
-    }
-
     // return the vertex k that doesn't belong to the partial Hamiltonian circuit that
     // maximizes the distance δ(k, circuit).
     // get_distance is the distance function that computes the cost between 2 nodes.
@@ -54,29 +42,6 @@ namespace utils {
         // obtain the maximum of the minimum distances δ(k, circuit)
         const size_t new_k = it_new_k->first;
         return new_k;
-    }
-
-    // compute the total weight of the circuit defined by the two iterators cbegin and cend.
-    // For example, if the iterators represent a container {0,3,4,1}, and we call w the distance
-    // function, it computes the cost as:
-    // w(0,3) + w(3,4) + w(4,1) + w(1,0)
-    //
-    // cbegin and cend are the iterators of the container used to store the circuit.
-    // get_distance is the distance function that computes the cost between 2 nodes.
-    template <typename It, typename Distance>
-    [[nodiscard]] int sum_weights_in_circuit(const It& cbegin, const It& cend,
-                                                Distance&& get_distance) {
-        int total_weight = 0;
-        auto it_prev = cbegin;
-
-        for (auto it_curr = std::next(cbegin, 1); it_curr != cend; ++it_curr) {
-            int weight = get_distance(*it_curr, *it_prev);
-            total_weight += weight;
-            ++it_prev;
-        }
-
-        total_weight += get_distance(*cbegin, *it_prev);
-        return total_weight;
     }
 
     // find the arc (i, j) that minimizes the value of w(i, k) - w(k, j) - w(i, j)

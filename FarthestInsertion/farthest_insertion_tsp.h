@@ -1,11 +1,11 @@
 #pragma once
 
 #include <iterator>
-#include <list>
 #include <unordered_set>
 #include <vector>
 
 #include "DistanceMatrix.h"
+#include "shared_utils.h"
 #include "utils.h"
 
 [[nodiscard]] inline int farthest_insertion_tsp(DistanceMatrix<int>&& distance_matrix) noexcept {
