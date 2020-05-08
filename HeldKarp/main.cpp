@@ -1,7 +1,6 @@
 #include <iostream>  // std::cout, std::endl
 
 #include "DistanceMatrix.h"
-#include "held_karp.h"
 #include "read_file.h"
 // #include "HeldKarpBryan.h"
 
