@@ -20,7 +20,7 @@ namespace utils {
     // converts x to radians
     [[nodiscard]] inline double to_radians(const double x) noexcept {
         // deg is the integer part of x
-        const long deg = static_cast<long>(std::floor(x));
+        const long deg = static_cast<long>(std::trunc(x));
         const double min = x - deg;
         return pi<double> * (deg + 5.0 * min / 3.0) / 180.0;
     }

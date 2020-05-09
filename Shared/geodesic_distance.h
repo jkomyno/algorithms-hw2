@@ -25,6 +25,6 @@ namespace distance {
         const double distance = RRR * std::acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0;
 
         // return the integer part of the geodesic distance
-        return static_cast<int>(std::floor(distance));
+        return static_cast<int>(std::trunc(distance));
     }
 }  // namespace distance
