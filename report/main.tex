@@ -1,0 +1,126 @@
+\documentclass[a4paper,11pt]{article}
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage[italian]{babel}
+  \usepackage{tabularx}
+  \usepackage[font=small,labelfont=bf]{caption}
+  \usepackage[footskip=0.4in,margin=2.5cm]{geometry}
+  \usepackage{enumitem}
+  \usepackage{graphicx}
+  \usepackage{amssymb}
+  \usepackage{wrapfig}
+  \usepackage[dvipsnames]{xcolor}
+  \usepackage{listings}
+  \usepackage{fancyvrb}
+  \usepackage{color}
+  \usepackage{mathtools}
+  \usepackage{nameref}
+  \usepackage{array,collcell}
+  \usepackage{float}
+  \usepackage{subfig}
+  \usepackage{minted} % Needs to be above csquotes.
+  \usepackage{csquotes} % Quotes
+  \usepackage{booktabs} % For \toprule, \midrule and \bottomrule
+  \usepackage{caption}
+  \usepackage{longtable}
+  \usepackage{amssymb}
+  \usepackage{hyperref}
+
+\newminted{c++}{
+    frame=leftline,
+    framesep=2mm,
+    baselinestretch=1.2,
+    fontsize=\footnotesize,
+    fontfamily=courier,
+    escapeinside=@@,
+    rulecolor=black
+}
+
+  \captionsetup[table]{position=bottom}
+
+  % Setup hyperref
+  \hypersetup{
+    colorlinks=true,
+    linkcolor=NavyBlue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={Algoritmi Avanzati - Laboratorio 1},
+    bookmarks=true,
+    pdfpagemode=FullScreen,
+  }
+
+  % \usepackage{amsmath}
+  \DefineShortVerb{\|}
+  \fontfamily{arial}
+
+   % C++ code setting
+
+  \newcommand{\tablepath}{tables}
+
+  \makeatletter
+  \newcommand{\includetable}[1]{%
+    \@ifundefined{tablepath}{%
+      \InputIfFileExists{#1}{}{}%
+    }{%
+      \InputIfFileExists{\tablepath/#1}{}{\InputIfFileExists{#1}{}{}}%
+    }
+  }
+  \makeatother
+
+  \definecolor{diagcolor}{RGB}{146, 151, 192}
+  \newcommand\diagid[0]{\textcolor{diagcolor}{$ (\Delta) $}}
+  \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+  \newcommand\norminf[1]{\norm*{#1}_{\infty}}
+  \newcommand\detox[1]{\ttfamily\detokenize{#1}}
+  \newcommand\strong[1]{\textbf{#1}}
+
+  \newcommand\complexity[1]{$\mathcal{O}(${#1}$)$}
+  \newcommand\complexityConstant[0]{\complexity{$1$}}
+
+  \newcommand\complexityNSquared[0]{\complexity{$n^2$}}
+  \newcommand\complexityNDegree[0]{\complexity{$degree(n)$}}
+  \newcommand\complexityNPlusM[0]{\complexity{$n + m$}}
+  \newcommand\complexityM[0]{\complexity{$m$}}
+  \newcommand\complexityN[0]{\complexity{$n$}}
+  \newcommand\complexityMN[0]{\complexity{$m n$}}
+  \newcommand\complexityMLogN[0]{\complexity{$m \cdot log(n)$}}
+  \newcommand\complexityLogN[0]{\complexity{$\log_{2}({n})$}}
+  \newcommand\complexityLogkN[0]{\complexity{$\log_{k}({n})$}}
+  \newcommand\complexityKLogkN[0]{\complexity{$k \cdot \log_{k}({n})$}}
+  \newcommand\complexityAlpha[0]{\complexity{$\log_{*}({n})$}}
+  \newcommand\complexityMLogM[0]{\complexity{$m \cdot log(m)$}}
+
+  \newcommand\bigO[1]{\mathcal{O}(#1)}
+
+  \newcommand\codeinline[1]{\texttt{#1}}  % alternatives: \mintinline{bash}{#1} or \mintinline{c++}{#1} or \textit{#1}
+
+  \begin{document}
+
+    \input{chapters/0-heading}
+    \cleardoublepage
+    \setlist[itemize]{noitemsep}
+
+    \input{chapters/1-abstract}
+    \input{chapters/2-language-choice}
+    \input{chapters/3-benchmark-process}
+    \input{chapters/4-code-structure}
+    \input{chapters/5-implementation-choices}
+
+    \newpage
+    \input{chapters/6-algorithms}
+
+    \newpage
+    \input{chapters/6-performance-analysis}
+
+    \newpage
+    \input{chapters/7-tests}
+    \input{chapters/8-extensions-and-originalities}
+
+    \newpage
+    \input{chapters/9-conclusions}
+
+
+    % TODO: appendix with results read from CSV
+    \newpage
+    \input{appendixes/A-runtime-tables}
+  \end{document}

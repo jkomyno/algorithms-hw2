@@ -1,0 +1,20 @@
+\section{Struttura del codice}
+\label{cap:code-structure}
+
+Il progetto è strutturato in un'unica soluzione Visual Studio\footnote{Una soluzione Visual Studio può essere vista come un macro-progetto che contiene più sotto-moduli.} contenente molteplici progetti, uno per ogni algoritmo implementato. Il codice di ogni progetto è contenuto nella omonima cartella. Di seguito l'elenco dei progetti realizzati.
+
+\begin{itemize}
+    \item \textbf{TSP2Approximation TODO: Cambiarlo nella soluzione}
+    \item \textbf{HeldKarp}
+    \item \textbf{FarthestInsertion}
+\end{itemize}
+
+\noindent I progetti indicati con $(*)$ sono delle estensioni originali degli algoritmi richiesti.
+\\
+
+\noindent La cartella \textit{Shared} contiene le strutture dati custom e alcune classi e metodi di utilità usati
+condivisi tra progetti.
+
+\noindent Abbiamo configurato Visual Studio per importare automaticamente i file di header salvati nella cartella \textit{Shared}
+durante la compilazione di ogni sottoprogetto. Analogamente, tale cartella è inclusa nella compilazione del \textit{Makefile}, grazie all'opzione \textit{-I} del compilatore \textit{g++}.
+

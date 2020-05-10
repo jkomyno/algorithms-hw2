@@ -1,0 +1,102 @@
+\section{Scelte implementative}
+\label{cap:implementation-choices}
+
+\subsection{Codice templatizzato}
+
+Al fine di rendere il codice quanto più generico ed estendibile, molte delle classi e dei metodi scritti
+usano i template C++, corrispondenti ai generics in Java.
+I nomi ricorrenti dei tipi generici impiegati sono \codeinline{Label} e \codeinline{Weight}.
+\codeinline{Label} denota il tipo del nome di un nodo del grafo. È istanziato come \codeinline{size\_t}, corrispondente a \codeinline{unsigned long long}, occupa almeno 64bit può rappresentare solo valori $\geq 0$.
+\codeinline{Weight} denota il tipo del peso di un arco del grafo. È istanziato come \codeinline{long}, corrispondente a \codeinline{signed long int},
+occupa almeno 32bit.
+
+\subsection{Rappresentazione del grafo}
+\label{sub:graph-representation}
+
+Gli algoritmi di questo homework operano su grafi pesati connessi e non diretti.
+Le operazioni generiche sui grafi di cui abbiamo bisogno sono:
+
+\begin{itemize}
+    \item Creazione di un grafo a partire da una lista di archi in input, con ($n$) vertici e ($m$) archi noti a priori, e con nodi etichettati nell'intervallo $ [0, n[ $ ;
+    \item Lista degli archi del grafo;
+    \item Lista dei vertici del grafo;
+    \item Ottenere dei vertici adiacenti ad un nodo;
+    \item Lista dei vertici adiacenti ad un nodo;
+    \item Aggiunta di un arco (escludendo archi duplicati di peso non minimo);
+    \item Rimozione di un arco.
+\end{itemize}
+
+\noindent Le due rappresentazioni più comuni per rappresentare un grafo sono \textbf{Matrici di Adiacenza} (\textit{Adj. Matrix}) o \textbf{Liste di Adiacenza} (\textit{Adj. List}). \\
+Noi abbiamo deciso invece di utilizzare una Matrice di Adiacenza (\textit{Adj. Matrix}), in particolare una \textbf{Matrice delle distanze}  la quale ci permette complessità temporali migliori per le operazioni richieste.
+
+\begin{table}[ht]
+\centering
+    \begin{tabular}{|l|ccc|}
+    \hline
+    &  \multicolumn{1}{c}{Adj. Matrix} & \multicolumn{1}{c}{Adj. List} & \multicolumn{1}{c|}{Adj. Map} \\
+    \hline
+     Complessità spaziale   & \complexityNSquared{}  & \complexityNPlusM{} & \complexityNPlusM{} \\ \hline
+
+     Creazione grafo & \complexityNSquared{}  & \complexityNPlusM{} & \complexityNPlusM{} \\
+     Enumerazione archi & \complexityNSquared{} & \complexityM{} & \complexityM{} \\
+     Enumerazione vertici & \complexityN{} & \complexityN{} & \complexityN{} \\
+     Ottenere vertici adiacenti ad un nodo & \complexityN{} & \complexityNDegree{} & \complexityConstant{} \\
+     Enumerazione vertici adiacenti ad un nodo & \complexityN{} & \complexityNDegree{} &  \complexityNDegree{} \\
+     Aggiunta arco & \complexityConstant{} & \complexityConstant{} & \complexityConstant{} \\
+     Rimozione arco & \complexityConstant{} & \complexityM{} & \complexityConstant{} \\
+    \hline
+    \end{tabular}
+    \caption{Confronto di complessità spaziali (prima riga) e complessità temporali di alcune operazioni su grafi rappresentati da diverse strutture dati.}
+    \label{table:graph-representation-comparison}
+\end{table}
+
+\subsubsection {Costruzione del Grafo}
+
+
+\subsection{Strutture Dati}
+
+Tutte le strutture dati elencate di seguito sono definite nella cartella \textit{Shared}.
+Ove possibile, per la nomenclatura dei metodi abbiamo cercato di seguire lo stesso standard dei container STL di C++.
+Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando possibile, evitando rehashing e riallocazioni dispendiose. Questo significa che la maggior parte delle operazioni indicate con \complexityConstant{} ammortizzato siano in realtà totalmente costanti nella pratica.
+
+\subsubsection{Heap}
+
+\textit{Heap.h} contiene la definizione astratta di una generica Heap.
+Gli elementi della Heap sono salvati in un \codeinline{std::vector}.
+Per generalizzare il concetto di MinHeap/MaxHeap, la classe usa un comparatore binario booleano. Se il funtore dato in input alla classe è
+\codeinline{std::greater<>}, la struttura dati avrà la semantica di una Min Heap; viceversa, con il comparatore \codeinline{std::less<>} si avrà la semantica di una Max Heap.
+
+\paragraph{Ottimizzazioni}\mbox{} \\
+
+\noindent Il parametro template \textit{IsAlreadyHeap} è usato per evitare di costruire la Heap se l'utente specifica che il container dato in input alla struttura dati rispetta già la proprietà di essere una Heap. Il controllo su questo flag booleano avviene a compile-time. Questa ottimizzazione garantisce un risparmio di tempo pari a \complexityN{}, ed è usata nell'implementazione dell'algoritmo di \textbf{Prim}. \\
+
+\noindent I metodi che ripristinano la prioprietà di Heap (\codeinline{heapify\_up} e \codeinline{heapify\_down}) sono definiti in modo iterativo invece che ricorsivo, per eliminare alla radice tutti i problemi di ottimizzazione legati alla ricorsione che questo specifico linguaggio porta con se.
+
+\subsubsection{Binary Heap}
+
+\textit{BinaryHeap.h} contiene una classe concreta che eredita \textit{Heap.h} e ne implementa i metodi virtuali. Definisce una Binary Heap, ovvero è possibile rappresentare gli elementi salvati come un albero binario completo (tranne eventualmente l'ultimo livello, che potrebbe non essere completo) che rispetta la proprietà di ordinamento delle Heap.
+
+\paragraph{Ottimizzazioni}\mbox{} \\
+
+\noindent L'operazione di divisione per 2, utilizzata ad esempio per determinare i figli sinistro e destro di un nodo nella Heap, è stata sostituita con l'operazione di shift binario.
+
+\subsubsection{K-ary Heap}
+
+\textit{KHeap.h} contiene una classe concreta che eredita \textit{Heap.h} e ne implementa i metodi virtuali. Definisce una K-ary Heap, ovvero è possibile rappresentare gli elementi salvati come un albero k-ario completo (tranne eventualmente l'ultimo livello, che potrebbe non essere completo) che rispetta la proprietà di ordinamento delle Heap.
+\textit{K} è un parametro template che deve essere strettamente maggiore di due.
+
+\subsubsection{Priority Queue}
+
+\textit{PriorityQueue.h} è una classe concreta che eredita privatamente \textit{BinaryHeap.h} o \textit{KHeap.h}, a seconda del parametro template \textit{Heap}.
+La semantica di PriorityQueue dipende dal comparatore passato al costruttore, che indica se si vuole usare una coda di priorità basata su Min Heap o su Max Heap. \\
+
+\noindent PriorityQueue ha accesso diretto ai nodi salvati nella Heap, e usa due container associativi di tipo \codeinline{std::unordered\_map} per tenere traccia delle chiavi e degli indici posizionali di ogni elemento della Heap, permettendone la lettura e l'aggiornamento in tempo costante ammortizzato. \\
+
+\noindent Rispetto ai costruttori delle varie classi Heap, PriorityQueue richiede non un comparatore, bensì una factory di comparatori. A tale factory è data in input una mappa che associa i valori degli elementi della Heap alle rispettive chiavi. Poiché tale input è passato per reference, il comparatore generato userà sempre la versione più aggiornata della mappa.
+
+\noindent L'operazione di aggiornamento di una chiave richiede chiavi strettamente discendenti nel caso di una MinHeap, e chiavi strettamente crescenti nel caso di una MaxHeap. Abbiamo imposto questo vincolo per mantenere la complessità di \codeinline{update\_key} logaritmica anziché lineare (come sarebbe se avessimo usato il metodo \codeinline{build\_heap} indistintamente).
+
+\paragraph{Ottimizzazioni}\mbox{} \\
+
+\noindent Poichè istanziare una PriorityQueue così generica e flessibile è un'operazione non banale, abbiamo creato una serie di funzioni di utilità di facile comprensione da usare. Ad esempio, per creare una coda di priorità basata su una Min Heap binaria, esiste il metodo \codeinline{make\_min\_priority\_queue} (analogamente esiste \codeinline{make\_min\_k\_priority\_queue} per Min Heap K-ary).
+L'utente finale della classe non deve preoccuparsi di inserire manualmente tutti i parametri template di tali funzioni, grazie alla \textit{type deduction} di C++17.

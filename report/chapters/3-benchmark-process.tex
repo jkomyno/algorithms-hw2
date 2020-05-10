@@ -1,0 +1,42 @@
+\section{Benchmark}
+\label{cap:benchmark-process}
+
+Abbiamo deciso di rendere il processo di misurazione del tempo di esecuzione dei nostri algoritmi esterno al codice dei programmi sviluppati.
+Il nostro benchmark tiene quindi conto di tutto, ovvero:
+
+\begin{itemize}
+    \item Tempo necessario a leggere il file di input in un container \textit{std::vector} temporaneo;
+    \item Tempo per trasformare il container temporaneo in una matrice di adiacenza;
+    \item Tempo per eseguire l'algoritmo vero e proprio per la risoluzione di TSP e restituire il risultato;
+\end{itemize}
+
+\noindent TODO: PARLARE DEGLI SCRIPT DI MISURAZIONE DEI TEMPI
+
+\noindent Le colonne dei file CSV sopracitati sono le seguenti:
+
+\begin{itemize}
+    \item \textbf{ms}: tempo in millisecondi per eseguire il programma su un singolo file di input;
+    \item \textbf{output}: risultato del programma, ovvero peso dell'MST del grafo letto in input;
+    \item \textbf{n}: numero di nodi del grafo letto;
+    \item \textbf{m}: numero di archi del grafo letto;
+    \item \textbf{filename}: nome del file di input letto.
+\end{itemize}
+
+\noindent Per rendere i risultati del benchmark quanto più stabili e affidabili possibile, abbiamo preso le seguenti precauzioni:
+
+\begin{itemize}
+    \item Abbiamo usato sempre lo stesso computer per misurare il tempo di esecuzione dei programmi implementati;
+    \item Abbiamo chiuso tutti i programmi in foreground e disabilitato quanti più servizi possibile in background;
+    \item Abbiamo disabilitato la connessione Internet del computer scelto;
+    \item Abbiamo fatto più misurazioni in tempi differenti. Di tutte le misurazioni effettuate è poi stata scelta la minima per elaborazioni e grafici.
+\end{itemize}
+
+\noindent Abbiamo definito lo script Python \textit{benchmark/analysis.py} per automatizzare il processo di confronto degli algoritmi e la creazione di tabelle e grafici inseriti in questa relazione. Esso legge i file CSV generati dallo script di benchmark \textit{benchmark.ps1}. \\
+
+\noindent Il computer usato per effettuare i benchmark degli algoritmi ha le seguenti caratteristiche:
+
+\begin{itemize}
+    \item \textbf{Sistema Operativo}: Windows 10 Education 64 bit;
+    \item \textbf{CPU}: Intel Core i5 6600K 3.50 GHz
+    \item \textbf{RAM}: 16 GB;
+\end{itemize}

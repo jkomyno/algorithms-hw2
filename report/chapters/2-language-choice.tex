@@ -1,0 +1,25 @@
+\section{Linguaggio di programmazione scelto}
+\label{cap:language-choice}
+
+Per l'implementazione dei vari algoritmi proposti nell'homework abbiamo scelto usare il linguaggio di programmazione
+C++17. Le ragioni della nostra scelta sono dovute principalmente al fatto che C++17
+
+\begin{itemize}
+    \item è un linguaggio compilato e fortemente orientato ai tipi;
+    \item è privo di garbage collector;
+    \item supporta i tipi generici (\textit{template});
+    \item permette di creare personalizzazioni a compile-time senza alcun impatto a runtime;
+    \item ha un'ampia libreria standard consolidata e ben mantenuta;
+    \item se opportunamente usato, permette di limitare al minimo il consumo di memoria;
+    \item la sua sintassi è intuitiva, leggibile e facile da seguire, anche più prolissa rispetto ad altri linguaggi;
+    \item supporta la \textit{move semantics \footnote{https://stackoverflow.com/questions/3106110/what-is-move-semantics} } e altre ottimizzazioni che permettono al programmatore di evitare inutili copie di oggetti e overhead in memoria.
+\end{itemize}
+Ciò si traduce in un linguaggio che privilegia l'efficienza e la chiarezza, particolarmente indicato per il nostro scopo.
+
+\subsection{IDE e compilatore}
+
+Poiché il nostro sistema operativo di sviluppo è Windows 10, abbiamo usato l'IDE Visual Studio 2019 Community e il suo compilatore \textit{MSVC v142 x64/x86}. \\
+
+\noindent Nell'archivio allegato a questa relazione abbiamo incluso un \textit{Makefile} per permettere la compilazione su altri sistemi operativi usando \textit{g++-9}. Il comando da usare per la compilazione è \mintinline{bash}{make all}. Nel caso la versione di \textit{g++} installata sia la 9.x.y ma l'alias esplicito \textit{g++-9} non esista, è possibile sovrascrivere il compilatore usato con il comando \mintinline{bash}{make CXX=g++ all}.
+
+Altri comandi sono disponibili per eseguire test e benchmark degli algoritmi, oppure per eseguire semplicemente i programmi compilati. Ci si riferisca al file \textit{README.md} incluso al progetto.
