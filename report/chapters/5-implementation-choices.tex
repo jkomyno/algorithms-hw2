@@ -13,44 +13,27 @@ occupa almeno 32bit.
 \subsection{Rappresentazione del grafo}
 \label{sub:graph-representation}
 
-Gli algoritmi di questo homework operano su grafi pesati connessi e non diretti.
-Le operazioni generiche sui grafi di cui abbiamo bisogno sono:
+Gli algoritmi di questo homework operano su grafi pesati connessi e non diretti. In questo caso in particolare, ai nodi viene assegnato un intero da 1 a n che lo identifica ed una posizione nel piano che può essere geografico o euclidea a seconda del formato specificato.
 
+\noindent Per rappresentare quindi questa particolare istanza di grafo abbiamo deciso di utilizzare una Matrice di Adiacenza (\textit{Adj. Matrix}), in particolare in questo specifico contesto useremo una \textbf{Matrice delle distanze}: dati due nodi del grafo essa restituisce la distanza dei due nodi a partire dalle coordinate di quest'ultimi. In particolare:
 \begin{itemize}
-    \item Creazione di un grafo a partire da una lista di archi in input, con ($n$) vertici e ($m$) archi noti a priori, e con nodi etichettati nell'intervallo $ [0, n[ $ ;
-    \item Lista degli archi del grafo;
-    \item Lista dei vertici del grafo;
-    \item Ottenere dei vertici adiacenti ad un nodo;
-    \item Lista dei vertici adiacenti ad un nodo;
-    \item Aggiunta di un arco (escludendo archi duplicati di peso non minimo);
-    \item Rimozione di un arco.
+    \item \textbf{Se le coordinate sono in formato EUC\_2D}: significa che esse rappresentano la posizione nel piano euclideo a 2 dimensioni. Viene dunque calcolata la distanza euclidea tra ogni nodo e il risultato viene inserito nella corrispondente posizione della matrice delle distanze.
+    \item \textbf{Se le coordinate sono in formato GEO}: significa che esse rappresentano la posizione in termini geografici (ossia latitudine e longitudine). Vengono quindi convertite in radianti e calcolata la distanza con l'apposito codice fornito nella consegna e il risultato viene inserito nella corrispondente posizione della matrice delle distanze.
 \end{itemize}
 
-\noindent Le due rappresentazioni più comuni per rappresentare un grafo sono \textbf{Matrici di Adiacenza} (\textit{Adj. Matrix}) o \textbf{Liste di Adiacenza} (\textit{Adj. List}). \\
-Noi abbiamo deciso invece di utilizzare una Matrice di Adiacenza (\textit{Adj. Matrix}), in particolare una \textbf{Matrice delle distanze}  la quale ci permette complessità temporali migliori per le operazioni richieste.
+E quindi possibile tramite la matrice delle distanze, rappresentare l'intero grafo in quanto le righe o le colonne rappresentano i nodi del grafo, mentre i valori contenuti in essa rappresentano le distanze tra i nodi considerati. Le coordinate dei nodi vengono perse in quanto non sono necessarie ai fini della risoluzione del problema del TSP.
 
-\begin{table}[ht]
-\centering
-    \begin{tabular}{|l|ccc|}
-    \hline
-    &  \multicolumn{1}{c}{Adj. Matrix} & \multicolumn{1}{c}{Adj. List} & \multicolumn{1}{c|}{Adj. Map} \\
-    \hline
-     Complessità spaziale   & \complexityNSquared{}  & \complexityNPlusM{} & \complexityNPlusM{} \\ \hline
-
-     Creazione grafo & \complexityNSquared{}  & \complexityNPlusM{} & \complexityNPlusM{} \\
-     Enumerazione archi & \complexityNSquared{} & \complexityM{} & \complexityM{} \\
-     Enumerazione vertici & \complexityN{} & \complexityN{} & \complexityN{} \\
-     Ottenere vertici adiacenti ad un nodo & \complexityN{} & \complexityNDegree{} & \complexityConstant{} \\
-     Enumerazione vertici adiacenti ad un nodo & \complexityN{} & \complexityNDegree{} &  \complexityNDegree{} \\
-     Aggiunta arco & \complexityConstant{} & \complexityConstant{} & \complexityConstant{} \\
-     Rimozione arco & \complexityConstant{} & \complexityM{} & \complexityConstant{} \\
-    \hline
-    \end{tabular}
-    \caption{Confronto di complessità spaziali (prima riga) e complessità temporali di alcune operazioni su grafi rappresentati da diverse strutture dati.}
-    \label{table:graph-representation-comparison}
-\end{table}
 
 \subsubsection {Costruzione del Grafo}
+La procedura per costruire il grafo, ossia costruire la matrice delle distanze richiede le seguente operazioni:
+\begin{enumerate}
+    \item Lettura del file di input: in particolare in questa fase vengono estratte tutte le informazioni necessarie, come il tipo di file che si sta leggendo (formato EUC\_2D o GEO) e il numero di nodi presenti; 
+    \item Una volta identificato il formato del file, viene letto ogni singolo nodo con le sue coordinate ed inserito in un vettore.
+    \item Viene creata la matrice delle distanze, calcolando tutte le distanze di ogni nodo con ogni altro nodo del grafo. La distanza viene calcolata a seconda del formato delle coordinate del file di input.
+\end{enumerate}
+
+\paragraph{Ottimizzazioni}\mbox{} \\
+\noindent Per definizione, la matrice delle distanze risulta essere una matrice simmetrica con gli elementi della diagonale pari a 0 (in quanto ogni nodo dista 0 da se stesso). Pertanto è possibile calcolare le distanze della matrice triangolare superiore e copiare poi i valori in maniera speculare nella matrice triangolare inferiore, risparmiando così in termini di tempo. E' possibile fare ciò in quanto la distanza tra un nodi i e j e la stessa tra j e i.\\
 
 
 \subsection{Strutture Dati}
