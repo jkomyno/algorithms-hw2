@@ -13,7 +13,7 @@ occupa almeno 32bit.
 \subsection{Rappresentazione del grafo}
 \label{sub:graph-representation}
 
-Gli algoritmi di questo homework operano su grafi pesati connessi e non diretti. In questo caso in particolare, ai nodi viene assegnato un intero da 1 a n che lo identifica ed una posizione nel piano che può essere geografico o euclidea a seconda del formato specificato.
+Gli algoritmi di questo homework operano su grafi pesati connessi e non diretti. In questo caso in particolare, ai nodi viene assegnato un intero da 1 a n che lo identifica ed una posizione nel piano che può essere geografica o euclidea a seconda del formato specificato.
 
 \noindent Per rappresentare quindi questa particolare istanza di grafo abbiamo deciso di utilizzare una Matrice di Adiacenza (\textit{Adj. Matrix}), in particolare in questo specifico contesto useremo una \textbf{Matrice delle distanze}: dati due nodi del grafo essa restituisce la distanza dei due nodi a partire dalle coordinate di quest'ultimi. In particolare:
 \begin{itemize}
@@ -33,7 +33,7 @@ La procedura per costruire il grafo, ossia costruire la matrice delle distanze r
 \end{enumerate}
 
 \paragraph{Ottimizzazioni}\mbox{} \\
-\noindent Per definizione, la matrice delle distanze risulta essere una matrice simmetrica con gli elementi della diagonale pari a 0 (in quanto ogni nodo dista 0 da se stesso). Pertanto è possibile calcolare le distanze della matrice triangolare superiore e copiare poi i valori in maniera speculare nella matrice triangolare inferiore, risparmiando così in termini di tempo. E' possibile fare ciò in quanto la distanza tra un nodi i e j e la stessa tra j e i.\\
+\noindent Per definizione, la matrice delle distanze risulta essere una matrice simmetrica con gli elementi della diagonale pari a 0 (in quanto ogni nodo dista 0 da se stesso). Pertanto è possibile calcolare le distanze della matrice triangolare superiore e copiare poi i valori in maniera speculare nella matrice triangolare inferiore, risparmiando così in termini di tempo. E' possibile fare ciò in quanto la distanza tra i nodi i e j e la stessa tra j e i.\\
 
 
 \subsection{Strutture Dati}

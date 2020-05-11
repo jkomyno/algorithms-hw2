@@ -7,16 +7,29 @@
 La versione vista a lezione di questo algoritmo prevede i seguenti step:
 
 \begin{enumerate}
-    \item -
-    \item -
-    \item -
+    \item Ricavare l'MST del grafo in input utilizzando l'algortimo di Primm e la radice da cui partire.
+    \item Eseguire una visita pre-order dell'MST ricavato al passo precedente
+    \item Aggiungere alla visita pre-order la radice.
+    \item Calcolare il peso totale del circuito ricavato nei 2 passi precedente e restituire il risultato.
 \end{enumerate}
 
 \noindent Il listato \ref{listing:tsp2approx} contiene la nostra implementazione dell'algoritmo, step per step.\\
 
 \begin{listing}[!ht]
 \begin{minted}{c++}
-// ----
+    // Step: 1
+    auto mst(mst::prim_binary_heap_mst(distance_matrix));
+
+    // Step: 2-3
+    DFS dfs(std::move(mst));
+    const auto circuit = dfs.preorder_traversal_rec();
+
+    const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
+        return distance_matrix.at(x, y);
+    };
+
+    // Step: 4
+    return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_distance);
 
 \end{minted}
 \caption{Implementazione di TSP 2-approssimato. I commenti del file originale sono stati omessi per una maggiore compattezza.}
@@ -28,17 +41,15 @@ La versione vista a lezione di questo algoritmo prevede i seguenti step:
 \subsubsection{Osservazioni}
 
 \begin{itemize}
-    \item -
+    \item E' opportuno in questo caso utilizzare una matrice delle distanze (o matrice di adiacenza) in quanto essendo questi grafi completi l'implementazione di Primm diventa più efficiente e performante.
+    \item La cosa di priorità per Primm è stata implementata con una Binary Heap.
 \end{itemize}
 
 
 \subsection{Held e Karp}
 
-La versione vista a lezione di Held e Karp prevede i seguenti step:
-
-\begin{enumerate}
-    \item -
-\end{enumerate}
+Riportiamo qui di seguito nel listato TODO lo pseudocodice dell'algortimo di Held e Karp:
+TODO immagine?
 
 \noindent Il listato \ref{listing:held-karp} contiene la nostra implementazione dell'algoritmo, step per step.
 
