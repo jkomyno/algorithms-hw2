@@ -1,8 +1,9 @@
 #pragma once
 
-#include <chrono>
-#include <future>
-#include <thread>
+#include <chrono>              // std::milliseconds, std::chrono_literals
+#include <future>              // std::future, std::promise
+#include <thread>              // std::thread
+#include <type_traits>         // std::invoke_result_t
 
 using namespace std::chrono_literals;
 
@@ -17,6 +18,8 @@ namespace timeout {
 
     // future<void> wrapper used to signal expired timeout signals
     struct timeout_signal {
+        timeout_signal() = delete;
+
         explicit timeout_signal(std::future<void>&& signal_future) :
             signal_future(std::move(signal_future)) {
         }
@@ -41,8 +44,8 @@ namespace timeout {
     // the function returns or the timeout expires, whatever of the two conditions happens earlier.
     // If the function concludes before the timeout expires, the result is immediately returned.
     // If the timeout expires while the function is still in execution, its timeout signal object is
-    // marked as expired. The function itself must check whether the timeout signal was triggered or not
-    // with the timeout_signal::is_expired() mmethod.
+    // marked as expired. The function itself must check whether the timeout signal was triggered or
+    // not with the timeout_signal::is_expired() mmethod.
     template <typename Duration, typename Function, class... Args>
     std::invoke_result_t<Function, timeout_signal&&, Args...> with_timeout(Duration duration,
                                                                            Function&& f,

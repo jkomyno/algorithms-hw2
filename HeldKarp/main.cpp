@@ -6,10 +6,12 @@
 #include "timeout.h"
 // #include "HeldKarpBryan.h"
 
+#include <thread>
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cerr << "1 argument required: filename" << std::endl;
-        exit(0);
+        exit(1);
     }
 
     // read the graph and create the distance matrix
