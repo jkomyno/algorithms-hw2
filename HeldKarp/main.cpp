@@ -1,7 +1,9 @@
 #include <iostream>  // std::cout, std::endl
 
 #include "DistanceMatrix.h"
+#include "HeldKarpAlberto.h"
 #include "read_file.h"
+#include "timeout.h"
 // #include "HeldKarpBryan.h"
 
 int main(int argc, char** argv) {
@@ -15,14 +17,24 @@ int main(int argc, char** argv) {
     auto point_reader(read_file(filename));
     auto distance_matrix = point_reader->create_distance_matrix();
 
-    // HeldKarp held_karp(std::move(distance_matrix));
-    // int total_weight = held_karp.execute();
-    // std::cout << total_weight << std::endl;
+    /*
+    // matrix used for debug purposes
+    DistanceMatrix<int> distance_matrix {
+        0, 2, 4, 1, 6,
+        2, 0, 5, 4, 7,
+        4, 5, 0, 2, 1,
+        1, 4, 2, 0, 8,
+        6, 7, 1, 8, 0
+    };
+    */
 
-    // calculate the weight
-    // const auto total_weight =
-    //    held_karp_tsp(std::forward<decltype(distance_matrix)>(distance_matrix));
+    // the TSP timeout is set to 5 minutes
+    auto timeout_min = 5min;
 
-    // use std::fixed to avoid displaying numbers in scientific notation
-    // std::cout << std::fixed << total_weight << std::endl;
+    // it's either the weight of the optimal Hamiltonian cycle, or an upper-bound of it in case the
+    // computation requires more time than the alotted timeout.
+    int total_weight = timeout::with_timeout(std::move(timeout_min), &held_karp_tsp_rec,
+                                             std::move(distance_matrix));
+
+    std::cout << std::fixed << total_weight << std::endl;
 }
