@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     // read the graph and create the distance matrix
     const char* filename = argv[1];
     auto point_reader(read_file(filename));
-    auto distance_matrix = point_reader->create_distance_matrix();
+    // auto distance_matrix = point_reader->create_distance_matrix();
 
     /*
     // matrix used for debug purposes
@@ -30,6 +30,33 @@ int main(int argc, char** argv) {
     };
     */
 
+    std::cout << "A" << std::endl;
+
+    auto f = [&point_reader]() {
+        auto distance_matrix = point_reader->create_distance_matrix();
+        // the TSP timeout is set to 5 minutes
+        auto timeout_min = 5min;
+
+        std::cout << "B" << std::endl;
+
+        // it's either the weight of the optimal Hamiltonian cycle, or an upper-bound of it in case
+        // the computation requires more time than the alotted timeout.
+        int total_weight = timeout::with_timeout(std::move(timeout_min), &held_karp_tsp_rec,
+                                                 std::move(distance_matrix));
+
+        std::cout << std::fixed << total_weight << std::endl;
+    };
+
+    std::packaged_task<void()> task(f);
+    std::thread thread(std::move(task));
+
+    std::cout << "C" << std::endl;
+
+    thread.join();
+
+    std::cout << "D" << std::endl;
+
+    /*
     // the TSP timeout is set to 5 minutes
     auto timeout_min = 5min;
 
@@ -39,4 +66,5 @@ int main(int argc, char** argv) {
                                              std::move(distance_matrix));
 
     std::cout << std::fixed << total_weight << std::endl;
+    */
 }

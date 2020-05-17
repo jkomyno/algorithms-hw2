@@ -123,7 +123,7 @@ inline void clear_old_dp_entries(held_karp_dp_bits_t& C, const size_t threshold)
 // Iterative Held Karp implementation with manual bit sets.
 // Time: O(2^n * n^2)
 // Space: O(2^n * sqrt(n))
-inline int held_karp_tsp(timeout::timeout_signal&& signal, DistanceMatrix<int>&& distance_matrix) {
+inline int held_karp_tsp(DistanceMatrix<int>&& distance_matrix) {
     using ull = unsigned long long;
     const size_t n = distance_matrix.size();
 
