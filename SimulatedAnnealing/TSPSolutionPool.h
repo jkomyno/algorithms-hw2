@@ -7,7 +7,7 @@
 
 #include "DistanceMatrix.h"
 #include "SimulatedAnnealing.h"
-#include "random.h"
+#include "random_generator.h"
 #include "shared_utils.h"
 
 class TSPSolution;
@@ -20,7 +20,7 @@ class TSPSolutionPool {
     const DistanceMatrix<int>& distance_matrix;
     SolutionFactory solution_factory;
 
-    random::RealRandomGenerator rand;
+    random_generator::RealRandomGenerator rand;
     std::vector<std::vector<size_t>> holder;
     std::vector<size_t> unused;
 

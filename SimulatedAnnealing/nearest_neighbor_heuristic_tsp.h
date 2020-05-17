@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "DistanceMatrix.h"
-#include "random.h"
+#include "random_generator.h"
 #include "shared_utils.h"
 
 [[nodiscard]] std::vector<size_t> nearest_neighbor_heuristic_tsp(
-    DistanceMatrix<int>& distance_matrix, random::IntegerRandomGenerator& rand) {
+    DistanceMatrix<int>& distance_matrix, random_generator::IntegerRandomGenerator& rand) {
     const size_t size = distance_matrix.size();
 
     size_t curr_node = rand();

@@ -4,7 +4,7 @@
 #include <type_traits>  // std::enable_if, std::is_base_of
 
 #include "SimulatedAnnealingOptions.h"
-#include "random.h"
+#include "random_generator.h"
 
 namespace simulated_annealing {
     template <class Solution>
@@ -24,7 +24,7 @@ namespace simulated_annealing {
     class SimulatedAnnealing {
         double temperature;
         SimulatedAnnealingOptions options;
-        random::RealRandomGenerator rand;
+        random_generator::RealRandomGenerator rand;
 
         bool metropolis(double x, double y) {
             return rand() <= std::exp(-(x - y) / temperature);
@@ -62,7 +62,7 @@ namespace simulated_annealing {
         SimulatedAnnealing(SimulatedAnnealingOptions&& options) :
             temperature(options.init_temperature),
             options(std::forward<decltype(options)>(options)),
-            rand(random::RealRandomGenerator(0.0, 1.0)) {
+            rand(random_generator::RealRandomGenerator(0.0, 1.0)) {
         }
 
         Solution solve(Solution initial_solution) {

@@ -7,12 +7,12 @@
 #include "SimulatedAnnealingOptions.h"
 #include "TSPSolutionPool.h"
 #include "nearest_neighbor_heuristic_tsp.h"
-#include "random.h"
+#include "random_generator.h"
 #include "shared_utils.h"
 
 [[nodiscard]] int simulated_annealing_tsp(DistanceMatrix<int>&& distance_matrix) {
     const size_t size = distance_matrix.size();
-    random::IntegerRandomGenerator rand_int(0, size);
+    random_generator::IntegerRandomGenerator rand_int(0, size);
 
     const auto get_distance = [&](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
