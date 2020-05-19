@@ -12,7 +12,7 @@
 
 [[nodiscard]] int simulated_annealing_tsp(DistanceMatrix<int>&& distance_matrix) {
     const size_t size = distance_matrix.size();
-    random_generator::IntegerRandomGenerator rand_int(0, size);
+    random_generator::IntegerRandomGenerator rand_int(0, size - 1);
 
     const auto get_distance = [&](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
