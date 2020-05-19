@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Usage: ./benchmark.sh
 #
 # Create a csv benchmark file for each program supplying to it the datasets
