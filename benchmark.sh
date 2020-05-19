@@ -16,7 +16,7 @@ else
     ext=".out";
 fi
 
-algorithms="MST2Approximation FarthestInsertion HeldKarp SimulatedAnnealing" # SimulatedAnnealing
+algorithms="MST2Approximation FarthestInsertion SimulatedAnnealing HeldKarp"
 output_folder="benchmark"
 
 datasets="tsp_dataset"
