@@ -1,8 +1,10 @@
 #pragma once
 
-#include <algorithm>  // std::prev_permutation, std::fill
-#include <cmath>      // std::log2
-#include <vector>     // std::vector
+#include <algorithm>      // std::prev_permutation, std::fill
+#include <cmath>          // std::log2
+#include <iterator>       // std::inserter
+#include <unordered_set>  // std::unordered_set
+#include <vector>         // std::vector
 
 namespace utils {
     using ull = unsigned long long;
@@ -39,6 +41,17 @@ namespace utils {
         } while (std::prev_permutation(v.begin(), v.end()));
 
         return combinations;
+    }
+
+    template <typename T>
+    std::unordered_set<T> set_singleton_difference(const std::unordered_set<T>& original_set,
+                                                   const T& v) {
+        std::unordered_set<size_t> difference;
+        std::copy_if(original_set.cbegin(), original_set.cend(),
+                     std::inserter(difference, difference.end()), [v](const auto& u) {
+                         return u != v;
+                     });
+        return difference;
     }
 
     inline void set_bit_in_position(ull& number, const size_t position) noexcept {
