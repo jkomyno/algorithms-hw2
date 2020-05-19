@@ -25,6 +25,7 @@ namespace random_generator {
         std::uniform_int_distribution<size_t> dist;
 
     public:
+        // creates a random generator that can return random integers in the range [x, y]
         IntegerRandomGenerator(size_t x, size_t y) : dist(x, y) {
         }
 
@@ -36,4 +37,4 @@ namespace random_generator {
             return dist(engine);
         }
     };
-}  // namespace random
+}  // namespace random_generator
