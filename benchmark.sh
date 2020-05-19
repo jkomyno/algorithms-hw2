@@ -3,10 +3,21 @@
 # Create a csv benchmark file for each program supplying to it the datasets
 # in dataset folder.
 
-exe_folder="."
-algorithms="MST2Approximation FarthestInsertion HeldKarp" # SimulatedAnnealing
+IFS=' '
+read -ra os <<< "$(uname -a)"
+os=${os[0]}
+
+if [[ $os ==  MINGW* ]];
+then
+    exe_folder="./x64/Release";
+    ext=".exe";
+else
+    exe_folder=".";
+    ext=".out";
+fi
+
+algorithms="MST2Approximation FarthestInsertion HeldKarp SimulatedAnnealing" # SimulatedAnnealing
 output_folder="benchmark"
-ext=".out"
 
 datasets="tsp_dataset"
 
