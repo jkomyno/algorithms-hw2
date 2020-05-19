@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     };
     */
 
-    // the TSP timeout is set to 5 minutes
+    // the TSP timeout is set to 2 minutes
     auto timeout_min = 2min;
 
     // it's either the weight of the optimal Hamiltonian cycle, or an upper-bound of it in case the
