@@ -331,6 +331,30 @@ def show_or_save_plot(title: str):
         plt.show()
 
 
+def names_to_vs(names: List[str]) -> str:
+    """
+    Return a string made by names joined by "vs".
+    """
+    return reduce(lambda x, y: x + ' vs ' + y, names)
+
+
+def names_to_dfs(names: List[str], dfs) -> Dict[str, List[pd.DataFrame]]:
+    """
+    Return a dict where for each name the key is one of the name given and the
+    value is the corresponding benchmark dataframe.
+    """
+    return reduce(lambda x, y: {**x, **y}, map(lambda n: {n: dfs[n]}, names))
+
+
+def filter_df(df: pd.DataFrame, pred):
+    """
+    Return the filtered version of given dataframe w.r.t. pred, i.e. a dataframe where pred holds on each row.
+    :param df: A dataframe.
+    :param pred: A predicate over a dataset row.
+    """
+    return pd.DataFrame([df.loc[i] for i in range(len(df)) if pred(df.loc[i])], columns=df.columns)
+
+
 def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, y_log=False):
     """
     Plots `dfs` data.
@@ -350,21 +374,6 @@ def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, y_log=Fa
     show_or_save_plot(title)
 
 
-def names_to_vs(names: List[str]) -> str:
-    """
-    Return a string made by names joined by "vs".
-    """
-    return reduce(lambda x, y: x + ' vs ' + y, names)
-
-
-def names_to_dfs(names: List[str], dfs) -> Dict[str, List[pd.DataFrame]]:
-    """
-    Return a dict where for each name the key is one of the name given and the
-    value is the corresponding benchmark dataframe.
-    """
-    return reduce(lambda x, y: {**x, **y}, map(lambda n: {n: dfs[n]}, names))
-
-
 def plot_series(names: List[str], dfs: pd.DataFrame, title=None, y_log=False):
     """
     Plot given programs.
@@ -373,15 +382,6 @@ def plot_series(names: List[str], dfs: pd.DataFrame, title=None, y_log=False):
     if title is None:
         title = names_to_vs(names)
     plot_line(benchmark_subset, x='d', y='ms', title=title, y_log=y_log)
-
-
-def filter_df(df: pd.DataFrame, pred):
-    """
-    Return the filtered version of given dataframe w.r.t. pred, i.e. a dataframe where pred holds on each row.
-    :param df: A dataframe.
-    :param pred: A predicate over a dataset row.
-    """
-    return pd.DataFrame([df.loc[i] for i in range(len(df)) if pred(df.loc[i])], columns=df.columns)
 
 
 def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=None, y_log=False):
