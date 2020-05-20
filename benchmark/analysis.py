@@ -331,20 +331,20 @@ def show_or_save_plot(title: str):
         plt.show()
 
 
-def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, options_f=[]):
+def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, y_log=False):
     """
     Plots `dfs` data.
     :dfs: a dictionary with the benchmark dataframe to plot.
     :x: the x axis name.
     :y: the y axis name.
     :title: a string representing the plot title.
-    :options_f: a list of functions to apply to the result of sns.lineplot (matplotlib.axis).
+    :y_log: a boolean flag that indicates whether y should be log scaled or not.
     """
     plt.figure(figsize=(14, 7))
     for k, v in dfs.items():
         g = sns.lineplot(v[x], v[y], label=k)
-        for fo in options_f:
-            fo(g)
+        if y_log: 
+            g.set_yscale('log')
     plt.title(title)
 
     show_or_save_plot(title)
@@ -365,26 +365,14 @@ def names_to_dfs(names: List[str], dfs) -> Dict[str, List[pd.DataFrame]]:
     return reduce(lambda x, y: {**x, **y}, map(lambda n: {n: dfs[n]}, names))
 
 
-def names_to_plot(names: List[str], dfs: pd.DataFrame, title=None):
+def plot_series(names: List[str], dfs: pd.DataFrame, title=None, y_log=False):
     """
     Plot given programs.
     """
     benchmark_subset = names_to_dfs(names, dfs)
     if title is None:
         title = names_to_vs(names)
-    plot_line(benchmark_subset, x='d', y='ms', title=title)
-
-
-def names_to_plot_logy(names: List[str], dfs: pd.DataFrame, title=None):
-    """
-    Plot given programs with log scaled y axis.
-    """
-    benchmark_subset = names_to_dfs(names, dfs)
-    if title is None:
-        title = names_to_vs(names) + ' (log y scaled)'
-    def log_scale(g): return g.set_yscale('log')
-    plot_line(benchmark_subset, x='d', y='ms',
-              title=title, options_f=[log_scale])
+    plot_line(benchmark_subset, x='d', y='ms', title=title, y_log=y_log)
 
 
 def filter_df(df: pd.DataFrame, pred):
@@ -396,7 +384,7 @@ def filter_df(df: pd.DataFrame, pred):
     return pd.DataFrame([df.loc[i] for i in range(len(df)) if pred(df.loc[i])], columns=df.columns)
 
 
-def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=None):
+def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=None, y_log=False):
     """
     Plot filtered dataframes w.r.t. pred.
     :param names: A list of programs.
@@ -410,7 +398,7 @@ def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=
         df = filter_df(dfs[name], pred=pred)
         d = {**d, **{name: df}}
 
-    names_to_plot(names, d, title=title)
+    plot_series(names, d, title=title, y_log=y_log)
 
 
 if __name__ == '__main__':
