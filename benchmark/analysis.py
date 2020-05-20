@@ -355,7 +355,7 @@ def filter_df(df: pd.DataFrame, pred):
     return pd.DataFrame([df.loc[i] for i in range(len(df)) if pred(df.loc[i])], columns=df.columns)
 
 
-def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, y_log=False):
+def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, y_log=False):
     """
     Plots `dfs` data.
     :dfs: a dictionary with the benchmark dataframe to plot.
@@ -369,28 +369,25 @@ def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, y_log=Fa
         g = sns.lineplot(v[x], v[y], label=k)
         if y_log: 
             g.set_yscale('log')
-    plt.title(title)
-
-    show_or_save_plot(title)
 
 
-def plot_series(names: List[str], dfs: pd.DataFrame, title=None, y_log=False):
+def plot_series(names: List[str], dfs: pd.DataFrame, y_log=False):
     """
     Plot given programs.
     """
     benchmark_subset = names_to_dfs(names, dfs)
-    if title is None:
-        title = names_to_vs(names)
-    plot_line(benchmark_subset, x='d', y='ms', title=title, y_log=y_log)
+    plot_line(benchmark_subset, x='d', y='ms', y_log=y_log)
 
 
-def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=None, y_log=False):
+def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title, pred=lambda _: True, filename=None, y_log=False):
     """
     Plot filtered dataframes w.r.t. pred.
     :param names: A list of programs.
     :param dfs: A dictionary of dataframes of the type (name -> dataframe).
     :param pred: A predicate over a dataframe benchmark row.
     :param title: The plot title.
+    :param filename: The plot filename, default is `title`.
+    :param y_log: a boolean flag that indicates whether y should be log scaled or not.
     """
     d = {}
     for i in range(len(names)):
@@ -398,7 +395,11 @@ def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=
         df = filter_df(dfs[name], pred=pred)
         d = {**d, **{name: df}}
 
-    plot_series(names, d, title=title, y_log=y_log)
+    plot_series(names, d, y_log=y_log)
+
+    plt.title(title)
+
+    show_or_save_plot(filename if filename is not None else title)
 
 
 if __name__ == '__main__':
