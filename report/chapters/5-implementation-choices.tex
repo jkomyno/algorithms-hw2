@@ -1,40 +1,135 @@
 \section{Scelte implementative}
 \label{cap:implementation-choices}
 
-\subsection{Codice templatizzato}
-
-Al fine di rendere il codice quanto più generico ed estendibile, molte delle classi e dei metodi scritti
-usano i template C++, corrispondenti ai generics in Java.
-I nomi ricorrenti dei tipi generici impiegati sono \codeinline{Label} e \codeinline{Weight}.
-\codeinline{Label} denota il tipo del nome di un nodo del grafo. È istanziato come \codeinline{size\_t}, corrispondente a \codeinline{unsigned long long}, occupa almeno 64bit può rappresentare solo valori $\geq 0$.
-\codeinline{Weight} denota il tipo del peso di un arco del grafo. È istanziato come \codeinline{long}, corrispondente a \codeinline{signed long int},
-occupa almeno 32bit.
-
 \subsection{Rappresentazione del grafo}
 \label{sub:graph-representation}
 
-Gli algoritmi di questo homework operano su grafi pesati connessi e non diretti. In questo caso in particolare, ai nodi viene assegnato un intero da 1 a n che lo identifica ed una posizione nel piano che può essere geografica o euclidea a seconda del formato specificato.
+Gli algoritmi di questo homework operano su grafi pesati completamente connessi e non diretti. Ha quindi senso rappresentare ogni grafo con una Matrice di Adiacenza, dato che i grafi sono completi. In questa relazione useremo in maniera ambivalente i termini \textit{Matrice di Adiacenza} e \textit{Matrice delle distanze}, poiché i grafi sono pesati.
 
-\noindent Per rappresentare quindi questa particolare istanza di grafo abbiamo deciso di utilizzare una Matrice di Adiacenza (\textit{Adj. Matrix}), in particolare in questo specifico contesto useremo una \textbf{Matrice delle distanze}: dati due nodi del grafo essa restituisce la distanza dei due nodi a partire dalle coordinate di quest'ultimi. In particolare:
+\noindent I dataset contenenti i grafi di input sono in formato standard \textbf{TSPLIB } e riportano le coordinate 2D dei nodi del grafo in due possibili formati:
+
 \begin{itemize}
-    \item \textbf{Se le coordinate sono in formato EUC\_2D}: significa che esse rappresentano la posizione nel piano euclideo a 2 dimensioni. Viene dunque calcolata la distanza euclidea tra ogni nodo e il risultato viene inserito nella corrispondente posizione della matrice delle distanze.
-    \item \textbf{Se le coordinate sono in formato GEO}: significa che esse rappresentano la posizione in termini geografici (ossia latitudine e longitudine). Vengono quindi convertite in radianti e calcolata la distanza con l'apposito codice fornito nella consegna e il risultato viene inserito nella corrispondente posizione della matrice delle distanze.
+    \item \textbf{EUC\_2D}: le coordinate rappresentano la posizione nello spazio euclideo a 2 dimensioni. È dunque richiesto il calcolo della distanza euclidea tra ogni nodo, con il valore arrotondato al numero intero più vicino;
+    \item \textbf{GEO}: le coordinate rappresentano la latidudine e la longitudine di ogni punto. Il calcolo della distanza tra due punti in questo caso è più complesso, e richiede una conversione preliminari in radianti; rimandiamo alle FAQ della consegna per ulteriori dettagli.
 \end{itemize}
 
-E quindi possibile tramite la matrice delle distanze, rappresentare l'intero grafo in quanto le righe o le colonne rappresentano i nodi del grafo, mentre i valori contenuti in essa rappresentano le distanze tra i nodi considerati. Le coordinate dei nodi vengono perse in quanto non sono necessarie ai fini della risoluzione del problema del TSP.
+\noindent I risultati del calcolo delle distanze (\textit{EUC\_2D} o \textit{GEO} a seconda del dataset di input) sono inseriti nella posizione corrispondente della Matrice delle Distanze.
+Una volta calcolate le distanze, le coordinate originali non sono mantenute: non sono infatti necessarie ai fini della rappresentazione del grafo e del calcolo della soluzione di TSP.
 
+\noindent Come nel precedente homework, per semplificare la logica di indicizzazione dei nodi del grafo, la label dei nodi (originariamente numerata da $1$ a $n$) è decrementata di 1, quindi i nodi sono rappresentati dall'intervallo numerico $[0, n-1]$.
 
-\subsubsection {Costruzione del Grafo}
-La procedura per costruire il grafo, ossia costruire la matrice delle distanze richiede le seguente operazioni:
-\begin{enumerate}
-    \item Lettura del file di input: in particolare in questa fase vengono estratte tutte le informazioni necessarie, come il tipo di file che si sta leggendo (formato EUC\_2D o GEO) e il numero di nodi presenti; 
-    \item Una volta identificato il formato del file, viene letto ogni singolo nodo con le sue coordinate ed inserito in un vettore.
-    \item Viene creata la matrice delle distanze, calcolando tutte le distanze di ogni nodo con ogni altro nodo del grafo. La distanza viene calcolata a seconda del formato delle coordinate del file di input.
-\end{enumerate}
+\noindent La classe che rappresenta la Matrice delle Distanze dei grafi è definita in \codeinline{DistanceMatrix.h} nella cartella \textit{Shared}.
+
+\begin{listing}[!ht]
+\begin{minted}{c++}
+std::vector<T> data;
+
+// mappa la coppia di indici (row, column) della matrice in un indice per
+// il vettore 1-dimensionale data. (Indicizzazione fisica)
+[[nodiscard]] size_t get_index(size_t row, size_t column) const noexcept {
+    return row * n_vertexes + column;
+}
+
+// valore della distanza tra i nodi (i, j). (Indicizzazione virtuale)
+[[nodiscard]] T& at(size_t i, size_t j) noexcept {
+    return data.at(get_index(i, j));
+}
+\end{minted}
+\caption{Indicizzazione virtuale e fisica della classe DistanceMatrix.h.}
+\label{listing:virtual-physica-addressing}
+\end{listing}
 
 \paragraph{Ottimizzazioni}\mbox{} \\
-\noindent Per definizione, la matrice delle distanze risulta essere una matrice simmetrica con gli elementi della diagonale pari a 0 (in quanto ogni nodo dista 0 da se stesso). Pertanto è possibile calcolare le distanze della matrice triangolare superiore e copiare poi i valori in maniera speculare nella matrice triangolare inferiore, risparmiando così in termini di tempo. E' possibile fare ciò in quanto la distanza tra i nodi i e j e la stessa tra j e i.\\
 
+\noindent Poichè i grafi in esame sono non diretti ($\forall i,j \in V$, $c(i,j) = c(j,i)$), la Matrice delle Distanze è una matrice simmetrica con tutte le entry della diagonale principale pari a 0 (in quanto ogni vertice dista 0 da se stesso).
+Abbiamo quindi calcolato le distanze \textit{pair-wise} solo per la parte triangolare superiore della matrice, per poi copiarle in maniera trasposta nella parte triangolare inferiore. Questo ci ha permesso quindi quindi di calcolare le stesse distanze più volte. \\
+
+\noindent La matrice è rappresentata da un singolo \codeinline{std::vector}. Questo dà la garanzia che ogni riga della matrice sia definita in sezioni contigue di memoria, riduce l'overhead rispetto ad un approccio \codeinline{std::vector<std::vector>}, e, nonostante la logica di indicizzazione sia un po' più complessa (l'indicizzazione virtuale è a due dimensioni, quella fisica è ad una sola dimensione), il cache behaviour della classe è migliore. Si veda il listing \ref{listing:virtual-physica-addressing}.
+
+\begin{listing}[!ht]
+\begin{minted}{c++}
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "1 argument required: filename" << std::endl;
+        exit(0);
+    }
+
+    const char* filename = argv[1];
+
+    // legge il grafo completo non diretto dal file di input
+    auto point_reader(read_file(filename));
+
+    // crea la matrice di distanza, usando le distanze euclidea o geodesica a seconda del
+    // tipo di input
+    DistanceMatrix<int>&& distance_matrix = point_reader->create_distance_matrix();
+
+    // calcola il peso della soluzione TSP individuata dall'algoritmo
+    const auto total_weight = ...;
+
+    // stampa la soluzione trovata
+    std::cout << std::fixed << total_weight << std::endl;
+}
+\end{minted}
+\caption{Scheletro comune ad ogni file \codeinline{main.cpp} del progetto.}
+\label{listing:main-cpp}
+\end{listing}
+
+\subsection{Lettura del Grafo}
+
+\noindent Il file \codeinline{main.cpp} ha la stessa struttura per ogni algoritmo, si veda il listing \ref{listing:main-cpp}. Ad alto livello, le operazioni svolte sono:
+
+\begin{enumerate}
+    \item Lettura del file di input: il file di input viene parsato, e vengono lette solo le informazioni più importanti, ovvero:
+    
+    \begin{itemize}
+        \item dimensione del grafo;
+        \item tipo di distanza (\textit{EUC\_2D} o \textit{GEO});
+        \item coordinate del grafo.
+    \end{itemize}
+    
+    \noindent Abbiamo usato la libreria di file streaming offerta da C++ (\codeinline{fstream}). Abbiamo rappresentato il tipo di distanza dall'enumerazione \codeinline{EdgeWeightType.h}, per la quale abbiamo definito l'operatore di lettura \codeinline{std::istream\& operator>>}.
+    
+    \item I punti definiti dopo la riga \textit{NODE\_COORD\_SECTION} del dataset di input sono letti con un'istanza polimorfica di \codeinline{PointReader.h}, che interpreta le coordinate in maniera diversa a seconda del valore assunto dall'enumerazione \codeinline{EdgeWeightType}, ovvero a seconda del tipo di distanza del file. Naturalmente, la sottoclasse \codeinline{EuclideanPointReader.h} usa la distanza Euclidea, mentre \codeinline{GeodesicPointReader.h} usa quella geodesica. Le classi dei punti letti in input sono definiti in \codeinline{point.h} (\codeinline{point\_2D} per le coordinate euclidee, \codeinline{point\_geo} per le coordinate geografiche), e per ognuno di essi è stato definito l'operatore di lettura \codeinline{std::istream\& operator>>} adeguato. Questo ci ha permesso di non avere duplicazione di codice per gestire tipi diversi di punti in input. \\
+    
+    \noindent La label dei nodi è decrementata di 1 in questa fase di lettura.
+    
+    \item Una volta letti i nodi, viene creata la matrice delle distanze tramite \textit{Template Method Pattern}, usando la nozione di distanza definita dalle sottoclassi di \codeinline{PointReader.h}. Il metodo concreto \codeinline{distance(i, j)} delle sottoclassi è usato nel costruttore di \codeinline{DistanceMatrix} come \textit{higher-order function}. Si veda il listing \ref{listing:point-reader}.
+\end{enumerate}
+
+Tutti i file citati qui sopra sono nella cartella \textit{Shared} del progetto consegnato.
+
+\begin{listing}[!ht]
+\begin{minted}{c++}
+class PointReader {
+protected:
+  std::fstream& file;
+  size_t dimension;
+
+  // calcola la distanza tra i punti i e j
+  virtual int distance(size_t i, size_t j) const = 0;
+
+public:
+  PointReader(std::fstream& file, size_t dimension) :
+    file(file), dimension(dimension) { }
+
+  virtual ~PointReader() = default;
+
+  // consuma la lista di coordinate dal file di input
+  virtual void read() = 0;
+    
+  // crea la matrice delle distanze a partire dai punti letti. Usa il metodo distance 
+  // implementato dalle sotto classi come funzione higher-order
+  DistanceMatrix<int> create_distance_matrix() {
+    using namespace std::placeholders;
+    auto distance_fun(std::bind(&PointReader::distance, this, _1, _2));
+
+    return DistanceMatrix<int>(dimension, distance_fun);
+  }
+};
+\end{minted}
+\caption{Definizione parziale di \codeinline{PointReader.h} che evidenza la creazione della matrice delle distanze del grafo letto.}
+\label{listing:point-reader}
+\end{listing}
 
 \subsection{Strutture Dati}
 
@@ -42,44 +137,24 @@ Tutte le strutture dati elencate di seguito sono definite nella cartella \textit
 Ove possibile, per la nomenclatura dei metodi abbiamo cercato di seguire lo stesso standard dei container STL di C++.
 Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando possibile, evitando rehashing e riallocazioni dispendiose. Questo significa che la maggior parte delle operazioni indicate con \complexityConstant{} ammortizzato siano in realtà totalmente costanti nella pratica.
 
-\subsubsection{Heap}
+\noindent Le strutture dati relative alle Heap e alle code di priorità necessarie per l'algoritmo di Prim sono già state ampiamente documentate nell'homework 1.
 
-\textit{Heap.h} contiene la definizione astratta di una generica Heap.
-Gli elementi della Heap sono salvati in un \codeinline{std::vector}.
-Per generalizzare il concetto di MinHeap/MaxHeap, la classe usa un comparatore binario booleano. Se il funtore dato in input alla classe è
-\codeinline{std::greater<>}, la struttura dati avrà la semantica di una Min Heap; viceversa, con il comparatore \codeinline{std::less<>} si avrà la semantica di una Max Heap.
+\subsection{Timeout}
 
-\paragraph{Ottimizzazioni}\mbox{} \\
+\noindent L'algoritmo di Held-Karp ha complessità temporale \complexityHeldKarpTime{}, quindi i tempi di esecuzione \textit{esplodono} anche solo per grafi con poche decine di nodi. Come richiesto dall'homework, all'algoritmo di Held-Karp è assegnato un timeout di esecuzione $T$. Abbiamo fissato il valore di $T$ a 2 minuti, per mantenere la RAM occupata sotto controllo (anche la complessità spaziale dell'algoritmo è esponenziale).\\
 
-\noindent Il parametro template \textit{IsAlreadyHeap} è usato per evitare di costruire la Heap se l'utente specifica che il container dato in input alla struttura dati rispetta già la proprietà di essere una Heap. Il controllo su questo flag booleano avviene a compile-time. Questa ottimizzazione garantisce un risparmio di tempo pari a \complexityN{}, ed è usata nell'implementazione dell'algoritmo di \textbf{Prim}. \\
+\noindent La nostra implementazione di Held-Karp, quindi:
 
-\noindent I metodi che ripristinano la prioprietà di Heap (\codeinline{heapify\_up} e \codeinline{heapify\_down}) sono definiti in modo iterativo invece che ricorsivo, per eliminare alla radice tutti i problemi di ottimizzazione legati alla ricorsione che questo specifico linguaggio porta con se.
+\begin{enumerate}
+    \item Ritorna la soluzione esatta se i suoi tempi di esecuzione sono inferiori a 2 minuti, senza aspettare lo scadere del timeout;
+    \item Se invece il timeout scade, termina preventivamente la ricorsione e ritorna la migliore soluzione trovata fino a quel momento. A seconda della profondità del call-stack ricorsivo, la soluzione potrebbe essere ritornata qualche secondo dopo lo scadere del timeout.
+\end{enumerate}
 
-\subsubsection{Binary Heap}
+\noindent C++17 non fornisce soluzione \textit{out-of-the-box} ad alto livello per eseguire funzioni con un limite di tempo. Abbiamo quindi implementato un meccanismo di questo tipo in \codeinline{Shared/timeout.h}, il cui funzionamento ad alto livello è il seguente:
 
-\textit{BinaryHeap.h} contiene una classe concreta che eredita \textit{Heap.h} e ne implementa i metodi virtuali. Definisce una Binary Heap, ovvero è possibile rappresentare gli elementi salvati come un albero binario completo (tranne eventualmente l'ultimo livello, che potrebbe non essere completo) che rispetta la proprietà di ordinamento delle Heap.
-
-\paragraph{Ottimizzazioni}\mbox{} \\
-
-\noindent L'operazione di divisione per 2, utilizzata ad esempio per determinare i figli sinistro e destro di un nodo nella Heap, è stata sostituita con l'operazione di shift binario.
-
-\subsubsection{K-ary Heap}
-
-\textit{KHeap.h} contiene una classe concreta che eredita \textit{Heap.h} e ne implementa i metodi virtuali. Definisce una K-ary Heap, ovvero è possibile rappresentare gli elementi salvati come un albero k-ario completo (tranne eventualmente l'ultimo livello, che potrebbe non essere completo) che rispetta la proprietà di ordinamento delle Heap.
-\textit{K} è un parametro template che deve essere strettamente maggiore di due.
-
-\subsubsection{Priority Queue}
-
-\textit{PriorityQueue.h} è una classe concreta che eredita privatamente \textit{BinaryHeap.h} o \textit{KHeap.h}, a seconda del parametro template \textit{Heap}.
-La semantica di PriorityQueue dipende dal comparatore passato al costruttore, che indica se si vuole usare una coda di priorità basata su Min Heap o su Max Heap. \\
-
-\noindent PriorityQueue ha accesso diretto ai nodi salvati nella Heap, e usa due container associativi di tipo \codeinline{std::unordered\_map} per tenere traccia delle chiavi e degli indici posizionali di ogni elemento della Heap, permettendone la lettura e l'aggiornamento in tempo costante ammortizzato. \\
-
-\noindent Rispetto ai costruttori delle varie classi Heap, PriorityQueue richiede non un comparatore, bensì una factory di comparatori. A tale factory è data in input una mappa che associa i valori degli elementi della Heap alle rispettive chiavi. Poiché tale input è passato per reference, il comparatore generato userà sempre la versione più aggiornata della mappa.
-
-\noindent L'operazione di aggiornamento di una chiave richiede chiavi strettamente discendenti nel caso di una MinHeap, e chiavi strettamente crescenti nel caso di una MaxHeap. Abbiamo imposto questo vincolo per mantenere la complessità di \codeinline{update\_key} logaritmica anziché lineare (come sarebbe se avessimo usato il metodo \codeinline{build\_heap} indistintamente).
-
-\paragraph{Ottimizzazioni}\mbox{} \\
-
-\noindent Poichè istanziare una PriorityQueue così generica e flessibile è un'operazione non banale, abbiamo creato una serie di funzioni di utilità di facile comprensione da usare. Ad esempio, per creare una coda di priorità basata su una Min Heap binaria, esiste il metodo \codeinline{make\_min\_priority\_queue} (analogamente esiste \codeinline{make\_min\_k\_priority\_queue} per Min Heap K-ary).
-L'utente finale della classe non deve preoccuparsi di inserire manualmente tutti i parametri template di tali funzioni, grazie alla \textit{type deduction} di C++17.
+\begin{itemize}
+    \item Il thread principale crea un \textit{worker thread} incaricandolo di eseguire Held-Karp sul grafo letto in input. Fa quindi partire il timeout e resta in attesa del risultato del worker thread. Tale risultato sarà disponibile da un \codeinline{std::future}.
+    \item Se il worker thread termina prima dello scadere del timeout, il thread principale è immediatamente sbloccato e il risultato della funzione (restituito da \codeinline{std::future::get()}) è ritornato al chiamante.
+    \item Se il timeout scade e il worker thread non ha ancora terminato l'esecuzione, il thread principale gli notifica di terminare l'esecuzione il prima possibile. Tale notifica avviene forzando la conclusione di una \codeinline{std::promise} creata dal main thread e data in input alla funzione eseguita incapsulata nella classe \codeinline{timeout\_signal}.
+    \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna la migliore soluzione individuata fino a quel momento al chiamante. 
+\end{itemize}
