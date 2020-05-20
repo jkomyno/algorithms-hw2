@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C0EB85
 		Shared\point.h = Shared\point.h
 		Shared\point_reader_factory.h = Shared\point_reader_factory.h
 		Shared\PointReader.h = Shared\PointReader.h
+		Shared\random_generator.h = Shared\random_generator.h
 		Shared\read_file.h = Shared\read_file.h
 		Shared\shared_utils.h = Shared\shared_utils.h
 		Shared\sum_weights.h = Shared\sum_weights.h
