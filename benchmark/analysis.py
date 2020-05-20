@@ -60,10 +60,10 @@ FARTHEST_INSERTION = 'FarthestInsertion'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
 
 programs = [
-    # HELD_KARP,  # TODO: enable when benchmarks are available
+    HELD_KARP,
     MST_2_APPROX,
     FARTHEST_INSERTION,
-    # SIMULATED_ANNEALING,
+    SIMULATED_ANNEALING,
 ]
 
 ms_programs = [
@@ -420,14 +420,24 @@ if __name__ == '__main__':
 
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
-        # TODO: create meaningful tables (needed more benchmarks)
         print_comparison(dataframes_min, MST_2_APPROX, FARTHEST_INSERTION)
+        print_comparison(dataframes_min, MST_2_APPROX, SIMULATED_ANNEALING)
+        print_comparison(dataframes_min, FARTHEST_INSERTION, SIMULATED_ANNEALING)
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
 
     if IS_PLOT_ENABLED:    
-        # TODO: create meaningful charts (needed more benchmarks)
-        plot_comparison([MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{MST_2_APPROX}')
-        plot_comparison([FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{FARTHEST_INSERTION}')
-        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}')
+        # OK: HelpKarp with more than 52 nodes timeouts (Timeout is setted to 2 minutes)
+        plot_comparison([HELD_KARP], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{HELD_KARP} (52 nodes)')
+        
+        # OK: approximated solution vs heuristic
+        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
+
+        # OK: the three (y log scaled)
+        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING])} (y log scaled)', y_log=True)
+
+        # OK: simulated annealing vs approx solution
+        plot_comparison([SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING])}')
+        plot_comparison([SIMULATED_ANNEALING, MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
+        plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
