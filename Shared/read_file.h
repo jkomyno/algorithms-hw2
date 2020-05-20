@@ -31,8 +31,8 @@ inline std::unique_ptr<point_reader::PointReader> read_file(const char* filename
     }
 
     skip_line(file);  // skip NAME line
-    skip_line(file);  // skip TYPE line
-    skip_line(file);  // skip COMMENT line
+    skip_line(file);  // skip TYPE/COMMENT line
+    skip_line(file);  // skip COMMENT/TYPE line
 
     skip_chars(file, utils::string_length("DIMENSION:"));
 
