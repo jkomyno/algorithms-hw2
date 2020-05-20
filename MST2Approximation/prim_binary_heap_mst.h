@@ -9,7 +9,8 @@
 #include "PriorityQueue.h"
 
 namespace mst {
-    std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<int>& distance_matrix) noexcept {
+    std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<int>& distance_matrix,
+                                           const size_t root) noexcept {
         auto vertexes = distance_matrix.get_vertexes();
 
         const size_t n_stop = vertexes.size() - 1;
@@ -20,14 +21,11 @@ namespace mst {
         constexpr int Infinity = std::numeric_limits<int>::max();
         std::vector<int> keys(vertexes.size(), Infinity);
 
-        // the source vertex can be randomly chosen. For simplicity, we choose the first vertex
-        // available. the first vertex is distant 0 from itself
-        keys.at(0) = 0;
+        // the root of the spanning tree is source_vertex, which is at distance 0 from itself.
+        keys.at(root) = 0;
 
         // Priority Queue based on a Min Heap ordered by keys, from smaller to larger.
-        // We don't need the O(N) first to reorder the vertexes as a heap, since keys is already
-        // a valid heap. The priority queue creation thus takes O(1) time
-        constexpr bool IsAlreadyHeap = true;
+        constexpr bool IsAlreadyHeap = false;
         auto min_pq(priority_queue::make_min_priority_queue<IsAlreadyHeap>(std::move(keys),
                                                                            std::move(vertexes)));
 
@@ -52,7 +50,6 @@ namespace mst {
             }
         }
 
-        // mst.erase(mst.begin());
         return mst;
     }
 }  // namespace mst

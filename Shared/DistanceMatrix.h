@@ -7,8 +7,6 @@
 #include <numeric>    // std::iota
 #include <vector>     // std::vector
 
-#include "Edge.h"
-
 /**
  * DistanceMatrix represents a distance matrix for a complete, weighted, undirected graph.
  * It's a symmetric matrix which main diagonal is filled with 0s.
@@ -26,12 +24,12 @@ class DistanceMatrix {
     using ForwardIt = decltype(data.cbegin());
 
     // maps a matrix index pair to a vector index
-    [[nodiscard]] size_t get_index(size_t row, size_t column) const {
+    [[nodiscard]] size_t get_index(size_t row, size_t column) const noexcept {
         return row * n_vertexes + column;
     }
 
     // returns the begin and end iterator to the required row
-    [[nodiscard]] std::pair<ForwardIt, ForwardIt> get_row_at(size_t row) const {
+    [[nodiscard]] std::pair<ForwardIt, ForwardIt> get_row_at(size_t row) const noexcept {
         const size_t begin = get_index(row, 0);
         const size_t end = get_index(row, this->size() - 1);
         const auto it_begin = data.cbegin() + begin;
@@ -40,7 +38,7 @@ class DistanceMatrix {
     }
 
     // given a matrix index, return the corresponding row and column indexes
-    [[nodiscard]] std::pair<size_t, size_t> get_row_column_by_index(size_t mat_index) const {
+    [[nodiscard]] std::pair<size_t, size_t> get_row_column_by_index(size_t mat_index) const noexcept {
         const size_t row = mat_index / n_vertexes;
         const size_t column = mat_index % n_vertexes;
         return {row, column};
@@ -51,7 +49,7 @@ class DistanceMatrix {
     void init(const Distance& distance) noexcept {
         const size_t dimension = size();
 
-        // the vector data is already filles with 0, so we don't have to
+        // the vector data is already filled with 0s, so we don't have to
         // place 0s in the diagonal.
 
         // populate the triangle above the main diagonal
@@ -70,13 +68,6 @@ class DistanceMatrix {
         }
     }
 
-    void init_from_mst(const std::vector<Edge>& mst) noexcept {
-        for (const auto& [i, j, weight] : mst) {
-            at(i, j) = weight;
-            at(j, i) = weight;
-        }
-    }
-
 public:
     // create a new square matrix with n_vertexes rows initialized to all 0s.
     // distance(i, j) returns the distance between the i-th and j-th point.
@@ -84,12 +75,6 @@ public:
     explicit DistanceMatrix(size_t n_vertexes, Distance&& distance) noexcept :
         n_vertexes(n_vertexes), data(n_vertexes * n_vertexes, 0) {
         init(std::forward<Distance>(distance));
-    }
-
-    // TODO: this should probably belong to an AdjacentList implementation
-    explicit DistanceMatrix(std::vector<Edge>&& mst) noexcept :
-        n_vertexes(mst.size() + 1), data(n_vertexes * n_vertexes, 0) {
-        init_from_mst(std::forward<decltype(mst)>(mst));
     }
 
     // this constructor reads an arbitrary square matrix in input.
@@ -106,17 +91,17 @@ public:
     }
 
     // retrieve the value saved at position (i, j)
-    [[nodiscard]] const T& at(size_t i, size_t j) const {
+    [[nodiscard]] const T& at(size_t i, size_t j) const noexcept {
         return data.at(get_index(i, j));
     }
 
     // set the value for position (i, j)
-    [[nodiscard]] T& at(size_t i, size_t j) {
+    [[nodiscard]] T& at(size_t i, size_t j) noexcept {
         return data.at(get_index(i, j));
     }
 
     // return the vertexes in the distance matrix
-    [[nodiscard]] std::vector<size_t> get_vertexes() const {
+    [[nodiscard]] std::vector<size_t> get_vertexes() const noexcept {
         std::vector<size_t> v(n_vertexes);
         std::iota(v.begin(), v.end(), 0);
         return v;

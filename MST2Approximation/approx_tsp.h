@@ -1,16 +1,20 @@
 #pragma once
 
-#include <vector>
+#include <vector> // std::vector
 
 #include "DFS.h"
 #include "DistanceMatrix.h"
 #include "prim_binary_heap_mst.h"
 #include "shared_utils.h"
 #include "sum_weights.h"
+#include "random_generator.h"
 
 [[nodiscard]] inline int approx_tsp(DistanceMatrix<int>&& distance_matrix) noexcept {
+    random_generator::IntegerRandomGenerator random(0, distance_matrix.size() - 1);
+    const size_t root = random();
+
     // compute the exact Minimum Spanning Tree of the input graph using Prim's algorithm
-    auto mst(mst::prim_binary_heap_mst(distance_matrix));
+    std::vector<Edge> mst(mst::prim_binary_heap_mst(distance_matrix, root));
 
     // use DFS to perform a preorder traversal of the MST
     DFS dfs(std::move(mst));
