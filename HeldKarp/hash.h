@@ -32,8 +32,8 @@ namespace hash {
     struct unordered_set {
         template <typename T>
         size_t operator()(const std::unordered_set<T>& set) const noexcept {
-            const size_t MAX = std::numeric_limits<size_t>::max();
-            const size_t MASK = 2 * MAX + 1;
+            constexpr size_t MAX = std::numeric_limits<size_t>::max();
+            constexpr size_t MASK = 2 * MAX + 1;
             const size_t n = set.size();
 
             size_t hash = 1927868237UL * (n + 1);
