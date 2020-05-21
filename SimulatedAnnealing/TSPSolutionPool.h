@@ -27,14 +27,19 @@ class TSPSolutionPool {
     // real number generator in the range [0, 1)
     random_generator::RealRandomGenerator random;
 
-    // holder of the solutions
-    std::vector<std::vector<size_t>> holder;
-    std::vector<size_t> unused;
+public:
+    // list of all feasible solutions generated up to now
+    std::vector<std::vector<size_t>> feasible_solutions;
+
+private:
+    // list of indexes of unused solutions
+    std::vector<size_t> unused_solution_indexes;
 
     // create a new initial solution starting from the heuristic initialization returned by
     // solution_factory
     TSPSolution create();
 
+    // add the pool index of solution to the unused vector
     void reclaim(const TSPSolution& solution);
 
     // return the path at index
@@ -46,7 +51,7 @@ class TSPSolutionPool {
 
     // prunes some solutions at random mantaining the current best solution. Although it reduces the
     // simulated annealing solution space, it helps keeping the memory consumption low
-    // void remove_random_solutions_except(size_t best_index);
+    void remove_random_solutions_except(size_t best_index);
 
 public:
     TSPSolutionPool(const DistanceMatrix<int>& distance_matrix,
@@ -65,7 +70,10 @@ class TSPSolution : public simulated_annealing::SolutionBase<TSPSolution> {
     using super = simulated_annealing::SolutionBase<TSPSolution>;
     friend class TSPSolutionPool;
 
+public:
     TSPSolutionPool* pool;
+
+private:
     size_t pool_index;
 
     double NOT_INITIALIZED = std::numeric_limits<double>::max();
@@ -109,13 +117,11 @@ public:
 };
 
 inline std::vector<size_t>& TSPSolutionPool::get(size_t index) {
-    return holder[index];
+    return feasible_solutions[index];
 }
 
 inline void TSPSolutionPool::reclaim(const TSPSolution& solution) {
-    if (solution.pool == this) {
-        unused.push_back(solution.pool_index);
-    }
+    unused_solution_indexes.push_back(solution.pool_index);
 }
 
 inline size_t TSPSolutionPool::size() const {
@@ -142,23 +148,23 @@ inline TSPSolution TSPSolutionPool::init() {
 }
 
 inline TSPSolution TSPSolutionPool::create() {
-    if (unused.empty()) {
-        holder.emplace_back(std::vector<size_t>(circuit_size));
-        unused.push_back(holder.size() - 1);
+    if (unused_solution_indexes.empty()) {
+        feasible_solutions.emplace_back(std::vector<size_t>(circuit_size));
+        unused_solution_indexes.push_back(feasible_solutions.size() - 1);
     }
 
-    auto to_use = unused.back();
-    unused.pop_back();
+    auto pool_index_to_use = unused_solution_indexes.back();
+    unused_solution_indexes.pop_back();
 
-    return TSPSolution(*this, to_use);
+    return TSPSolution(*this, pool_index_to_use);
 }
 
-/*
- TODO: find a way to efficiently reindex the spared solutions
+ // TODO: find a way to efficiently reindex the spared solutions
 inline void TSPSolutionPool::remove_random_solutions_except(size_t best_index) {
-    size_t size = holder.size();
+    size_t size = feasible_solutions.size();
     size_t n_to_remove = std::min(size * 0.3, 10.0);
 
+    /*
     size_t n = size;
 
     // The element at the index of the current best solution is never moved.
@@ -177,8 +183,8 @@ inline void TSPSolutionPool::remove_random_solutions_except(size_t best_index) {
 
     // remove the last size - n elements from holder
     holder.resize(n);
+    */
 }
-*/
 
 inline std::vector<size_t>& TSPSolution::circuit() const {
     return pool->get(pool_index);
@@ -313,5 +319,5 @@ inline void TSPSolution::destroy() {
 }
 
 inline void TSPSolution::survives() {
-    // pool->remove_random_solutions_except(this->pool_index);
+    pool->remove_random_solutions_except(this->pool_index);
 }
