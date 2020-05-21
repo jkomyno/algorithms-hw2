@@ -26,6 +26,10 @@ namespace utils {
         return number ^ (static_cast<ull>(1) << position);
     }
 
+    inline ull reset_bit(ull number, const size_t position) noexcept {
+        return number &= ~(static_cast<ull>(1) << position);
+    }
+
     template <typename It>
     ull set_bits_from_subset(const It& cbegin, const It& cend) noexcept {
         ull bits = 0;

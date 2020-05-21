@@ -40,7 +40,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
     }
 
     int min_dist = std::numeric_limits<int>::max();
-    const utils::ull difference = utils::toggle_bit(bits, v);
+    const utils::ull difference = utils::reset_bit(bits, v);
     const size_t n = distance_matrix.size();
 
     // iterate over any bit set to 1 in differences, from the least significant to the most
