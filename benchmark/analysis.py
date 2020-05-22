@@ -58,12 +58,14 @@ HELD_KARP = 'HeldKarp'
 MST_2_APPROX = 'MST2Approximation'
 FARTHEST_INSERTION = 'FarthestInsertion'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
+CLOSEST_INSERTION = 'ClosestInsertion'
 
 programs = [
     HELD_KARP,
     MST_2_APPROX,
     FARTHEST_INSERTION,
     SIMULATED_ANNEALING,
+    CLOSEST_INSERTION,
 ]
 
 ms_programs = [
@@ -71,6 +73,7 @@ ms_programs = [
     'ms_mst2approx',
     'ms_farthest_insertion',
     'ms_simulated_annealing',
+    'ms_closest_insertion',
 ]
 
 
@@ -433,6 +436,7 @@ if __name__ == '__main__':
         
         # OK: approximated solution vs heuristic
         plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
+        plot_comparison([FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, CLOSEST_INSERTION])}', y_log=True)
 
         # OK: the three (y log scaled)
         plot_comparison([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING])} (y log scaled)', y_log=True)
