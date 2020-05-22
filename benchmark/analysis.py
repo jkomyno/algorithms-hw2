@@ -60,10 +60,10 @@ FARTHEST_INSERTION = 'FarthestInsertion'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
 
 programs = [
-    # HELD_KARP,  # TODO: enable when benchmarks are available
+    HELD_KARP,
     MST_2_APPROX,
     FARTHEST_INSERTION,
-    # SIMULATED_ANNEALING,
+    SIMULATED_ANNEALING,
 ]
 
 ms_programs = [
@@ -331,25 +331,6 @@ def show_or_save_plot(title: str):
         plt.show()
 
 
-def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, title: str, options_f=[]):
-    """
-    Plots `dfs` data.
-    :dfs: a dictionary with the benchmark dataframe to plot.
-    :x: the x axis name.
-    :y: the y axis name.
-    :title: a string representing the plot title.
-    :options_f: a list of functions to apply to the result of sns.lineplot (matplotlib.axis).
-    """
-    plt.figure(figsize=(14, 7))
-    for k, v in dfs.items():
-        g = sns.lineplot(v[x], v[y], label=k)
-        for fo in options_f:
-            fo(g)
-    plt.title(title)
-
-    show_or_save_plot(title)
-
-
 def names_to_vs(names: List[str]) -> str:
     """
     Return a string made by names joined by "vs".
@@ -365,28 +346,6 @@ def names_to_dfs(names: List[str], dfs) -> Dict[str, List[pd.DataFrame]]:
     return reduce(lambda x, y: {**x, **y}, map(lambda n: {n: dfs[n]}, names))
 
 
-def names_to_plot(names: List[str], dfs: pd.DataFrame, title=None):
-    """
-    Plot given programs.
-    """
-    benchmark_subset = names_to_dfs(names, dfs)
-    if title is None:
-        title = names_to_vs(names)
-    plot_line(benchmark_subset, x='d', y='ms', title=title)
-
-
-def names_to_plot_logy(names: List[str], dfs: pd.DataFrame, title=None):
-    """
-    Plot given programs with log scaled y axis.
-    """
-    benchmark_subset = names_to_dfs(names, dfs)
-    if title is None:
-        title = names_to_vs(names) + ' (log y scaled)'
-    def log_scale(g): return g.set_yscale('log')
-    plot_line(benchmark_subset, x='d', y='ms',
-              title=title, options_f=[log_scale])
-
-
 def filter_df(df: pd.DataFrame, pred):
     """
     Return the filtered version of given dataframe w.r.t. pred, i.e. a dataframe where pred holds on each row.
@@ -396,13 +355,39 @@ def filter_df(df: pd.DataFrame, pred):
     return pd.DataFrame([df.loc[i] for i in range(len(df)) if pred(df.loc[i])], columns=df.columns)
 
 
-def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=None):
+def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, y_log=False):
+    """
+    Plots `dfs` data.
+    :dfs: a dictionary with the benchmark dataframe to plot.
+    :x: the x axis name.
+    :y: the y axis name.
+    :title: a string representing the plot title.
+    :y_log: a boolean flag that indicates whether y should be log scaled or not.
+    """
+    plt.figure(figsize=(14, 7))
+    for k, v in dfs.items():
+        g = sns.lineplot(v[x], v[y], label=k)
+        if y_log: 
+            g.set_yscale('log')
+
+
+def plot_series(names: List[str], dfs: pd.DataFrame, y_log=False):
+    """
+    Plot given programs.
+    """
+    benchmark_subset = names_to_dfs(names, dfs)
+    plot_line(benchmark_subset, x='d', y='ms', y_log=y_log)
+
+
+def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title, pred=lambda _: True, filename=None, y_log=False):
     """
     Plot filtered dataframes w.r.t. pred.
     :param names: A list of programs.
     :param dfs: A dictionary of dataframes of the type (name -> dataframe).
     :param pred: A predicate over a dataframe benchmark row.
     :param title: The plot title.
+    :param filename: The plot filename, default is `title`.
+    :param y_log: a boolean flag that indicates whether y should be log scaled or not.
     """
     d = {}
     for i in range(len(names)):
@@ -410,7 +395,11 @@ def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], pred, title=
         df = filter_df(dfs[name], pred=pred)
         d = {**d, **{name: df}}
 
-    names_to_plot(names, d, title=title)
+    plot_series(names, d, y_log=y_log)
+
+    plt.title(title)
+
+    show_or_save_plot(filename if filename is not None else title)
 
 
 if __name__ == '__main__':
@@ -431,14 +420,24 @@ if __name__ == '__main__':
 
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
-        # TODO: create meaningful tables (needed more benchmarks)
         print_comparison(dataframes_min, MST_2_APPROX, FARTHEST_INSERTION)
+        print_comparison(dataframes_min, MST_2_APPROX, SIMULATED_ANNEALING)
+        print_comparison(dataframes_min, FARTHEST_INSERTION, SIMULATED_ANNEALING)
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
 
     if IS_PLOT_ENABLED:    
-        # TODO: create meaningful charts (needed more benchmarks)
-        plot_comparison([MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{MST_2_APPROX}')
-        plot_comparison([FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{FARTHEST_INSERTION}')
-        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}')
+        # OK: HelpKarp with more than 52 nodes timeouts (Timeout is setted to 2 minutes)
+        plot_comparison([HELD_KARP], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{HELD_KARP} (52 nodes)')
+        
+        # OK: approximated solution vs heuristic
+        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
+
+        # OK: the three (y log scaled)
+        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING])} (y log scaled)', y_log=True)
+
+        # OK: simulated annealing vs approx solution
+        plot_comparison([SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING])}')
+        plot_comparison([SIMULATED_ANNEALING, MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
+        plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
