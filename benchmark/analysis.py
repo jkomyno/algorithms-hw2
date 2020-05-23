@@ -410,7 +410,6 @@ def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, y_log=False):
     :dfs: a dictionary with the benchmark dataframe to plot.
     :x: the x axis name.
     :y: the y axis name.
-    :title: a string representing the plot title.
     :y_log: a boolean flag that indicates whether y should be log scaled or not.
     """
     plt.figure(figsize=(14, 7))
@@ -451,6 +450,36 @@ def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title, pred=
     show_or_save_plot(filename if filename is not None else title)
 
 
+def plot_precision_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title: str, pred=lambda _: True, filename=None):
+    """
+    Plot filtered dataframes w.r.t. pred.
+    :param names: A list of programs.
+    :param dfs: A dictionary of dataframes of the type (name -> dataframe).
+    :param pred: A predicate over a dataframe benchmark row.
+    :param title: The plot title.
+    :param filename: The plot filename, default is `title`.
+    """
+    df = pd.DataFrame()
+
+    for i in range(len(names)):
+        name = names[i]
+        dfx = dfs[name]
+        dfx['error'] = calculate_error(GROUND_TRUTH_DF['exact'].tolist(), dfs[name]['output'].tolist())
+        dfx['name'] = name
+        dfx = filter_df(dfx, pred=pred)
+        df = df.append(dfx)
+
+    # not working properly
+    # sns.set(rc={'figure.figsize':(14, 7)})
+
+    g = sns.catplot(x='d', y='error', hue='name', data=df,  kind='bar', aspect=2,  margin_titles=True)
+    g.set_ylabels("Error (%)")
+    g.set_xlabels("Nodes")
+    g.set_titles(title)
+
+    show_or_save_plot(filename if filename is not None else title)
+
+
 if __name__ == '__main__':
     if IS_HELP:
         print(__doc__)
@@ -478,16 +507,19 @@ if __name__ == '__main__':
     # export_dataframes_min_to_latex(dataframes_min)
 
     if IS_PLOT_ENABLED:    
-        # OK: HelpKarp with more than 52 nodes timeouts (Timeout is setted to 2 minutes)
-        plot_comparison([HELD_KARP], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{HELD_KARP} (52 nodes)')
+        # # OK (speed): HelpKarp with more than 52 nodes timeouts (Timeout is setted to 2 minutes)
+        # plot_comparison([HELD_KARP], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{HELD_KARP} (52 nodes)')
         
-        # OK: approximated solution vs heuristic
-        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
+        # # OK (speed): approximated solution vs heuristic
+        # plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
 
-        # OK: the three (y log scaled)
-        plot_comparison([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING])} (y log scaled)', y_log=True)
+        # # OK (speed): the three (y log scaled)
+        # plot_comparison([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING])} (y log scaled)', y_log=True)
 
-        # OK: simulated annealing vs approx solution
-        plot_comparison([SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING])}')
-        plot_comparison([SIMULATED_ANNEALING, MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
-        plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
+        # # OK (speed): simulated annealing vs approx solution
+        # plot_comparison([SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING])}')
+        # plot_comparison([SIMULATED_ANNEALING, MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
+        # plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
+
+        # OK (precision): heuristic
+        plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')    
