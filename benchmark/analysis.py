@@ -73,6 +73,14 @@ ms_programs = [
     'ms_simulated_annealing',
 ]
 
+GROUND_TRUTH_DF = pd.DataFrame({
+    'd': [ 52, 14, 150, 493, 1000, 51, 202, 229, 100, 100, 442, 16, 22 ], 
+    'instance': [ 
+        'berlin52.tsp', 'burma14.tsp', 'ch150.tsp', 'd493.tsp', 'dsj1000.tsp', 'eil51.tsp', 'gr202.tsp',
+        'gr229.tsp', 'kroA100.tsp', 'kroD100.tsp', 'pcb442.tsp', 'ulysses16.tsp', 'ulysses22.tsp',],
+    'exact': [ 7542, 3323, 6528, 35002, 18659688, 426, 40160, 134602, 21282, 21294, 50778, 6859, 7013, ]
+})
+
 
 def read_csvs_of_program(program: str) -> List[pd.DataFrame]:
     """
@@ -222,12 +230,53 @@ def compare_2_programs(dfs_dict: Dict[str, pd.DataFrame], program_1: str, progra
     return pd.DataFrame(data, columns=['', *columns])
 
 
-def print_comparison(dfs_dict: Dict[str, pd.DataFrame], program_1: str, program_2: str):
-    print(f'Comparison between {program_1} and {program_2}.')
+def compare_n_programs(dfs_dict: Dict[str, pd.DataFrame], programs: List[str]):
 
-    df_comparison = compare_2_programs(dfs_dict, program_1, program_2)
+    df = GROUND_TRUTH_DF
 
-    # pretty-print comparison DataFrame
+    for program in programs:
+        data = dfs_dict[program][['d', 'ms', 'output', 'filename']]
+        
+        data = data[['output', 'ms']]
+        data['error'] = calculate_error(df['exact'].tolist(), data['output'].tolist())
+
+        # https://stackoverflow.com/questions/17985159/creating-dataframe-with-hierarchical-columns
+        # is not working when pretty printed.
+        df = pd.concat([df, data], axis=1, sort=False)
+    
+    df = df.sort_values('d')
+    df = df.drop('d', axis=1)
+    df = df.rename(columns={
+        'instance': 'Instance',
+        'exact': 'Exact',
+        'output':'Solution',
+        'ms': 'Time (ms)',
+        'error': 'Error (%)'
+    })
+    
+    return df
+
+
+def calculate_error(exact, output):
+    """
+    :param exact: A list with ground truth values.
+    :param output: A list with actual values.
+    :return: The absolute error in %.
+    """
+    return np.abs(np.around(100 * (np.subtract(exact, output)) / exact, decimals=N_DECIMALS_PERCENTAGE))
+
+
+def print_comparison_time(dfs_dict: Dict[str, pd.DataFrame], programs: List[str]):
+    print(f'Comparison {names_to_vs(programs)}.')
+
+    df_comparison = compare_2_programs(dfs_dict, programs[0], programs[1])
+    pretty_print_pandas(df_comparison)
+
+
+def print_comparison(dfs_dict: Dict[str, pd.DataFrame], programs: List[str]):
+    print(f'Comparison {names_to_vs(programs)}.')
+
+    df_comparison = compare_n_programs(dfs_dict, programs)
     pretty_print_pandas(df_comparison)
 
 
@@ -420,9 +469,10 @@ if __name__ == '__main__':
 
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
-        print_comparison(dataframes_min, MST_2_APPROX, FARTHEST_INSERTION)
-        print_comparison(dataframes_min, MST_2_APPROX, SIMULATED_ANNEALING)
-        print_comparison(dataframes_min, FARTHEST_INSERTION, SIMULATED_ANNEALING)
+        # OK: Deterministic, Heuristic, Approximated
+        print_comparison(dataframes_min, [HELD_KARP, FARTHEST_INSERTION, MST_2_APPROX])
+        # OK: Different heuristics
+        print_comparison(dataframes_min, [FARTHEST_INSERTION, SIMULATED_ANNEALING])
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
