@@ -7,8 +7,10 @@
 
 #include "DistanceMatrix.h"
 #include "SimulatedAnnealing.h"
+#include "SimulatedAnnealingOptions.h"
 #include "random_generator.h"
 #include "shared_utils.h"
+#include "utils.h"
 
 class TSPSolution;
 
@@ -16,6 +18,7 @@ class TSPSolutionPool {
     friend class TSPSolution;
     using SolutionFactory = std::function<std::vector<size_t>()>;
 
+    // size of the graph
     size_t circuit_size;
 
     // graph represented as a distance matrix
@@ -45,9 +48,11 @@ private:
     // return the path at index
     std::vector<size_t>& get(size_t index);
 
+    // return a random index in [start, end]
     size_t random_index(size_t start, size_t end);
 
-    double compute_distance(const std::vector<size_t>& circuit);
+    // return the total distance of the circuit
+    int compute_distance(const std::vector<size_t>& circuit);
 
     // prunes some solutions at random mantaining the current best solution. Although it reduces the
     // simulated annealing solution space, it helps keeping the memory consumption low
@@ -62,8 +67,11 @@ public:
         random(0.0, 1.0) {
     }
 
+    // return the size of the graph
     size_t size() const;
-    TSPSolution init();
+
+    TSPSolution init(simulated_annealing::SimulatedAnnealingOptions& options,
+                     size_t sample_pair_size, size_t sample_temperature_iterations);
 };
 
 class TSPSolution : public simulated_annealing::SolutionBase<TSPSolution> {
@@ -76,12 +84,11 @@ public:
 private:
     size_t pool_index;
 
-    double NOT_INITIALIZED = std::numeric_limits<double>::max();
-    mutable double distance = NOT_INITIALIZED;
+    int NOT_INITIALIZED = std::numeric_limits<int>::max();
+    mutable int distance = NOT_INITIALIZED;
 
-    TSPSolution two_opt(size_t x, size_t y);
-    TSPSolution translate(size_t x, size_t y);
-    TSPSolution switching(size_t x, size_t y);
+    std::vector<size_t> manipulate_raw(const std::vector<size_t>& path,
+                                       std::vector<size_t>& new_path) const noexcept;
 
 public:
     TSPSolution(TSPSolutionPool& pool, size_t pool_index) :
@@ -102,8 +109,10 @@ public:
 
     std::vector<size_t>& circuit() const;
 
+    std::vector<size_t> manipulate_raw(const std::vector<size_t>& path) const noexcept;
+
     // lazily computes the cost of the current solution
-    double fitness() override;
+    int fitness() override;
 
     // manipulate the current solution to create a new feasible solution
     TSPSolution manipulate() override;
@@ -133,7 +142,7 @@ inline size_t TSPSolutionPool::random_index(size_t start, size_t end) {
     return start + static_cast<size_t>(stride);
 }
 
-inline double TSPSolutionPool::compute_distance(const std::vector<size_t>& circuit) {
+inline int TSPSolutionPool::compute_distance(const std::vector<size_t>& circuit) {
     const auto get_distance = [this](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
     };
@@ -141,9 +150,65 @@ inline double TSPSolutionPool::compute_distance(const std::vector<size_t>& circu
     return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_distance);
 }
 
-inline TSPSolution TSPSolutionPool::init() {
+// @param sample_size size n of R, a sample of 2n randomly generated solutions
+inline TSPSolution TSPSolutionPool::init(simulated_annealing::SimulatedAnnealingOptions& options,
+                                         size_t sample_pair_size,
+                                         size_t sample_temperature_iterations) {
+    const auto initial_path = solution_factory();
     auto solution = create();
-    solution.circuit() = solution_factory();
+
+    // percentage of proposed uphill transitions that must be accepted at τ_0
+    // (0.8 <= χ_0 <= 0.99)
+    const double init_acceptance_ratio = options.init_acceptance_ratio;
+
+    // average absolute difference in objective function over the n sample transitions composing a
+    // sample of 2n solutions
+    double delta_v = 0;
+
+    const auto trials = 2 * sample_pair_size;
+    for (size_t r = 0; r < trials; ++r) {
+        auto n1 = solution.manipulate_raw(initial_path);
+        auto n2 = solution.manipulate_raw(n1);
+
+        const double c1 = compute_distance(n1);
+        const double c2 = compute_distance(n2);
+
+        delta_v += std::abs(c1 - c2);
+    }
+
+    // initial temperature τ_0
+    double init_temperature = delta_v / std::log(1.0 / init_acceptance_ratio);
+
+    for (size_t accepted = 0;; accepted = 0, init_temperature *= 1.5) {
+        auto current_path = initial_path;
+
+        double current_cost = compute_distance(current_path);
+
+        for (size_t i = 0; i < sample_temperature_iterations; ++i) {
+            auto next = solution.manipulate_raw(current_path);
+            const double next_cost = compute_distance(next);
+            const double current_e = current_cost;
+            const double next_e = next_cost;
+
+            if (options.metropolis(init_temperature, current_e, next_e)) {
+                current_path = next;
+                current_cost = next_cost;
+                ++accepted;
+            }
+        }
+
+        const auto acc = static_cast<double>(accepted);
+        const auto sample_it = static_cast<double>(sample_temperature_iterations);
+
+        if ((acc / sample_it) >= init_acceptance_ratio) {
+            break;
+        }
+    }
+
+    options.set_init_temperature(init_temperature);
+    options.set_reheat_interval(std::max(static_cast<int>(init_temperature / 4000), 100));
+
+    solution.circuit() = initial_path;
     return solution;
 }
 
@@ -153,13 +218,13 @@ inline TSPSolution TSPSolutionPool::create() {
         unused_solution_indexes.push_back(feasible_solutions.size() - 1);
     }
 
-    auto pool_index_to_use = unused_solution_indexes.back();
+    const auto pool_index_to_use = unused_solution_indexes.back();
     unused_solution_indexes.pop_back();
 
     return TSPSolution(*this, pool_index_to_use);
 }
 
- // TODO: find a way to efficiently reindex the spared solutions
+// TODO: find a way to efficiently reindex the spared solutions
 inline void TSPSolutionPool::remove_random_solutions_except(size_t best_index) {
     size_t size = feasible_solutions.size();
     size_t n_to_remove = std::min(size * 0.3, 10.0);
@@ -190,94 +255,7 @@ inline std::vector<size_t>& TSPSolution::circuit() const {
     return pool->get(pool_index);
 }
 
-inline TSPSolution TSPSolution::two_opt(size_t x, size_t y) {
-    auto new_solution = pool->create();
-    auto& path = circuit();
-    auto& new_path = new_solution.circuit();
-
-    size_t i = 0;
-    size_t j = 0;
-
-    // copy the first x items
-    for (; i < x; i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    // copy the reversed version of the next x items
-    for (i = y - 1; i >= x; i--, j++) {
-        new_path[j] = path[i];
-    }
-
-    // copy the last part
-    for (i = y; i < path.size(); i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    return new_solution;
-}
-
-inline TSPSolution TSPSolution::translate(size_t x, size_t y) {
-    auto new_solution = pool->create();
-    auto& path = circuit();
-    auto& new_path = new_solution.circuit();
-
-    size_t i = 0;
-    size_t j = 0;
-
-    // copy the first x items
-    for (; i < x; i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    // copy the item at position y-1
-    new_path[j++] = path[y - 1];
-
-    // copy the next y-x-1 items
-    for (i = x; i < y - 1; i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    // copy the last part
-    for (i = y; i < path.size(); i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    return new_solution;
-}
-
-inline TSPSolution TSPSolution::switching(size_t x, size_t y) {
-    auto new_solution = pool->create();
-    auto& path = circuit();
-    auto& new_path = new_solution.circuit();
-
-    size_t i = 0;
-    size_t j = 0;
-
-    // copy the first x items
-    for (; i < x; i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    // copy the item at position y-1
-    new_path[j++] = path[y - 1];
-
-    // skip the x-th item, copy the next y-x-2 items
-    for (i = x + 1; i < y - 1; i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    // copy the x-th item
-    new_path[j++] = path[x];
-
-    // copy the last part
-    for (i = y; i < path.size(); i++, j++) {
-        new_path[j] = path[i];
-    }
-
-    return new_solution;
-}
-
-inline double TSPSolution::fitness() {
+inline int TSPSolution::fitness() {
     if (distance == NOT_INITIALIZED) {
         distance = pool->compute_distance(circuit());
     }
@@ -285,16 +263,24 @@ inline double TSPSolution::fitness() {
     return distance;
 }
 
-inline TSPSolution TSPSolution::manipulate() {
+inline std::vector<size_t> TSPSolution::manipulate_raw(const std::vector<size_t>& path) const
+    noexcept {
+    std::vector<size_t> new_path(pool->size());
+    return manipulate_raw(path, new_path);
+}
+
+inline std::vector<size_t> TSPSolution::manipulate_raw(const std::vector<size_t>& path,
+                                                       std::vector<size_t>& new_path) const
+    noexcept {
     // ensure that endpoints aren't involved in the manipulation
     // we assume length of the path > 4 and k >= 2
-    size_t k = 2;
+    const size_t k = 2;
 
     // x and j are the selected endpoints used for manipulating the previous solution to create a
     // new solution.
     // The first x items and the items at position >= y will be always copied as they are.
-    size_t x = pool->random_index(1, pool->size() - k);
-    size_t y = x + pool->random_index(2, pool->size() - x);
+    const size_t x = pool->random_index(1, pool->size() - k);
+    const size_t y = x + pool->random_index(2, pool->size() - x);
 
     const double dice = pool->random();
 
@@ -305,13 +291,23 @@ inline TSPSolution TSPSolution::manipulate() {
      */
 
     if (dice < 0.4) {
-        return two_opt(x, y);
-    }
-    if (dice < 0.8) {
-        return translate(x, y);
+        utils::two_opt(path, new_path, x, y);
+    } else if (dice < 0.8) {
+        utils::translate(path, new_path, x, y);
+    } else {
+        utils::switching(path, new_path, x, y);
     }
 
-    return switching(x, y);
+    return new_path;
+}
+
+inline TSPSolution TSPSolution::manipulate() {
+    auto new_solution = pool->create();
+    auto& path = circuit();
+    auto& new_path = new_solution.circuit();
+
+    manipulate_raw(path, new_path);
+    return new_solution;
 }
 
 inline void TSPSolution::destroy() {

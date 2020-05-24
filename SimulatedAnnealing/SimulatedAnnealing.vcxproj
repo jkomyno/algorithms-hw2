@@ -150,10 +150,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="nearest_neighbor_heuristic_tsp.h" />
+    <ClInclude Include="parallel.h" />
     <ClInclude Include="SimulatedAnnealing.h" />
     <ClInclude Include="SimulatedAnnealingOptions.h" />
     <ClInclude Include="simulated_annealing_tsp.h" />
     <ClInclude Include="TSPSolutionPool.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

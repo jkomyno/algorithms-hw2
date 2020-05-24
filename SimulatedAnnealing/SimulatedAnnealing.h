@@ -5,7 +5,6 @@
 #include <type_traits>  // std::enable_if, std::is_base_of
 
 #include "SimulatedAnnealingOptions.h"
-#include "random_generator.h"
 
 namespace simulated_annealing {
     template <class Solution>
@@ -14,7 +13,7 @@ namespace simulated_annealing {
         virtual ~SolutionBase() = default;
 
         // returns the cost of the current solution
-        virtual double fitness() = 0;
+        virtual int fitness() = 0;
 
         // manipulate the current solution to create a new feasible solution
         virtual Solution manipulate() = 0;
@@ -32,14 +31,13 @@ namespace simulated_annealing {
     class SimulatedAnnealing {
         double temperature;
         SimulatedAnnealingOptions options;
-        random_generator::RealRandomGenerator rand;
 
         bool metropolis(double x, double y) {
-            return rand() <= std::exp(-(x - y) / temperature);
+            return options.metropolis(temperature, x, y);
         }
 
         void anneal() {
-            temperature = temperature * options.lambda;
+            temperature *= options.cooling;
         }
 
         // accept with probability 1 if the candidate solution is better than the current one.
@@ -68,49 +66,65 @@ namespace simulated_annealing {
 
     public:
         SimulatedAnnealing(SimulatedAnnealingOptions&& options) :
-            temperature(options.init_temperature),
-            options(std::forward<decltype(options)>(options)),
-            rand(random_generator::RealRandomGenerator(0.0, 1.0)) {
+            temperature(options.get_init_temperature()),
+            options(std::forward<decltype(options)>(options)) {
         }
 
         // runs the Simulated Annealing optimization either for the specified amount of annealing
         // steps, or until the temperature reaches its minimum, whatever happens first.
-        Solution solve(Solution initial_solution) {
+        int solve(Solution initial_solution) {
             auto current_solution = initial_solution;
             auto best_solution = initial_solution;
 
-            // variables used for debugging
-            // TODO: remove
-            size_t _iterations = 0;
-            size_t _reheats = 0;
-            double _final_temperature = 0;
+            int best_cost = best_solution.fitness();
+            size_t same_best_solution_times = 1;
 
-            size_t i = 0;
-            for (; i < options.annealing_steps && temperature > options.stop_temperature; ++i) {
-                if (i % options.reheat_interval == 0) {
-                    temperature *= std::min(temperature, options.init_temperature * temperature) *
-                                   options.reheat_factor;
+            for (size_t r = 0; r < options.restarts; ++r) {
+                // variables used for debugging
+                // TODO: remove
+                size_t _iterations = 0;
+                size_t _reheats = 0;
+                double _final_temperature = 0;
 
-                    _reheats++;
+                size_t i = 0;
+                for (; i < options.annealing_steps &&
+                       (temperature > options.stop_temperature &&
+                        same_best_solution_times < options.max_same_best_solution_times);
+                     ++i) {
+                    if ((i + 1) % options.get_reheat_interval() == 0) {
+                        temperature =
+                            options.get_init_temperature() * options.reheat_factor / (10 * (i + 1));
+                        _reheats++;
+                    }
+
+                    for (size_t j = 0; j < options.steady_steps; ++j) {
+                        // generate a new solution manipulating the current solution
+                        auto new_solution = current_solution.manipulate();
+
+                        // accept the new solution with a probability dependent on the metropolis
+                        // policy
+                        probably_accept(new_solution, current_solution, best_solution);
+                    }
+
+                    anneal();
+                    best_solution.survives();
+
+                    if (best_solution.fitness() == best_cost) {
+                        ++same_best_solution_times;
+                    } else {
+                        best_cost = std::min({best_cost, best_solution.fitness()});
+                        same_best_solution_times = 1;
+                    }
+
+                    _iterations++;
                 }
 
-                for (size_t j = 0; j < options.steady_steps; ++j) {
-                    // generate a new solution manipulating the current solution
-                    auto new_solution = current_solution.manipulate();
+                _final_temperature = temperature;
 
-                    // accept the new solution with a probability dependent on the metropolis policy
-                    probably_accept(new_solution, current_solution, best_solution);
-                }
-
-                anneal();
-                best_solution.survives();
-
-                _iterations++;
+                temperature = options.get_init_temperature();
             }
 
-            _final_temperature = temperature;
-
-            return best_solution;
+            return best_solution.fitness();
         }
     };
 
