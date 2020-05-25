@@ -16,7 +16,9 @@ class TSPSolution;
 
 class TSPSolutionPool {
     friend class TSPSolution;
-    using SolutionFactory = std::function<std::vector<size_t>()>;
+    using Path = std::vector<size_t>;
+    using Cost = int;
+    using SolutionFactory = std::function<std::pair<Path, Cost>()>;
 
     // size of the graph
     size_t circuit_size;
@@ -151,11 +153,24 @@ inline int TSPSolutionPool::compute_distance(const std::vector<size_t>& circuit)
 }
 
 // @param sample_size size n of R, a sample of 2n randomly generated solutions
+
+/**
+ * Initialize the first TSP solution and some core Simulated Annealing options.
+ * The first TSP solution is initialized via solution_factory (which uses the Nearest Neighbor
+ * heuristic).
+ * The initial annealing temperature τ_0 is determined using the approach suggested by Ben-Ameur,
+ * @see https://www.researchgate.net/publication/227061666_Computing_the_Initial_Temperature_of_Simulated_Annealing.
+ *
+ * The reheating interval ρ is determined by max{τ_0 / 4000, 100}.
+ */
 inline TSPSolution TSPSolutionPool::init(simulated_annealing::SimulatedAnnealingOptions& options,
                                          size_t sample_pair_size,
                                          size_t sample_temperature_iterations) {
-    const auto initial_path = solution_factory();
+    const auto [initial_path, initial_cost] = solution_factory();
+
     auto solution = create();
+    solution.circuit() = initial_path;
+    solution.distance = initial_cost;
 
     // percentage of proposed uphill transitions that must be accepted at τ_0
     // (0.8 <= χ_0 <= 0.99)
@@ -181,8 +196,7 @@ inline TSPSolution TSPSolutionPool::init(simulated_annealing::SimulatedAnnealing
 
     for (size_t accepted = 0;; accepted = 0, init_temperature *= 1.5) {
         auto current_path = initial_path;
-
-        double current_cost = compute_distance(current_path);
+        double current_cost = initial_cost;
 
         for (size_t i = 0; i < sample_temperature_iterations; ++i) {
             auto next = solution.manipulate_raw(current_path);
@@ -205,10 +219,10 @@ inline TSPSolution TSPSolutionPool::init(simulated_annealing::SimulatedAnnealing
         }
     }
 
+    // set the values of τ_0 and ρ for the current instance
     options.set_init_temperature(init_temperature);
     options.set_reheat_interval(std::max(static_cast<int>(init_temperature / 4000), 100));
 
-    solution.circuit() = initial_path;
     return solution;
 }
 

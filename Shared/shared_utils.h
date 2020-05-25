@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>      // std::generate_n
+#include <algorithm>      // std::generate_n, std::min_element
 #include <cmath>          // std::floor
 #include <iterator>       // std::inserter
 #include <unordered_set>  // std::unordered_set
@@ -59,4 +59,25 @@ namespace utils {
         total_weight += get_distance(*cbegin, *it_prev);
         return total_weight;
     }
+
+    /**
+     * Return the best solution from a set of multiple solutions.
+     * This std::min_element wrapper is necessary to force the compiler to choose the right overload
+     * of a higher-order function at compile-time
+     *
+     * @see https://stackoverflow.com/a/36794145/6174476
+     */
+    const auto select_best = [](auto&&... args) -> decltype(auto) {
+        return std::min_element(std::forward<decltype(args)>(args)...);
+    };
+
+    /**
+     * Return the best solution from a set of multiple solutions.
+     * The result is a std::pair containing the result as first term and its cost as second term
+     */
+    const auto select_best_result_cost_pair = [](auto&&... args) -> decltype(auto) {
+        return select_best(args..., [](const auto& x, const auto& y) {
+            return x.second < y.second;
+        });
+    };
 }  // namespace utils
