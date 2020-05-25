@@ -139,6 +139,12 @@ Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando poss
 
 \noindent Le strutture dati relative alle Heap e alle code di priorità necessarie per l'algoritmo di Prim sono già state ampiamente documentate nell'homework 1.
 
+\subsubsection{Bitset}
+
+L'algoritmo Held-Karp richiede di salvare la distanza minima da un nodo sorgente $S$ ad ogni altro nodo $\neq S$. L'algoritmo di programmazione dinamica richiede inoltre di salvare l'insieme dei nodi visitati path parziale e l'ultimo nodo attraversato nel path. \\
+
+\noindent Il modo migliore di rappresentare un set di nodi visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit).
+
 \subsection{Timeout}
 
 \noindent L'algoritmo di Held-Karp ha complessità temporale \complexityHeldKarpTime{}, quindi i tempi di esecuzione \textit{esplodono} anche solo per grafi con poche decine di nodi. Come richiesto dall'homework, all'algoritmo di Held-Karp è assegnato un timeout di esecuzione $T$. Abbiamo fissato il valore di $T$ a 2 minuti, per mantenere la RAM occupata sotto controllo (anche la complessità spaziale dell'algoritmo è esponenziale).\\
