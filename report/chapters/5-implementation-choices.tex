@@ -42,7 +42,7 @@ std::vector<T> data;
 \paragraph{Ottimizzazioni}\mbox{} \\
 
 \noindent Poichè i grafi in esame sono non diretti ($\forall i,j \in V$, $c(i,j) = c(j,i)$), la Matrice delle Distanze è una matrice simmetrica con tutte le entry della diagonale principale pari a 0 (in quanto ogni vertice dista 0 da se stesso).
-Abbiamo quindi calcolato le distanze \textit{pair-wise} solo per la parte triangolare superiore della matrice, per poi copiarle in maniera trasposta nella parte triangolare inferiore. Questo ci ha permesso quindi quindi di calcolare le stesse distanze più volte. \\
+Abbiamo quindi calcolato le distanze \textit{pair-wise} solo per la parte triangolare superiore della matrice, per poi copiarle in maniera trasposta nella parte triangolare inferiore. Questo ci ha permesso quindi di calcolare le stesse distanze più volte. \\
 
 \noindent La matrice è rappresentata da un singolo \codeinline{std::vector}. Questo dà la garanzia che ogni riga della matrice sia definita in sezioni contigue di memoria, riduce l'overhead rispetto ad un approccio \codeinline{std::vector<std::vector>}, e, nonostante la logica di indicizzazione sia un po' più complessa (l'indicizzazione virtuale è a due dimensioni, quella fisica è ad una sola dimensione), il cache behaviour della classe è migliore. Si veda il listing \ref{listing:virtual-physica-addressing}.
 
@@ -139,11 +139,53 @@ Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando poss
 
 \noindent Le strutture dati relative alle Heap e alle code di priorità necessarie per l'algoritmo di Prim sono già state ampiamente documentate nell'homework 1.
 
-\subsubsection{Bitset}
+\subsubsection{Rappresentazione dei vettori $\pi$ e $d[v,S]$}
 
-L'algoritmo Held-Karp richiede di salvare la distanza minima da un nodo sorgente $S$ ad ogni altro nodo $\neq S$. L'algoritmo di programmazione dinamica richiede inoltre di salvare l'insieme dei nodi visitati path parziale e l'ultimo nodo attraversato nel path. \\
+L'algoritmo Held-Karp richiede esplicitamente l'uso di due vettori:
+\begin{itemize}
+    \item $d[v,S]$ è il peso del cammino minimo che parte da 0 e termina in v, visitando tutti i nodi in S;
+    \item $\pi[v,S]$ è il predecessore di v nel cammino minimo definito come sopra.
+\end{itemize}
 
-\noindent Il modo migliore di rappresentare un set di nodi visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit).
+In questo caso l'homework prevede la restituizione del peso del cammino Hamiltoniano inferiore e non il cammino stesso, il vettore $\pi[v,S]$ è stato omesso. Per poter implementare dunque il vettore $d[v,S]$ si è deciso di creare una struttura dati apposita, formata da una \textit{std::unordered\_map} dove la chiave è una coppia $(S, v)$ ed il valore della mappa è un intero che rappresenta il peso del cammino minimo che parte da 0 e termina in v, visitando tutti i nodi in S. Per rappresentare il set di nodi S si sono studiate 3 possibili soluzione descritte nella sezione \ref{cap:S-repr}. Mentre il vertice $v$ viene rappresentato da un numero di tipo \textit{size\_t}.
+
+\subsubsection{Rappresentazione del sottoinsieme di vertici S}
+\label{cap:S-repr}
+In particolare ora vogliamo concentrare la nostra attenzione alla rappresentazione in maniera efficiente dell'insieme dei nodi S da visitare. In particolare abbiamo pensato a 3 soluzioni che argomenteremo qui di seguito.
+
+\paragraph{Unordered Set}
+La prima soluzione è quella di rappresentare il set di vertici S semplicemente attraverso la struttura dati \textit{unordered\_set} offerta dalla standard library \textit{std} di C++.  
+
+TODO: PARLARE DELL'HASHING
+
+\paragraph{Bitmasking}
+
+\noindent Una soluzione migliore per rappresentare il set di nodi S visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit). In questo caso ogni bit rappresenta la presenza o meno nel set S del vertice $i$ dell'$i$-esimo bit considerato nel numero. Per fare questo è stato sufficiente dichiarare un numero \textit{unsigned long long} che nel nostro linguaggio corrisponde ad numero senza segno a 64 bit. Tale numero viene manipolato sfruttando la sua rappresentazione binaria per decretare la presenza o meno dell'$i$-esimo vertice. Si consideri l'esempio in figura \ref{fig:bitmasking-example}, è possibile vedere come è possibile rappresentare l'insieme S attraverso i bit di un numero unsigned long long. 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{./images/BitMasking Example.png}
+	\caption{Rappresentazione di S tramite BitMasking}
+	\label{fig:bitmasking-example}
+\end{figure}
+
+Sfruttando questa rappresentazione dell'insieme S, le operazioni di eliminazione, aggiunta e di presenza di nodi sono implementate sfruttando operazioni sui bit tramite tecniche di bit-shifting, operazione logiche AND, OR e NOT: operazione pressoché istantanee nel nostro linguaggio garantendo così un complessità temporale molto bassa.
+
+Un limite di tale struttura è l'impossibilità di poter rappresentare un set S che contiene più di 64 nodi, come è possibile vedere nell'esempio della figura \ref{fig:bitmasking-example} dove il vertice 66 non può essere rappresentato in questo modo.
+
+\paragraph{Extended Bitmasking}
+TODO: Cambiare nome nel codice da ExtendedBitSet a ExtendedBitMasking.
+Per superare il limite della rappresentazione tramite BitMasking per più di 64 nodi si è pensato di estendere l'idea del bitmasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{EtendedBitMasking} che tramite un \textit{std::vector} di \textit{unsigned long long} è in grado di rappresentare qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:extendedbitmasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{./images/BitMaskingExtended Example.png}
+	\caption{Rappresentazione di S tramite ExtendedBitMasking}
+	\label{fig:extendedbitmasking-example}
+\end{figure}
+
+\paragraph{Confronto tra unordered\_set, BitMasking ed ExtendedBitMasking}
+In questo paragrafo vogliamo mettere a confronto le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte.
 
 \subsection{Timeout}
 
