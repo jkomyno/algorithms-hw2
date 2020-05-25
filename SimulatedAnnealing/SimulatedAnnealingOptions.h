@@ -26,10 +26,10 @@ namespace simulated_annealing {
         const size_t restarts;
 
         // temperature that, when reached, stops the optimization process
-        double stop_temperature;
+        const double stop_temperature;
 
         // stop when the best solution stays the same for the specified amount of times
-        size_t max_same_best_solution_times;
+        const size_t max_same_best_solution_times;
 
         // percentage of proposed uphill transitions that must be accepted at τ_0
         // (0.8 <= χ_0 <= 0.99)
