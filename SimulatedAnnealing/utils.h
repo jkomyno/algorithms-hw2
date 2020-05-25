@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <vector>  // std::vector
 
 namespace utils {
     template <typename T>
@@ -51,7 +51,8 @@ namespace utils {
     }
 
     template <typename T>
-    void switching(const std::vector<T>& path, std::vector<T>& new_path, size_t x, size_t y) {
+    void switching(const std::vector<T>& path, std::vector<T>& new_path, size_t x,
+                   size_t y) noexcept {
         size_t i = 0;
         size_t j = 0;
 
