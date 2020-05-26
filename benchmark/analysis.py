@@ -55,6 +55,9 @@ IS_SAVE_PLOT_ENABLED = '--save-plot' in sys.argv
 PLOT_IMG_DIR = 'images'
 
 HELD_KARP = 'HeldKarp'
+HELD_KARP_EXTENDED_BITSET = 'HeldKarp_ExtendedBitset'
+HELD_KARP_ULL = 'HeldKarp_ULL'
+HELD_KARP_UNORDERED_SET = 'HeldKarp_UnorderedSet'
 MST_2_APPROX = 'MST2Approximation'
 FARTHEST_INSERTION = 'FarthestInsertion'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
@@ -66,6 +69,9 @@ programs = [
     FARTHEST_INSERTION,
     SIMULATED_ANNEALING,
     CLOSEST_INSERTION,
+    HELD_KARP_EXTENDED_BITSET,
+    HELD_KARP_ULL,
+    HELD_KARP_UNORDERED_SET
 ]
 
 ms_programs = [
@@ -74,6 +80,9 @@ ms_programs = [
     'ms_farthest_insertion',
     'ms_simulated_annealing',
     'ms_closest_insertion',
+    'ms_HeldKarp_ExtendedBitset',
+    'ms_HeldKarp_ULL',
+    'ms_HeldKarp_UnorderedSet'
 ]
 
 GROUND_TRUTH_DF = pd.DataFrame({
@@ -525,4 +534,6 @@ if __name__ == '__main__':
         # plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
 
         # OK (precision): heuristic
-        plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')
+        #plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')
+
+        plot_comparison([HELD_KARP_EXTENDED_BITSET,HELD_KARP_ULL,HELD_KARP_UNORDERED_SET], dataframes_min, pred=lambda x: x['d'] <= 22, title=f'test')

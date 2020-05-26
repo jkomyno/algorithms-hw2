@@ -15,6 +15,14 @@ Gli algoritmi di questo homework operano su grafi pesati completamente connessi 
 
 \noindent I risultati del calcolo delle distanze (\textit{EUC\_2D} o \textit{GEO} a seconda del dataset di input) sono inseriti nella posizione corrispondente della Matrice delle Distanze.
 Una volta calcolate le distanze, le coordinate originali non sono mantenute: non sono infatti necessarie ai fini della rappresentazione del grafo e del calcolo della soluzione di TSP.
+Nella figura \ref{fig:distancematrix-example} è possbile vedere un esempio di una conversione di un grafo di esempio rappresentato da cordinate EUC\_2D nella sua matrice delle distanze.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{./images/Distance Matrix.png}
+	\caption{Grafo di esempio rappresentato con Matrice delle distanze}
+	\label{fig:distancematrix-example}
+\end{figure}
 
 \noindent Come nel precedente homework, per semplificare la logica di indicizzazione dei nodi del grafo, la label dei nodi (originariamente numerata da $1$ a $n$) è decrementata di 1, quindi i nodi sono rappresentati dall'intervallo numerico $[0, n-1]$.
 
