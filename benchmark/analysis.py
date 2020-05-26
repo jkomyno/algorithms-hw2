@@ -58,12 +58,14 @@ HELD_KARP = 'HeldKarp'
 MST_2_APPROX = 'MST2Approximation'
 FARTHEST_INSERTION = 'FarthestInsertion'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
+CLOSEST_INSERTION = 'ClosestInsertion'
 
 programs = [
     HELD_KARP,
     MST_2_APPROX,
     FARTHEST_INSERTION,
     SIMULATED_ANNEALING,
+    CLOSEST_INSERTION,
 ]
 
 ms_programs = [
@@ -71,11 +73,12 @@ ms_programs = [
     'ms_mst2approx',
     'ms_farthest_insertion',
     'ms_simulated_annealing',
+    'ms_closest_insertion',
 ]
 
 GROUND_TRUTH_DF = pd.DataFrame({
-    'd': [ 52, 14, 150, 493, 1000, 51, 202, 229, 100, 100, 442, 16, 22 ], 
-    'instance': [ 
+    'd': [ 52, 14, 150, 493, 1000, 51, 202, 229, 100, 100, 442, 16, 22 ],
+    'instance': [
         'berlin52.tsp', 'burma14.tsp', 'ch150.tsp', 'd493.tsp', 'dsj1000.tsp', 'eil51.tsp', 'gr202.tsp',
         'gr229.tsp', 'kroA100.tsp', 'kroD100.tsp', 'pcb442.tsp', 'ulysses16.tsp', 'ulysses22.tsp',],
     'exact': [ 7542, 3323, 6528, 35002, 18659688, 426, 40160, 134602, 21282, 21294, 50778, 6859, 7013, ]
@@ -133,7 +136,7 @@ def check_validity(dfs_list: List[List[pd.DataFrame]]):
 
 def get_row_index_with_max_edges(d: int) -> int:
     """
-    Return the row index of any benchmark CSV file with given dimension. 
+    Return the row index of any benchmark CSV file with given dimension.
     The number of nodes considered "inseresting" are:
     - 14
     - 16
@@ -236,14 +239,14 @@ def compare_n_programs(dfs_dict: Dict[str, pd.DataFrame], programs: List[str]):
 
     for program in programs:
         data = dfs_dict[program][['d', 'ms', 'output', 'filename']]
-        
+
         data = data[['output', 'ms']]
         data['error'] = calculate_error(df['exact'].tolist(), data['output'].tolist())
 
         # https://stackoverflow.com/questions/17985159/creating-dataframe-with-hierarchical-columns
         # is not working when pretty printed.
         df = pd.concat([df, data], axis=1, sort=False)
-    
+
     df = df.sort_values('d')
     df = df.drop('d', axis=1)
     df = df.rename(columns={
@@ -253,7 +256,7 @@ def compare_n_programs(dfs_dict: Dict[str, pd.DataFrame], programs: List[str]):
         'ms': 'Time (ms)',
         'error': 'Error (%)'
     })
-    
+
     return df
 
 
@@ -415,7 +418,7 @@ def plot_line(dfs: Dict[str, pd.DataFrame], x: str, y: str, y_log=False):
     plt.figure(figsize=(14, 7))
     for k, v in dfs.items():
         g = sns.lineplot(v[x], v[y], label=k)
-        if y_log: 
+        if y_log:
             g.set_yscale('log')
 
 
@@ -506,10 +509,10 @@ if __name__ == '__main__':
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
 
-    if IS_PLOT_ENABLED:    
+    if IS_PLOT_ENABLED:
         # # OK (speed): HelpKarp with more than 52 nodes timeouts (Timeout is setted to 2 minutes)
         # plot_comparison([HELD_KARP], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{HELD_KARP} (52 nodes)')
-        
+
         # # OK (speed): approximated solution vs heuristic
         # plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
 
@@ -522,4 +525,4 @@ if __name__ == '__main__':
         # plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
 
         # OK (precision): heuristic
-        plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')    
+        plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')

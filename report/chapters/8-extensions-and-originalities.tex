@@ -1,6 +1,10 @@
 \section{Estensioni e originalità}
 \label{cap:extensions-and-originalities}
 
+Oltre alle tre implementazioni richieste dalla consegna dell'homework,
+abbiamo deciso di esplorare qualche altra estensione degli algoritmi
+per il problema del commesso viaggiatore.
+
 \subsection{TSP con Simulated Annealing}
 
 \subsubsection{Metodo Generale}
@@ -70,7 +74,7 @@ Una delle estensioni di Simulated Annealing prevede di riscaldare nuovamente la 
 \noindent Nel nostro caso, la temperatura è aumentata ad intervalli regolari di valori via via decrescenti all'aumentare delle iterazioni di Simulated Annealing. La formula di reheating è la seguente, dove $\tau{}$ è la temperatura corrente, $\tau{}_0$ è la temperatura iniziale, $i$ è l'iterazione corrente, $\rho$ è il fattore di reheating:
 
 \begin{equation}
-    \tau{} = \frac{\tau{}_0 \cdot \rho{}}{10 \cdot (i + 1)} 
+    \tau{} = \frac{\tau{}_0 \cdot \rho{}}{10 \cdot (i + 1)}
 \end{equation}
 
 L'ampiezza degli intervalli di \textit{reheating} è fissata e data dalla seguente formula, dove $\tau{}_0$ rappresenta la temperatura iniziale:
@@ -105,3 +109,49 @@ Random Restart consiste nel lanciare un algoritmo di ricerca stocastico (nel nos
 \end{itemize}
 
 \noindent Tutte le condizioni elencate sopra sono "in OR", ovvero l'algoritmo termina non appena si verifica almeno una delle condizioni di convergenza.
+
+\subsection{Closest Insertion}
+\label{sec:closest-insertion}
+
+\emph{Closest Insertion} è una delle euristiche impiegabili per la
+risoluzione problema del TSP in modo approssimato. Questa euristica
+è molto simile a \emph{Farthest Insertion} (si veda \ref{sec:farthest-insertion}),
+infatti differisce da essa solo per la selezione del vertice $k$
+da inserire nel circuito parziale $C$.
+
+In particolare, in questo caso viene scelto il vertice $k$ non presente
+nel circuito $C$ che minimizza $\delta (k, C) = \min_{h \in C} w(h, k)$.
+Sostanzialmente viene scelto il vertice $k$ più vicino al ciclo $C$,
+ma che non è ancora incluso in esso.
+
+\subsubsection{Implementazione}
+
+Il codice è sostanzialmente simile a quello riportato nel listato
+\ref{listing:farthest-insertion}, con la differenza che per
+\emph{Closest Insertion} si effettua la scelta del nuovo nodo
+con \mintinline{c++}{utils::select_new_k} passandogli come quarto
+argomento un comparatore che permette, in questo caso, di
+minimizzare $\delta (k, C)$.
+
+\begin{listing}[!ht]
+\begin{minted}{c++}
+// the comparator will be passed to std::max_element.
+const auto min_comparator = [](const auto& x, const auto& y) {
+    return x.second > y.second;
+};
+\end{minted}
+\caption{Differenza di implementazione per Closest Insertion rispetto a Farthest Insertion.}
+\label{listing:closest-insertion-diff}
+\end{listing}
+
+\subsubsection{Approssimazione}
+
+Questa euristica permette di trovare una soluzione $\log(n)$-approssimata,
+ma è possibile dimostrare che il fattore di approssimazione può essere
+ulteriormente abbassato fino ad avere una soluzione $2$-approssimata.
+
+TODO: aggiungere grafici e tabelle
+
+\subsubsection{Osservazioni}
+
+---
