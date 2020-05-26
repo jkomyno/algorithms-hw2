@@ -66,38 +66,36 @@ namespace utils {
     }
 
     // return the vertex k that doesn't belong to the partial Hamiltonian circuit that
-    // maximizes the distance δ(k, circuit).
+    // maximizes or minimizes the distance δ(k, circuit) w.r.t. the given comparator.
     // get_distance is the distance function that computes the cost between 2 nodes.
     template <typename Distance, class Comparator>
     [[nodiscard]] size_t select_new_k(std::unordered_set<size_t>& not_visited,
                                       std::vector<size_t>& circuit,
                                       Distance&& get_distance,
                                       Comparator&& comparator) noexcept {
-        // map that stores the maximum distance for each candidate vertex k
-        std::unordered_map<size_t, double> node_max_weight_map;
-        node_max_weight_map.reserve(not_visited.size());
+        // map that stores the minimum distance for each candidate vertex k
+        std::unordered_map<size_t, double> node_min_weight_map;
+        node_min_weight_map.reserve(not_visited.size());
 
         for (const auto k : not_visited) {
-            double max_hk_weight = std::numeric_limits<double>::min();
+            double min_hk_weight = std::numeric_limits<double>::max();
             for (const auto h : circuit) {
                 const double weight = get_distance(h, k);
 
-                if (comparator(weight, max_hk_weight)) {
-                    max_hk_weight = weight;
+                if (weight < min_hk_weight) {
+                    min_hk_weight = weight;
                 }
             }
 
-            // update the map with the maximum weight between h and k found up to now
-            node_max_weight_map[k] = max_hk_weight;
+            // update the map with the minimum weight between h and k found up to now
+            node_min_weight_map[k] = min_hk_weight;
         }
 
-        const auto max_map_comparator = [](const auto& x, const auto& y) {
-            return x.second < y.second;
-        };
-        const auto it_new_k = std::max_element(node_max_weight_map.cbegin(),
-                                               node_max_weight_map.cend(), max_map_comparator);
+        // maximize or minimize distances based on comparator
+        const auto it_new_k = std::max_element(node_min_weight_map.cbegin(),
+                                               node_min_weight_map.cend(), comparator);
 
-        // obtain the maximum of the maximum distances δ(k, circuit)
+        // obtain the maximum of the maximum or minimum distances δ(k, circuit)
         const size_t new_k = it_new_k->first;
         return new_k;
     }
