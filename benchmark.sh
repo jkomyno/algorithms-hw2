@@ -11,9 +11,11 @@ os=${os[0]}
 
 if [[ $os ==  MINGW* ]];
 then
+    # git bash on Windows
     exe_folder="./x64/Release";
     ext=".exe";
 else
+    # UNIX-like OS
     exe_folder=".";
     ext=".out";
 fi
