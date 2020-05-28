@@ -102,7 +102,7 @@ def read_csvs_of_program(program: str) -> List[pd.DataFrame]:
     :return: list of benchmark CSV files
     """
 
-    csv_files = glob.glob(f'./{program}*.csv')
+    csv_files = glob.glob(f'./{program}.*.csv')
     dataframes_per_program = []
 
     for csv_file in csv_files:
