@@ -513,9 +513,16 @@ if __name__ == '__main__':
 
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
-         
-        print_comparison(dataframes_min, [CLOSEST_INSERTION])
-        print_comparison(dataframes_min, [CLOSEST_INSERTION, FARTHEST_INSERTION])
+        
+        # CLOSEST_INSERTION
+        # print_comparison(dataframes_min, [CLOSEST_INSERTION])
+        # print_comparison(dataframes_min, [CLOSEST_INSERTION, FARTHEST_INSERTION])
+
+        # Question 1 (complete and splitted, more readable).
+        print_comparison(dataframes_min, [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])
+        print_comparison(dataframes_min, [HELD_KARP])
+        print_comparison(dataframes_min, [MST_2_APPROX])
+        print_comparison(dataframes_min, [FARTHEST_INSERTION])
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
@@ -544,3 +551,7 @@ if __name__ == '__main__':
         # OK: ClosestInsertion (accuracy)
         plot_precision_comparison([CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION])} (approximation error)')
         plot_precision_comparison([CLOSEST_INSERTION, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION, FARTHEST_INSERTION])} (approximation error)')
+
+        # Question 1 (accuracy and runtime)
+        plot_precision_comparison([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, limited to 52 nodes)')
+        plot_precision_comparison([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error)')
