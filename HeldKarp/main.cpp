@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     auto distance_matrix = point_reader->create_distance_matrix();
 
     // the TSP timeout is set to 2 minutes
-    auto timeout_min = 1min;
+    auto timeout_min = 2min;
 
     // it's either the weight of the optimal Hamiltonian cycle, or an upper-bound of it in case the
     // computation requires more time than the alotted timeout.
