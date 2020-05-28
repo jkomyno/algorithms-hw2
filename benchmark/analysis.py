@@ -389,7 +389,7 @@ def show_or_save_plot(title: str):
     if IS_SAVE_PLOT_ENABLED:
         if not os.path.exists(f'./{PLOT_IMG_DIR}'):
             os.makedirs(f'./{PLOT_IMG_DIR}')
-        out_title = title.replace(' ', '_')
+        out_title = title.translate ({ord(c): "_" for c in " !@#$%^&*()[]{};:,./<>?\|`~-=+"})
         plt.savefig(f'./{PLOT_IMG_DIR}/{out_title}.png')
     else:
         plt.show()
