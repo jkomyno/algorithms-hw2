@@ -153,6 +153,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DynamicBitMasking.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="HeldKarpAlberto.h" />
     <ClInclude Include="HeldKarpLuca.h" />

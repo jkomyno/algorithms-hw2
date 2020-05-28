@@ -8,11 +8,14 @@
 #include "hash.h"
 #include "timeout.h"
 #include "utils.h"
+#include "DynamicBitMasking.h"
 
 // type of the Dynamic Programming structure that holds the intermediate distances.
 // This is what makes Held & Karp algorithm a better algorithm than the brute force approach
 // (which would be O(n!))
 using held_karp_dp_bits_t = std::unordered_map<std::pair<utils::ull, size_t>, int, hash::pair>;
+
+using held_karp_dp_bit_masking_t = std::unordered_map<std::pair<DynamicBitMasking, size_t>, int, hash::pair>;
 
 using held_karp_dp_t =
     std::unordered_map<std::pair<std::unordered_set<size_t>, size_t>, int, hash::pair>;
@@ -66,10 +69,63 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
  * the local minimum is returned.
  * @param distance_matrix represents the graph as a Distance Matrix.
  * @param C is the dynamic programming map that keeps tracks of the possible subpaths.
+ * @param bits is the subpath represented as a n-bit number.
+ * @param v is the node in the subpath currently considered. It's initially set to 0.
+ */
+int held_karp_tsp_rec_dp_bit_masking_helper(timeout::timeout_signal& signal,
+                                            DistanceMatrix<int>& distance_matrix,
+                                            held_karp_dp_bit_masking_t& C,
+                                            DynamicBitMasking bits,
+                                            size_t v = 0) {
+    // there's only one node in the subpath. Break the recursion and return w(v, 0).
+    if (bits.is_singleton(v)) {
+        return distance_matrix.at(v, 0);
+    }
+
+    // the weight of the subpath starting from node 0 to node v has already been computed. Return
+    // it.
+    if (C.count({bits, v})) {
+        return C[{bits, v}];
+    }
+
+    int min_dist = std::numeric_limits<int>::max();
+    DynamicBitMasking difference = bits;
+    difference.reset_bit_in_position(v);
+    const size_t n = distance_matrix.size();
+
+    bool keep_going = true;
+
+    int bit = difference.get_lsb_position();
+
+    for (; bit < n && keep_going; ++bit) {
+        // avoid running the visit callback if the current bit is set to 0
+        if (difference.at(bit) != 0) {
+            int dist = held_karp_tsp_rec_dp_bit_masking_helper(signal, distance_matrix, C, difference, bit);
+
+            int tmp_dist = dist + distance_matrix.at(v, bit);
+
+            if (tmp_dist < min_dist) {
+                min_dist = tmp_dist;
+            }
+
+            // return true to continue, return false to break the loop
+            keep_going = !signal.is_expired();
+        }
+    }
+
+    C[{bits, v}] = min_dist;
+    return min_dist;
+}
+
+/**
+ * @param signal is the timeout signal. When signal.is_expired() is true, the recursion stops and
+ * the local minimum is returned.
+ * @param distance_matrix represents the graph as a Distance Matrix.
+ * @param C is the dynamic programming map that keeps tracks of the possible subpaths.
  * @param subset is the std::unordered_set of nodes in the path currently considered.
  * @param v is the node in the subpath currently considered. It's initially set to 0.
  */
-int held_karp_tsp_rec_helper(timeout::timeout_signal& signal, DistanceMatrix<int>& distance_matrix,
+[[deprecated]] int held_karp_tsp_rec_helper(timeout::timeout_signal& signal, DistanceMatrix<int>& distance_matrix,
                              held_karp_dp_t& C, const std::unordered_set<size_t>& subset,
                              size_t v = 0) {
     // there's only one node in the subpath. Break the recursion and return w(v, 0).
@@ -119,7 +175,7 @@ int held_karp_tsp_rec_helper(timeout::timeout_signal& signal, DistanceMatrix<int
  */
 inline int held_karp_tsp_rec(timeout::timeout_signal&& signal,
                              DistanceMatrix<int>&& distance_matrix) {
-    constexpr unsigned char BITSET_TRESHOLD = 63;
+    constexpr unsigned char BITSET_TRESHOLD = 64;
     const size_t size = distance_matrix.size();
     const auto vertexes = distance_matrix.get_vertexes();
 
@@ -143,9 +199,9 @@ inline int held_karp_tsp_rec(timeout::timeout_signal&& signal,
     }
 
     // general, slower case with more than 63 nodes
-    held_karp_dp_t C;
+    held_karp_dp_bit_masking_t C;
 
     // subset initially contains every node in the graph
-    std::unordered_set<size_t> subset(vertexes.cbegin(), vertexes.cend());
-    return held_karp_tsp_rec_helper(signal, distance_matrix, C, subset);
+    DynamicBitMasking subset(vertexes.cbegin(), vertexes.cend());
+    return held_karp_tsp_rec_dp_bit_masking_helper(signal, distance_matrix, C, subset);
 }
