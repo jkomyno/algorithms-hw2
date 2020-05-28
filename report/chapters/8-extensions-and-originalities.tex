@@ -150,8 +150,97 @@ Questa euristica permette di trovare una soluzione $\log(n)$-approssimata,
 ma è possibile dimostrare che il fattore di approssimazione può essere
 ulteriormente abbassato fino ad avere una soluzione $2$-approssimata.
 
-TODO: aggiungere grafici e tabelle
+I risultati che abbiamo ottenuto con closest insertion sono illustrati
+dalla tabella \ref{table:closest-insertion-runtime-accuracy} e dal grafico
+\ref{fig:closest-insertion-accuracy-error}.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tabular}{lrrrr}
+    \toprule
+    \multicolumn{5}{c}{Closest Insertion} \\
+    \hline
+    Instance & Exact & Solution &   Time (ms) &   Error (\%) \\
+    \hline
+    burma14.tsp   &     3323 &       3664 &          35 &       10.26 \\
+    ulysses16.tsp &     6859 &       7054 &          36 &        2.84 \\
+    ulysses22.tsp &     7013 &       7499 &          36 &        6.93 \\
+    eil51.tsp     &      426 &        480 &          37 &       12.68 \\
+    berlin52.tsp  &     7542 &       8626 &          35 &       14.37 \\
+    kroA100.tsp   &    21282 &      24661 &          38 &       15.88 \\
+    kroD100.tsp   &    21294 &      22998 &          38 &        8    \\
+    ch150.tsp     &     6528 &       7763 &          40 &       18.92 \\
+    gr202.tsp     &    40160 &      45660 &          46 &       13.7  \\
+    gr229.tsp     &   134602 &     163597 &          52 &       21.54 \\
+    pcb442.tsp    &    50778 &      58297 &         142 &       14.81 \\
+    d493.tsp      &    35002 &      40537 &         180 &       15.81 \\
+    dsj1000.tsp   & 18659688 &   22510610 &        1127 &       20.64 \\
+    \bottomrule
+    \end{tabular}
+
+    \caption{ClosestInsertion runtime and accuracy error}
+    \label{table:closest-insertion-runtime-accuracy}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion__approximation_error_.png}
+
+    \caption{ClosestInsertion accuracy error scaling by nodes}
+    \label{fig:closest-insertion-accuracy-error}
+\end{figure}
 
 \subsubsection{Osservazioni}
 
----
+Data la netta dualità con FarthestInsertion, è doveroso analizzare
+le differenze tra i due algoritmi. Dalla tabella 
+\ref{table:closest-farthest-insertion-runtime-accuracy} 
+e dal grafico \ref{fig:closest-farthest-insertion-accuracy-error}
+è possibile notare che per quanto riguarda il runtime i due algoritmi
+sono perfettamente alla pari, infatti minimizzare o massimizzare la
+funzione $\delta (k, C)$ dal punto di vista del tempo di esecuzione
+non comporta differenze. Dal punto di vista dell'errore di 
+approssimazione invece FarthestInsertion riesce a fare mediamente
+meglio di ClosestInsertion. Da sottolineare anche il fatto che 
+FarthestInsertion riesce ad eliminare completamente l'errore di
+approssimazione su istanze molto piccole.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tabular}{lrrrrrr}
+    \toprule
+    \multicolumn{1}{c}{ } & \multicolumn{3}{c}{Closest Insertion} & \multicolumn{3}{c}{Farthest Insertion} \\
+    \hline
+    Instance & Solution &   Time (ms) &   Error (\%) & Solution &   Time (ms) &   Error (\%) \\
+    \hline
+    burma14.tsp   &     3664 &          35 &       10.26 &       3323 &          35 &        0    \\
+    ulysses16.tsp &     7054 &          36 &        2.84 &       6859 &          35 &        0    \\
+    ulysses22.tsp &     7499 &          36 &        6.93 &       7013 &          35 &        0    \\
+    eil51.tsp     &      480 &          37 &       12.68 &        439 &          36 &        3.05 \\
+    berlin52.tsp  &     8626 &          35 &       14.37 &       8118 &          36 &        7.64 \\
+    kroA100.tsp   &    24661 &          38 &       15.88 &      23373 &          36 &        9.83 \\
+    kroD100.tsp   &    22998 &          38 &        8    &      22577 &          36 &        6.03 \\
+    ch150.tsp     &     7763 &          40 &       18.92 &       6864 &          41 &        5.15 \\
+    gr202.tsp     &    45660 &          46 &       13.7  &      45211 &          46 &       12.58 \\
+    gr229.tsp     &   163597 &          52 &       21.54 &     148324 &          52 &       10.19 \\
+    pcb442.tsp    &    58297 &         142 &       14.81 &      56964 &         140 &       12.18 \\
+    d493.tsp      &    40537 &         180 &       15.81 &      39506 &         176 &       12.87 \\
+    dsj1000.tsp   & 22510610 &        1127 &       20.64 &   20599827 &        1125 &       10.4  \\
+    \bottomrule
+    \end{tabular}
+
+    \caption{ClosestInsertion vs FarthestInsertion runtime and accuracy error}
+    \label{table:closest-farthest-insertion-runtime-accuracy}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion_vs_FarthestInsertion__approximation_error_.png}
+
+    \caption{ClosestInsertion vs FarthestInsertion accuracy error scaling by nodes}
+    \label{fig:closest-farthest-insertion-accuracy-error}
+\end{figure}

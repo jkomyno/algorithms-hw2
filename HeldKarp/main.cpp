@@ -4,9 +4,6 @@
 #include "HeldKarpAlberto.h"
 #include "read_file.h"
 #include "timeout.h"
-// #include "HeldKarpBryan.h"
-
-#include <thread>
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -18,17 +15,6 @@ int main(int argc, char** argv) {
     const char* filename = argv[1];
     auto point_reader(read_file(filename));
     auto distance_matrix = point_reader->create_distance_matrix();
-
-    /*
-    // matrix used for debug purposes
-    DistanceMatrix<int> distance_matrix {
-        0, 2, 4, 1, 6,
-        2, 0, 5, 4, 7,
-        4, 5, 0, 2, 1,
-        1, 4, 2, 0, 8,
-        6, 7, 1, 8, 0
-    };
-    */
 
     // the TSP timeout is set to 2 minutes
     auto timeout_min = 2min;

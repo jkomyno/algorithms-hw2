@@ -1,19 +1,18 @@
 #pragma once
 
-#include <iostream>
-#include <iterator>
-#include <unordered_set>
-#include <vector>
-#include <functional>  // std::greater
+#include <unordered_set> // std::unordered_set
+#include <vector> // std::vector
 
 #include "DistanceMatrix.h"
 #include "shared_utils.h"
 
 [[nodiscard]] inline int closest_insertion_tsp(DistanceMatrix<int>&& distance_matrix) noexcept {
     const size_t size = distance_matrix.size();
+
     const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
     };
+
     // minimize δ(k, circuit)
     const auto min_comparator = [](const auto& x, const auto& y) {
         return x.second > y.second;

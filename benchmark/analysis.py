@@ -61,15 +61,18 @@ HELD_KARP_UNORDERED_SET = 'HeldKarp_UnorderedSet'
 MST_2_APPROX = 'MST2Approximation'
 FARTHEST_INSERTION = 'FarthestInsertion'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
-#CLOSEST_INSERTION = 'ClosestInsertion'
+CLOSEST_INSERTION = 'ClosestInsertion'
+CLOSEST_INSERTION_PARALLEL = 'ClosestInsertionParallel'
 
 programs = [
     HELD_KARP,
     MST_2_APPROX,
     FARTHEST_INSERTION,
     SIMULATED_ANNEALING,
-    #CLOSEST_INSERTION,
     HELD_KARP_DYNAMICBITMASKING,
+    CLOSEST_INSERTION,
+    CLOSEST_INSERTION_PARALLEL,
+    HELD_KARP_EXTENDED_BITSET,
     HELD_KARP_ULL,
     HELD_KARP_UNORDERED_SET
 ]
@@ -79,9 +82,10 @@ ms_programs = [
     'ms_mst2approx',
     'ms_farthest_insertion',
     'ms_simulated_annealing',
-    #'ms_closest_insertion',
+    'ms_closest_insertion',
+    'ms_closest_insertion_parallel',
     'ms_HeldKarp_DynamicBitMasking',
-    'ms_HeldKarp_BitMasking',
+     'ms_HeldKarp_BitMasking',
     'ms_HeldKarp_UnorderedSet'
 ]
 
@@ -102,7 +106,7 @@ def read_csvs_of_program(program: str) -> List[pd.DataFrame]:
     :return: list of benchmark CSV files
     """
 
-    csv_files = glob.glob(f'./{program}*.csv')
+    csv_files = glob.glob(f'./{program}.*.csv')
     dataframes_per_program = []
 
     for csv_file in csv_files:
@@ -386,7 +390,7 @@ def show_or_save_plot(title: str):
     if IS_SAVE_PLOT_ENABLED:
         if not os.path.exists(f'./{PLOT_IMG_DIR}'):
             os.makedirs(f'./{PLOT_IMG_DIR}')
-        out_title = title.replace(' ', '_')
+        out_title = title.translate ({ord(c): "_" for c in " !@#$%^&*()[]{};:,./<>?\|`~-=+"})
         plt.savefig(f'./{PLOT_IMG_DIR}/{out_title}.png')
     else:
         plt.show()
@@ -396,7 +400,7 @@ def names_to_vs(names: List[str]) -> str:
     """
     Return a string made by names joined by "vs".
     """
-    return reduce(lambda x, y: x + ' vs ' + y, names)
+    return reduce(lambda x, y: x + ' vs ' + y, names) if len(names) > 1 else names[0]
 
 
 def names_to_dfs(names: List[str], dfs) -> Dict[str, List[pd.DataFrame]]:
@@ -510,10 +514,16 @@ if __name__ == '__main__':
 
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
-        # OK: Deterministic, Heuristic, Approximated
-        print_comparison(dataframes_min, [HELD_KARP, FARTHEST_INSERTION, MST_2_APPROX])
-        # OK: Different heuristics
-        print_comparison(dataframes_min, [FARTHEST_INSERTION, SIMULATED_ANNEALING])
+        
+        # CLOSEST_INSERTION
+        # print_comparison(dataframes_min, [CLOSEST_INSERTION])
+        # print_comparison(dataframes_min, [CLOSEST_INSERTION, FARTHEST_INSERTION])
+
+        # Question 1 (complete and splitted, more readable).
+        print_comparison(dataframes_min, [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])
+        print_comparison(dataframes_min, [HELD_KARP])
+        print_comparison(dataframes_min, [MST_2_APPROX])
+        print_comparison(dataframes_min, [FARTHEST_INSERTION])
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
@@ -536,4 +546,13 @@ if __name__ == '__main__':
         # OK (precision): heuristic
         #plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')
 
-        plot_comparison([HELD_KARP_DYNAMICBITMASKING,HELD_KARP_ULL,HELD_KARP_UNORDERED_SET], dataframes_min, pred=lambda x: x['d'] <= 22, title=f'test')
+        # OK: HedlKarp extensions (accuracy) 
+        # plot_comparison([HELD_KARP_EXTENDED_BITSET,HELD_KARP_ULL,HELD_KARP_DYNAMICBITMASKING], dataframes_min, pred=lambda x: x['d'] <= 22, title=f'test')
+
+        # OK: ClosestInsertion (accuracy)
+        plot_precision_comparison([CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION])} (approximation error)')
+        plot_precision_comparison([CLOSEST_INSERTION, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION, FARTHEST_INSERTION])} (approximation error)')
+
+        # Question 1 (accuracy and runtime)
+        plot_precision_comparison([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, limited to 52 nodes)')
+        plot_precision_comparison([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error)')
