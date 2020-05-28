@@ -168,7 +168,7 @@ TODO: PARLARE DELL'HASHING
 
 \paragraph{Bitmasking}
 
-\noindent Una soluzione migliore per rappresentare il set di nodi S visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit). In questo caso ogni bit rappresenta la presenza o meno nel set S del vertice $i$ dell'$i$-esimo bit considerato nel numero. Per fare questo è stato sufficiente dichiarare un numero \textit{unsigned long long} che nel nostro linguaggio corrisponde ad numero senza segno a 64 bit. Tale numero viene manipolato sfruttando la sua rappresentazione binaria per decretare la presenza o meno dell'$i$-esimo vertice. Si consideri l'esempio in figura \ref{fig:bitmasking-example}, è possibile vedere come è possibile rappresentare l'insieme S attraverso i bit di un numero unsigned long long. 
+\noindent Una soluzione migliore per rappresentare il set di nodi S visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit). In questo caso ogni bit rappresenta la presenza o meno nel set S del vertice $i$: se il bit all'$i$-esima posizione nel numero è a 1 allora significa che il vertice $i \in S$ altrimenti no. Per fare questo è stato sufficiente dichiarare un numero \textit{unsigned long long} che nel nostro linguaggio corrisponde ad numero senza segno a 64 bit. Si consideri l'esempio in figura \ref{fig:bitmasking-example}, è possibile vedere come si può rappresentare l'insieme S attraverso i bit di un numero \textit{unsigned long long}. 
 
 \begin{figure}[h]
 	\centering
@@ -177,23 +177,34 @@ TODO: PARLARE DELL'HASHING
 	\label{fig:bitmasking-example}
 \end{figure}
 
-Sfruttando questa rappresentazione dell'insieme S, le operazioni di eliminazione, aggiunta e di presenza di nodi sono implementate sfruttando operazioni sui bit tramite tecniche di bit-shifting, operazione logiche AND, OR e NOT: operazione pressoché istantanee nel nostro linguaggio garantendo così un complessità temporale molto bassa.
+Sfruttando questa rappresentazione dell'insieme S, le operazioni di eliminazione, aggiunta e verifica della presenza di vertici in S sono implementate sfruttando operazioni sui bit tramite tecniche di bit-shifting, operazione logiche AND, OR e NOT: operazione pressoché istantanee nel nostro linguaggio, garantendo così un complessità temporale molto bassa.
 
 Un limite di tale struttura è l'impossibilità di poter rappresentare un set S che contiene più di 64 nodi, come è possibile vedere nell'esempio della figura \ref{fig:bitmasking-example} dove il vertice 66 non può essere rappresentato in questo modo.
 
 \paragraph{Extended Bitmasking}
-TODO: Cambiare nome nel codice da ExtendedBitSet a ExtendedBitMasking.
-Per superare il limite della rappresentazione tramite BitMasking per più di 64 nodi si è pensato di estendere l'idea del bitmasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{EtendedBitMasking} che tramite un \textit{std::vector} di \textit{unsigned long long} è in grado di rappresentare qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:extendedbitmasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura.
+TODO: Cambiare nome nel codice da ExtendedBitSet a DynamicBitMasking.
+Per superare il limite della rappresentazione tramite BitMasking per più di 64 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{DynamicBitMasking} che tramite un \textit{std::vector} di \textit{unsigned long long} è in grado di rappresentare qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images/BitMaskingExtended Example.png}
-	\caption{Rappresentazione di S tramite ExtendedBitMasking}
-	\label{fig:extendedbitmasking-example}
+	\caption{Rappresentazione di S tramite DynamicBitMasking}
+	\label{fig:DynamicBitMasking-example}
 \end{figure}
 
-\paragraph{Confronto tra unordered\_set, BitMasking ed ExtendedBitMasking}
-In questo paragrafo vogliamo mettere a confronto le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte.
+\paragraph{Confronto tra unordered\_set, BitMasking ed DynamicBitMasking}
+In questo paragrafo vogliamo mettere a confronto le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte. Nella grafico riportato in figura \ref{fig:UnorderedvsDynamicBitMasking} abbiamo voluto mettere a confronto i tempi esatti dell'esecuzione delle 3 varianti proposte con grafi a 14, 16 e 22 nodi.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{./images/unorderedSet vs BitMasking.png}
+	\caption{Comparazione tra unordered\_set, BitMasking ed DynamicBitMasking}
+	\label{fig:UnorderedvsDynamicBitMasking}
+\end{figure}
+
+Come è possibili notare, l'implementazione più veloce risulta essere il BitMasking a 64 bit, in quanto utilizzando un solo numero per rappresentare i nodi in S, l'overhead è inferiore rispetto alle operazioni da svolgere per DynamicBitMasking che deve calcolarsi la posizione del bit all'interno di più numeri. In ogni caso DynamicBitMasking è in grado di svolgere egregiamente il suo lavoro, avendo un tempo di esecuzione molto inferiore rispetto alla soluzione semplice con unordered\_set.
+
+Visti i seguenti risultati si è quindi deciso di utilizzare la versione BitMasking a 64 bit per i grafi con meno di 64 nodi e la versione DynamicBitMasking per i grafi con più di 64 nodi.
 
 \subsection{Timeout}
 
