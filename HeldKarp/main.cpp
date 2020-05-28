@@ -1,7 +1,7 @@
 #include <iostream>  // std::cout, std::endl
 
 #include "DistanceMatrix.h"
-#include "HeldKarpAlberto.h"
+#include "HeldKarp.h"
 #include "read_file.h"
 #include "timeout.h"
 
@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     auto distance_matrix = point_reader->create_distance_matrix();
 
     // the TSP timeout is set to 2 minutes
-    auto timeout_min = 2min;
+    auto timeout_min = 1min;
 
     // it's either the weight of the optimal Hamiltonian cycle, or an upper-bound of it in case the
     // computation requires more time than the alotted timeout.

@@ -3,6 +3,7 @@
 #include <functional>     // std::hash
 #include <unordered_set>  // std::unordered_set
 #include <utility>        // std::pair
+#include "DynamicBitMasking.h"
 
 /**
  * Hash functors for custom types
@@ -63,6 +64,40 @@ namespace hash {
             return hash;
         }
     };
+
+     struct DynamicBitMasking {
+        size_t operator()(const ::DynamicBitMasking& bitset) const noexcept {
+            constexpr size_t MAX = std::numeric_limits<size_t>::max();
+            constexpr size_t MASK = 2 * MAX + 1;
+            const size_t n = bitset.size();
+
+            size_t hash = 1927868237UL * (n + 1);
+            hash &= MASK;
+
+            for (const auto& x : bitset) {
+                std::hash<unsigned long long> hasher;
+                const size_t hx = hasher(x);
+
+                // the xor-equal is necessary to make the hash algorithm commutative.
+                // 89869747 has an interesting bit pattern that is used to break up sequences of
+                // nearby hash values 3644798167 is a randomly chosen large prime number with
+                // another interesting bit pattern. (hx << 16) gives two chances to the lower bits
+                // to affect the outcome, resulting in better dispersion of nearby hash values.
+                hash ^= (hx ^ (hx << 16) ^ 89869747UL) * 3644798167UL;
+                hash &= MASK;
+            }
+
+            // 69069 is related to linear congruential random number generators
+            hash = hash * 69069U + 907133923;
+            hash &= MASK;
+
+            if (hash > MAX) {
+                hash -= MASK + 1;
+            }
+
+            return hash;
+        }
+    };
 }  // namespace hash
 
 // we need to defined std::hash for generic std::unordered_set so that the custom hash:pair
@@ -73,6 +108,13 @@ namespace std {
     struct hash<std::unordered_set<T>> {
         size_t operator()(const std::unordered_set<T>& set) const noexcept {
             return ::hash::unordered_set{}(set);
+        }
+    };
+
+    template <>
+    struct hash<DynamicBitMasking> {
+        size_t operator()(const DynamicBitMasking& bitset) const noexcept {
+            return ::hash::DynamicBitMasking{}(bitset);
         }
     };
 }  // namespace std

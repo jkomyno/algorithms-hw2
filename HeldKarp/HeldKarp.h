@@ -69,7 +69,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
  * the local minimum is returned.
  * @param distance_matrix represents the graph as a Distance Matrix.
  * @param C is the dynamic programming map that keeps tracks of the possible subpaths.
- * @param bits is the subpath represented as a n-bit number.
+ * @param bits is the subpath represented as DynamicBitMasking instance.
  * @param v is the node in the subpath currently considered. It's initially set to 0.
  */
 int held_karp_tsp_rec_dp_bit_masking_helper(timeout::timeout_signal& signal,
@@ -198,7 +198,7 @@ inline int held_karp_tsp_rec(timeout::timeout_signal&& signal,
         return held_karp_tsp_rec_bits_helper(signal, distance_matrix, C, bits);
     }
 
-    // general, slower case with more than 63 nodes
+    // general, slower case with more than 64 nodes
     held_karp_dp_bit_masking_t C;
 
     // subset initially contains every node in the graph

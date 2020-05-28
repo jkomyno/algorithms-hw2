@@ -155,10 +155,7 @@
   <ItemGroup>
     <ClInclude Include="DynamicBitMasking.h" />
     <ClInclude Include="hash.h" />
-    <ClInclude Include="HeldKarpAlberto.h" />
-    <ClInclude Include="HeldKarpLuca.h" />
-    <ClInclude Include="HKVectors.h" />
-    <ClInclude Include="HeldKarpBryan.h" />
+    <ClInclude Include="HeldKarp.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
