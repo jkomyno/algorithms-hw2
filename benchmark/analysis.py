@@ -466,7 +466,7 @@ def plot_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title, pred=
     show_or_save_plot(filename if filename is not None else title)
 
 
-def plot_precision_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title: str, pred=lambda _: True, filename=None):
+def plot_precision_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], title: str, pred=lambda _: True, filename=None, y_log=False):
     """
     Plot filtered dataframes w.r.t. pred.
     :param names: A list of programs.
@@ -474,6 +474,7 @@ def plot_precision_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], ti
     :param pred: A predicate over a dataframe benchmark row.
     :param title: The plot title.
     :param filename: The plot filename, default is `title`.
+    :param y_log: A flag for scaling y axis.
     """
     df = pd.DataFrame()
 
@@ -492,6 +493,10 @@ def plot_precision_comparison(names: List[str], dfs: Dict[str, pd.DataFrame], ti
     g.set_ylabels("Error (%)")
     g.set_xlabels("Nodes")
     g.set_titles(title)
+
+    if y_log:
+        ax = g.axes
+        ax[0,0].set_yscale('log')
 
     show_or_save_plot(filename if filename is not None else title)
 
@@ -554,5 +559,15 @@ if __name__ == '__main__':
         plot_precision_comparison([CLOSEST_INSERTION, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION, FARTHEST_INSERTION])} (approximation error)')
 
         # Question 1 (accuracy and runtime)
-        plot_precision_comparison([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, limited to 52 nodes)')
-        plot_precision_comparison([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error)')
+        plot_precision_comparison(
+            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], 
+            dataframes_min, 
+            pred=lambda x: x['d'] <= 52, 
+            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, limited to 52 nodes)', 
+            y_log=False)
+        plot_precision_comparison(
+            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, y log scaled)', 
+            y_log=True)
