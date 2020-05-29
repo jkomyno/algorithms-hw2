@@ -10,8 +10,62 @@ Gli algoritmi di questo homework operano su grafi pesati completamente connessi 
 
 \begin{itemize}
     \item \textbf{EUC\_2D}: le coordinate rappresentano la posizione nello spazio euclideo a 2 dimensioni. È dunque richiesto il calcolo della distanza euclidea tra ogni nodo, con il valore arrotondato al numero intero più vicino;
-    \item \textbf{GEO}: le coordinate rappresentano la latidudine e la longitudine di ogni punto. Il calcolo della distanza tra due punti in questo caso è più complesso, e richiede una conversione preliminari in radianti; rimandiamo alle FAQ della consegna per ulteriori dettagli.
+    \item \textbf{GEO}: le coordinate rappresentano la latidudine e la longitudine di ogni punto. Il calcolo della distanza tra due punti in questo caso è più complesso, e richiede una conversione preliminari in radianti. Tale conversione avviene nel costruttore della classe \codeinline{point\_geo}, definita nel file \codeinline{Shared/point.h}.
 \end{itemize}
+
+La formula usata per il calcolo della distanza euclidea è mostrata nel listing \ref{listing:euclidean-distance}, mentre la formula usata per calcolare la distanza geodesica è illustrata nel listing \ref{listing:geodesic-distance}. Si noti che tali distanze non sono esatte, ma seguono i criteri di approssimazione a distanze intere definiti nella specifica dell'homework.
+
+\begin{listing}[!ht]
+\begin{minted}{c++}
+// Shared/euclidean_distance.h
+
+int euclidean_distance(const point::point_2D& i,
+                      const point::point_2D& j) noexcept {
+    const auto& [x_i, y_i] = i;
+    const auto& [x_j, y_j] = j;
+
+    const double x = x_i - x_j;
+    const double y = y_i - y_j;
+
+    // distanza euclidea tra i punti i e j
+    const double distance = std::sqrt(std::pow(x, 2) + std::pow(y, 2));
+    
+    // arrotonda al valore intero più vicino
+    return static_cast<int>(std::round(distance));
+}
+\end{minted}
+\caption{Funzione per il calcolo della distanza Euclidea approssimata tra due punti.}
+\label{listing:euclidean-distance}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{c++}
+// Shared/geodesic_distance.h
+
+int geodesic_distance(const point::point_geo& i,
+                      const point::point_geo& j) noexcept {
+    // raggio equatoriale approssimato della terra, in km
+    constexpr double RRR = 6378.388;
+
+    const auto& [lat_i, long_i] = i;
+    const auto& [lat_j, long_j] = j;
+
+    const double q1 = std::cos(long_i - long_j);
+    const double q2 = std::cos(lat_i - lat_j);
+    const double q3 = std::cos(lat_i + lat_j);
+
+    // distanza geodesica tra i punti i e j, che sono stati convertiti
+    // precedentemente in radianti
+    const double distance = RRR *
+        std::acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0;
+
+    // ritorna la parte intera della distanza geodesica
+    return static_cast<int>(std::trunc(distance));
+}
+\end{minted}
+\caption{Funzione per il calcolo della distanza geodesica approssimata tra due punti.}
+\label{listing:geodesic-distance}
+\end{listing}
 
 \noindent I risultati del calcolo delle distanze (\textit{EUC\_2D} o \textit{GEO} a seconda del dataset di input) sono inseriti nella posizione corrispondente della Matrice delle Distanze.
 Una volta calcolate le distanze, le coordinate originali non sono mantenute: non sono infatti necessarie ai fini della rappresentazione del grafo e del calcolo della soluzione di TSP.
@@ -43,16 +97,16 @@ std::vector<T> data;
     return data.at(get_index(i, j));
 }
 \end{minted}
-\caption{Indicizzazione virtuale e fisica della classe DistanceMatrix.h.}
+\caption{Indicizzazione virtuale e fisica della classe \codeinline{DistanceMatrix.h}.}
 \label{listing:virtual-physica-addressing}
 \end{listing}
 
 \paragraph{Ottimizzazioni}\mbox{} \\
 
 \noindent Poichè i grafi in esame sono non diretti ($\forall i,j \in V$, $c(i,j) = c(j,i)$), la Matrice delle Distanze è una matrice simmetrica con tutte le entry della diagonale principale pari a 0 (in quanto ogni vertice dista 0 da se stesso).
-Abbiamo quindi calcolato le distanze \textit{pair-wise} solo per la parte triangolare superiore della matrice, per poi copiarle in maniera trasposta nella parte triangolare inferiore. Questo ci ha permesso quindi di calcolare le stesse distanze più volte. \\
+Abbiamo quindi calcolato le distanze \textit{pair-wise} solo per la parte triangolare superiore della matrice, per poi copiarle in maniera trasposta nella parte triangolare inferiore. Questo ci ha permesso quindi di evitare di calcolare le stesse distanze più volte. \\
 
-\noindent La matrice è rappresentata da un singolo \codeinline{std::vector}. Questo dà la garanzia che ogni riga della matrice sia definita in sezioni contigue di memoria, riduce l'overhead rispetto ad un approccio \codeinline{std::vector<std::vector>}, e, nonostante la logica di indicizzazione sia un po' più complessa (l'indicizzazione virtuale è a due dimensioni, quella fisica è ad una sola dimensione), il cache behaviour della classe è migliore. Si veda il listing \ref{listing:virtual-physica-addressing}.
+\noindent La matrice è rappresentata da un singolo \codeinline{std::vector}. Questo dà la garanzia che ogni riga della matrice sia definita in sezioni contigue di memoria, riduce l'overhead rispetto ad un approccio \codeinline{std::vector<std::vector>}, e, nonostante la logica di indicizzazione sia un po' più complessa (l'indicizzazione virtuale è a due dimensioni, quella fisica è ad una sola dimensione), il cache behaviour della classe è migliore, dando risultati mediamente più performanti. Si veda il listing \ref{listing:virtual-physica-addressing} per osservare la relazione tra indirizzamente fisico e virtuale nella classe \codeinline{DistanceMatrix.h}.
 
 \begin{listing}[!ht]
 \begin{minted}{c++}
@@ -67,8 +121,8 @@ int main(int argc, char** argv) {
     // legge il grafo completo non diretto dal file di input
     auto point_reader(read_file(filename));
 
-    // crea la matrice di distanza, usando le distanze euclidea o geodesica a seconda del
-    // tipo di input
+    // crea la matrice di distanza, usando le distanze euclidea o geodesica a seconda
+    // del tipo di input
     DistanceMatrix<int>&& distance_matrix = point_reader->create_distance_matrix();
 
     // calcola il peso della soluzione TSP individuata dall'algoritmo
@@ -95,13 +149,13 @@ int main(int argc, char** argv) {
         \item coordinate del grafo.
     \end{itemize}
     
-    \noindent Abbiamo usato la libreria di file streaming offerta da C++ (\codeinline{fstream}). Abbiamo rappresentato il tipo di distanza dall'enumerazione \codeinline{EdgeWeightType.h}, per la quale abbiamo definito l'operatore di lettura \codeinline{std::istream\& operator>>}.
+    \noindent Abbiamo usato la libreria di file streaming nativa di C++ (\codeinline{fstream}). Abbiamo rappresentato il tipo di distanza con l'\mintinline{c++}{enum} \codeinline{EdgeWeightType.h}, per la quale abbiamo definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>}.
     
-    \item I punti definiti dopo la riga \textit{NODE\_COORD\_SECTION} del dataset di input sono letti con un'istanza polimorfica di \codeinline{PointReader.h}, che interpreta le coordinate in maniera diversa a seconda del valore assunto dall'enumerazione \codeinline{EdgeWeightType}, ovvero a seconda del tipo di distanza del file. Naturalmente, la sottoclasse \codeinline{EuclideanPointReader.h} usa la distanza Euclidea, mentre \codeinline{GeodesicPointReader.h} usa quella geodesica. Le classi dei punti letti in input sono definiti in \codeinline{point.h} (\codeinline{point\_2D} per le coordinate euclidee, \codeinline{point\_geo} per le coordinate geografiche), e per ognuno di essi è stato definito l'operatore di lettura \codeinline{std::istream\& operator>>} adeguato. Questo ci ha permesso di non avere duplicazione di codice per gestire tipi diversi di punti in input. \\
+    \item I punti definiti dopo la riga \textit{NODE\_COORD\_SECTION} dei dataset di input sono letti con un'istanza polimorfica di \codeinline{PointReader.h}, che interpreta le coordinate in maniera diversa a seconda del valore assunto dall'enumerazione \codeinline{EdgeWeightType}, ovvero a seconda del tipo di distanza del file. Naturalmente, la sottoclasse \codeinline{EuclideanPointReader.h} usa la distanza Euclidea, mentre \codeinline{GeodesicPointReader.h} usa quella geodesica. Le classi dei punti letti in input sono definiti in \codeinline{point.h} (\codeinline{point\_2D} per le coordinate euclidee, \codeinline{point\_geo} per le coordinate geografiche), e per ognuno di essi è stato definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>} adeguato. Questo ci ha permesso di non avere duplicazione di codice per gestire tipi diversi di punti in input. \\
     
     \noindent La label dei nodi è decrementata di 1 in questa fase di lettura.
     
-    \item Una volta letti i nodi, viene creata la matrice delle distanze tramite \textit{Template Method Pattern}, usando la nozione di distanza definita dalle sottoclassi di \codeinline{PointReader.h}. Il metodo concreto \codeinline{distance(i, j)} delle sottoclassi è usato nel costruttore di \codeinline{DistanceMatrix} come \textit{higher-order function}. Si veda il listing \ref{listing:point-reader}.
+    \item Una volta letti i nodi, viene creata la matrice delle distanze applicando il \textit{Template Method Pattern}, usando la nozione di distanza definita dalle sottoclassi di \codeinline{PointReader.h}. Il metodo concreto \codeinline{distance(i, j)} delle sottoclassi è usato nel costruttore di \codeinline{DistanceMatrix} come \textit{higher-order function}. Si veda il listing \ref{listing:point-reader}.
 \end{enumerate}
 
 Tutti i file citati qui sopra sono nella cartella \textit{Shared} del progetto consegnato.
@@ -198,7 +252,7 @@ In questo paragrafo vogliamo mettere a confronto le performance in termini di co
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{./images/unorderedSet vs BitMasking.png}
-	\caption{Comparazione tra unordered\_set, BitMasking ed DynamicBitMasking}
+	\caption{Confronto dei tempi di esecuzione di Held-Karp al crescere del numero di nodi usando unordered\_set, BitMasking ed DynamicBitMasking. I dataset usati per il confronto sono \codeinline{burma14}, \codeinline{ulysses16} e \codeinline{ulysses22}.}
 	\label{fig:UnorderedvsDynamicBitMasking}
 \end{figure}
 

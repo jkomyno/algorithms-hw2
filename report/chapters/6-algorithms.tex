@@ -53,11 +53,12 @@ La versione vista a lezione di questo algoritmo prevede i seguenti step:
 
 \subsection{Held e Karp}
 
-Riportiamo qui di seguito nel listato \ref{fig:heldkarp-pseudocode} lo pseudocodice dell'algortimo di Held e Karp:
+Riportiamo lo pseudocodice dell'algortimo di Held e Karp in Figura \ref{fig:heldkarp-pseudocode}.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images/HeldKarpPseudocode.png}
+	\caption{Pseudocodice dell'algoritmo Held-Karp.}
 	\label{fig:heldkarp-pseudocode}
 \end{figure}
 
@@ -72,7 +73,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
                                   held_karp_dp_bits_t& C,
                                   utils::ull bits, size_t v = 0) {
     
-    // Caso Base
+    // Caso base: c'è solo un nodo nel subpath
     if (utils::is_singleton(bits, v)) {
         return distance_matrix.at(v, 0);
     }
@@ -89,7 +90,8 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 
     // for all u in S\{v}
     utils::for_each(difference, n, [&](const size_t bit) {
-        int dist = held_karp_tsp_rec_bits_helper(signal, distance_matrix, C, difference, bit);
+        int dist = held_karp_tsp_rec_bits_helper(signal, distance_matrix, C,
+                                                 difference, bit);
         int tmp_dist = dist + distance_matrix.at(v, bit);
 
         if (tmp_dist < min_dist) {
