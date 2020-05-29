@@ -20,7 +20,9 @@ int main(int argc, char** argv) {
     auto timeout_min = 2min;
 
     // it's either the weight of the optimal Hamiltonian cycle, or an upper-bound of it in case the
-    // computation requires more time than the alotted timeout.
+    // computation requires more time than the allotted timeout.
+    // We have implemented 2 different Held-Karp implementations.
+    // If the number of nodes in the graph is less than 64, we use unsigned 64-bit integers
     int total_weight = timeout::with_timeout(std::move(timeout_min), &held_karp_tsp_rec,
                                              std::move(distance_matrix));
 
