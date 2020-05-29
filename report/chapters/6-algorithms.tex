@@ -53,14 +53,19 @@ La versione vista a lezione di questo algoritmo prevede i seguenti step:
 
 \subsection{Held e Karp}
 
-Riportiamo lo pseudocodice dell'algortimo di Held e Karp in Figura \ref{fig:heldkarp-pseudocode}.
+Riportiamo lo pseudocodice dell'algortimo di Held e Karp visto in classe. In particolare la funzione ricorsiva HeldKarp(v, S) si occupa di:
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.9\textwidth]{./images/HeldKarpPseudocode.png}
-	\caption{Pseudocodice dell'algoritmo Held-Karp.}
-	\label{fig:heldkarp-pseudocode}
-\end{figure}
+\begin{enumerate}
+    \item Caso base: verificare se l'insieme S contenga un solo nodo, e restituire la distanza tra il nodo $v$ e 0.
+    \item Controlla se la distanza tra 0 e v, passando per tutti i nodi in S, è già stata calcolata, restituendo tale valore.
+    \item Caso ricorsivo:
+    \begin{enumerate}
+        \item Inizializzare le variabili in maniera opportuna.
+        \item Scansionare tutti i nodi in S, togliendo v da S, e calcolare ricorsivamente la distanza. Se la distanza trovata è inferiore a quelle precedentemente ricavate, sostituirla.
+    \end{enumerate}
+    \item Ritornare la distanza minima calcolata.
+\end{enumerate}
+
 
 \noindent Il listato \ref{listing:held-karp} contiene la nostra implementazione dell'algoritmo, step per step.
 
@@ -73,22 +78,22 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
                                   held_karp_dp_bits_t& C,
                                   utils::ull bits, size_t v = 0) {
     
-    // Caso base: c'è solo un nodo nel subpath
+    // Step 1
     if (utils::is_singleton(bits, v)) {
         return distance_matrix.at(v, 0);
     }
 
-    // Distanza già calcolata, ritorna il valore memorizzato
+    // Step 2 
     if (C.count({bits, v})) {
         return C[{bits, v}];
     }
     
-    // Caso ricorsivo
+    // Step 3a
     int min_dist = std::numeric_limits<int>::max();
     const utils::ull difference = utils::reset_bit(bits, v);
     const size_t n = distance_matrix.size();
 
-    // for all u in S\{v}
+    // Step 3b
     utils::for_each(difference, n, [&](const size_t bit) {
         int dist = held_karp_tsp_rec_bits_helper(signal, distance_matrix, C,
                                                  difference, bit);
@@ -101,7 +106,8 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
         // Timeout scaduto: ritorna il miglior risultato ottenuto fino ad ora
         return !signal.is_expired();
     });
-
+    
+    // Step 4
     C[{bits, v}] = min_dist;
     return min_dist;
 }
