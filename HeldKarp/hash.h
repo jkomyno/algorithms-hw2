@@ -65,7 +65,11 @@ namespace hash {
         }
     };
 
-     struct DynamicBitMasking {
+    // commutative has functor for DynamicBitMasking.
+    // The object it is applied to is considered immutable.
+    // It has been inspired by CPython's frozenset hash function.
+    // See: https://stackoverflow.com/a/20833285/6174476
+    struct DynamicBitMasking {
         size_t operator()(const ::DynamicBitMasking& bitset) const noexcept {
             constexpr size_t MAX = std::numeric_limits<size_t>::max();
             constexpr size_t MASK = 2 * MAX + 1;
@@ -100,10 +104,11 @@ namespace hash {
     };
 }  // namespace hash
 
-// we need to defined std::hash for generic std::unordered_set so that the custom hash:pair
-// hash function works properly when a std::pair<std::unordered_set<T1>, T2> is used as a key
-// in a std::unordered_map.
+
 namespace std {
+    // we need to defined std::hash for generic std::unordered_set so that the custom hash:pair
+    // hash function works properly when a std::pair<std::unordered_set<T1>, T2> is used as a key
+    // in a std::unordered_map.
     template <typename T>
     struct hash<std::unordered_set<T>> {
         size_t operator()(const std::unordered_set<T>& set) const noexcept {
@@ -111,6 +116,9 @@ namespace std {
         }
     };
 
+    // we need to defined std::hash for DynamicBitMasking so that the custom hash:pair
+    // hash function works properly when a std::pair<DynamicBitMasking, T> is used as a key
+    // in a std::unordered_map.
     template <>
     struct hash<DynamicBitMasking> {
         size_t operator()(const DynamicBitMasking& bitset) const noexcept {
