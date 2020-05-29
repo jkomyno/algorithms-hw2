@@ -20,22 +20,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HKVectors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeldKarpBryan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeldKarpLuca.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeldKarpAlberto.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicBitMasking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HeldKarp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

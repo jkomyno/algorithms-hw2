@@ -1,7 +1,7 @@
 #include <iostream>  // std::cout, std::endl
 
 #include "DistanceMatrix.h"
-#include "HeldKarpAlberto.h"
+#include "HeldKarp.h"
 #include "read_file.h"
 #include "timeout.h"
 
