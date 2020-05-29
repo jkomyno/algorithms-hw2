@@ -61,9 +61,6 @@ public:
         }
     };
 
-    // TODO: is this constructor useful?
-    DynamicBitMasking() = default;
-
     template <typename It>
     DynamicBitMasking(const It& cbegin, const It& cend) {
         set_bits_from_subset(cbegin, cend);
@@ -85,8 +82,6 @@ public:
         if (index < bits.size()) {
             bits[index] = bits[index] &= ~(ONE << bit_pos);
         }
-
-        // TODO: manage out of bound, we could create the bit or throw an exception
     }
 
     void set_bit_in_position(const size_t position) {
@@ -117,16 +112,15 @@ public:
             if (i == index) {
                 result = (bits[i] == (ONE << bit_pos));
 
-                // optimizazion: if the result in the entry is already false we could exit the
+                // optimizazion: if the result in the entry is already false we can exit the
                 // function
                 if (!result) {
-                    return result;
-                }
-            } else {
-                // if in other entries there is at leat 1 bit set to 1 the result is false
-                if (bits[i] != 0) {
                     return false;
                 }
+            }
+            // if in other entries there is at leat 1 bit set to 1 the result is false
+            else if (bits[i] != 0) {
+                return false;
             }
         }
 
@@ -152,12 +146,7 @@ public:
             const auto tmp = n & (-n);
 
             if (tmp != 0) {
-                result = static_cast<size_t>(std::log2(tmp));
-            } else {
-                result = 0;
-            }
-            if (tmp != 0) {
-                return (i * 64) + result;
+                return (i * 64) + static_cast<size_t>(std::log2(tmp));
             }
         }
 
@@ -167,13 +156,13 @@ public:
     [[nodiscard]] bool at(const size_t position) const {
         const size_t index = get_index_of_vector(position);
         const size_t bit_pos = get_index_bit_in_entry(position);
-
-        if (index >= bits.size()) {
-            // if the index is out of bound return 0
-            return 0;
+        
+        if (index < bits.size()) {
+            return bits[index] & (ONE << bit_pos);
         }
-
-        return bits[index] & (ONE << bit_pos);
+        
+        // if the index is out of bound return 0
+        return 0;
     }
 
     [[nodiscard]] const_iterator begin() const noexcept {
