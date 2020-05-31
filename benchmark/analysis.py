@@ -59,19 +59,21 @@ HELD_KARP_DYNAMICBITMASKING = 'HeldKarp_DynamicBitMasking'
 HELD_KAR_BITMASKING = 'HeldKarp_BitMasking'
 HELD_KARP_UNORDERED_SET = 'HeldKarp_UnorderedSet'
 MST_2_APPROX = 'MST2Approximation'
-FARTHEST_INSERTION = 'FarthestInsertion'
+FARTHEST_INSERTION_1_ROUND = 'FarthestInsertion1Round'
+FARTHEST_INSERTION_4_PARALLEL_ROUNDS = 'FarthestInsertion4ParallelRounds'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
-CLOSEST_INSERTION = 'ClosestInsertion'
-CLOSEST_INSERTION_PARALLEL = 'ClosestInsertionParallel'
+CLOSEST_INSERTION_1_ROUND = 'ClosestInsertion1Round'
+CLOSEST_INSERTION_4_PARALLEL_ROUNDS = 'ClosestInsertion4ParallelRounds'
 
 programs = [
     HELD_KARP,
     MST_2_APPROX,
-    FARTHEST_INSERTION,
+    FARTHEST_INSERTION_1_ROUND,
+    FARTHEST_INSERTION_4_PARALLEL_ROUNDS,
     SIMULATED_ANNEALING,
     HELD_KARP_DYNAMICBITMASKING,
-    CLOSEST_INSERTION,
-    CLOSEST_INSERTION_PARALLEL,
+    CLOSEST_INSERTION_1_ROUND,
+    CLOSEST_INSERTION_4_PARALLEL_ROUNDS,
     HELD_KAR_BITMASKING,
     HELD_KARP_UNORDERED_SET
 ]
@@ -79,11 +81,12 @@ programs = [
 ms_programs = [
     'ms_held_karp',
     'ms_mst2approx',
-    'ms_farthest_insertion',
+    'ms_farthest_insertion_1_round',
+    'ms_farthest_insertion_4_parallel_rounds',
     'ms_simulated_annealing',
     'ms_HeldKarp_DynamicBitMasking',
-    'ms_closest_insertion',
-    'ms_closest_insertion_parallel',
+    'ms_closest_insertion_1_round',
+    'ms_closest_insertion_4_parallel_rounds',
     'ms_HeldKarp_BitMasking',
     'ms_HeldKarp_UnorderedSet'
 ]
@@ -540,55 +543,31 @@ if __name__ == '__main__':
 
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
-        
-        # CLOSEST_INSERTION
-        # print_comparison(dataframes_min, [CLOSEST_INSERTION])
-        # print_comparison(dataframes_min, [CLOSEST_INSERTION, FARTHEST_INSERTION])
 
         # Question 1 (complete and splitted, more readable).
-        print_comparison(dataframes_min, [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])
+        print_comparison(dataframes_min, [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND])
         print_comparison(dataframes_min, [HELD_KARP])
         print_comparison(dataframes_min, [MST_2_APPROX])
-        print_comparison(dataframes_min, [FARTHEST_INSERTION])
+        print_comparison(dataframes_min, [FARTHEST_INSERTION_1_ROUND])
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
 
     if IS_PLOT_ENABLED:
-        # # OK (speed): HelpKarp with more than 52 nodes timeouts (Timeout is setted to 2 minutes)
-        # plot_comparison([HELD_KARP], dataframes_min, pred=lambda x: x['d'] <= 52, title=f'{HELD_KARP} (52 nodes)')
-
-        # # OK (speed): approximated solution vs heuristic
-        # plot_comparison([MST_2_APPROX, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION])}', y_log=True)
-
-        # # OK (speed): the three (y log scaled)
-        # plot_comparison([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, FARTHEST_INSERTION, SIMULATED_ANNEALING])} (y log scaled)', y_log=True)
-
-        # # OK (speed): simulated annealing vs approx solution
-        # plot_comparison([SIMULATED_ANNEALING], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING])}')
-        # plot_comparison([SIMULATED_ANNEALING, MST_2_APPROX], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
-        # plot_comparison([SIMULATED_ANNEALING, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([SIMULATED_ANNEALING, MST_2_APPROX])} (y log scaled)', y_log=True)
-
-        # OK (precision): heuristic
-        #plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')
-
-        # OK: HedlKarp extensions (accuracy) 
-        # plot_comparison([HELD_KARP_EXTENDED_BITSET,HELD_KAR_BITMASKING,HELD_KARP_DYNAMICBITMASKING], dataframes_min, pred=lambda x: x['d'] <= 22, title=f'test')
-
         # OK: ClosestInsertion (accuracy)
-        plot_precision_comparison([CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION])} (approximation error)')
-        plot_precision_comparison([CLOSEST_INSERTION, FARTHEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION, FARTHEST_INSERTION])} (approximation error)')
+        plot_precision_comparison([CLOSEST_INSERTION_1_ROUND], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND])} (approximation error)')
+        plot_precision_comparison([CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND])} (approximation error)')
 
         # Question 1 (accuracy and runtime)
         plot_precision_comparison(
-            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], 
+            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND], 
             dataframes_min, 
             pred=lambda x: x['d'] <= 52, 
-            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, limited to 52 nodes)', 
+            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND])} (approximation error, limited to 52 nodes)', 
             y_log=False)
         plot_precision_comparison(
-            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION], 
+            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND], 
             dataframes_min, 
             pred=lambda x: True, 
-            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION])} (approximation error, y log scaled)', 
+            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND])} (approximation error, y log scaled)', 
             y_log=True)
