@@ -1,21 +1,23 @@
 #pragma once
 
-#include <unordered_set> // std::unordered_set
-#include <vector> // std::vector
+#include <functional>     // std::greater
+#include <unordered_set>  // std::unordered_set
+#include <vector>         // std::vector
 
 #include "DistanceMatrix.h"
+#include "random_generator.h"
 #include "shared_utils.h"
 
-[[nodiscard]] inline int closest_insertion_tsp(DistanceMatrix<int>&& distance_matrix) noexcept {
+using namespace random_generator;
+
+[[nodiscard]] inline int closest_insertion_tsp(DistanceMatrix<int>& distance_matrix,
+                                               RandomGenerator<size_t>& rand_int) noexcept {
+
     const size_t size = distance_matrix.size();
 
+    // lambda function that returns the distance between any 2 nodes
     const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
-    };
-
-    // minimize δ(k, circuit)
-    const auto min_comparator = [](const auto& x, const auto& y) {
-        return x.second > y.second;
     };
 
     // keep track of the nodes not in the partial Hamiltonian circuit.
@@ -23,32 +25,38 @@
     // every vertex from 0 to size-1
     std::unordered_set<size_t> not_visited = utils::generate_range_set(size);
 
-    // select the 2 farthest nodes and add them to the partial circuit
-    const auto& [u, v] = distance_matrix.get_2_farthest_nodes();
+    // minimize δ(k, circuit)
+    using min_comparator = std::greater<>;
+
+    // Step 1: start from a random node i. Find a node j that minimizes δ(i, j) and create
+    // the partial circuit (i, j, i).
+    const size_t first_node = rand_int();
+    const size_t second_node = distance_matrix.get_closest_node(first_node);
 
     // keep track of the nodes in the partial Hamiltonian circuit
-    std::vector<size_t> circuit{u, v};
+    std::vector<size_t> circuit{first_node, second_node};
     circuit.reserve(size);
 
-    // remove the farthest nodes from not_visited
-    not_visited.erase(u);
-    not_visited.erase(v);
+    // remove the first 2 selected nodes from not_visited
+    not_visited.erase(first_node);
+    not_visited.erase(second_node);
 
-    // select the 3rd vertex of the cycle
-    const size_t k = utils::select_new_k(not_visited, circuit, get_distance, min_comparator);
+    // Step 2: find a node k not in circuit that minimizes δ(k, circuit)
+    const size_t k = utils::select_new_k<min_comparator>(not_visited, circuit, get_distance);
 
-    // we insert k between i and j
+    // Step 3: insert k in between the two consecutive tour cities i, j for which such an insertion
+    // causes the minimum increase in total tour length.
     circuit.emplace_back(k);
     not_visited.erase(k);
 
-    // perform farthest insertion until all vertexes are in the circuit
+    // Step 4: repeat the insertion from step 2 until all nodes have been inserted into the circuit
     while (!not_visited.empty()) {
-        // select the new k vertex that maximizes δ(k, circuit)
-        size_t new_k = utils::select_new_k(not_visited, circuit, get_distance, min_comparator);
+        // select the not visited node k that minimizes δ(k, circuit)
+        size_t new_k = utils::select_new_k<min_comparator>(not_visited, circuit, get_distance);
         not_visited.erase(new_k);
 
         // find the arc (i, j) that minimizes the value of w(i, k) - w(k, j) - w(i, j)
-        // and add k between i and j in circuit
+        // and add k in between i and j in circuit
         utils::perform_best_circuit_insertion(new_k, circuit, get_distance);
     }
 
