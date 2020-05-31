@@ -140,9 +140,16 @@ def check_same_outputs(dfs_flat: List[pd.DataFrame]):
 
 
 def check_not_empty(dfs:  Dict[str, List[pd.DataFrame]]):
-    for k, v in dfs.items():
-        if len(v) == 0:
-            raise AssertionError(f'There are no data for {k}')
+    for name, dfs_list in dfs.items():
+        if len(dfs_list) == 0:
+            raise AssertionError(f'There are no data for {name}')
+
+
+def check_output_not_null(dfs: Dict[str, List[pd.DataFrame]]):
+    for name, dfs_list in dfs.items():
+        for df in dfs_list:
+            if np.any(df.isnull()):
+                raise AssertionError(f'Output values cannot be null, check {name} benchmarks')
 
 
 def check_validity(dfs: Dict[str, List[pd.DataFrame]]):
@@ -155,6 +162,7 @@ def check_validity(dfs: Dict[str, List[pd.DataFrame]]):
 
     check_not_empty(dfs)
     check_same_n_rows(dfs_flat)
+    check_output_not_null(dfs)
     check_same_outputs(dfs_flat)
 
 
