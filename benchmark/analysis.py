@@ -56,7 +56,7 @@ PLOT_IMG_DIR = 'images'
 
 HELD_KARP = 'HeldKarp'
 HELD_KARP_DYNAMICBITMASKING = 'HeldKarp_DynamicBitMasking'
-HELD_KARP_ULL = 'HeldKarp_BitMasking'
+HELD_KAR_BITMASKING = 'HeldKarp_BitMasking'
 HELD_KARP_UNORDERED_SET = 'HeldKarp_UnorderedSet'
 MST_2_APPROX = 'MST2Approximation'
 FARTHEST_INSERTION = 'FarthestInsertion'
@@ -72,8 +72,7 @@ programs = [
     HELD_KARP_DYNAMICBITMASKING,
     CLOSEST_INSERTION,
     CLOSEST_INSERTION_PARALLEL,
-    HELD_KARP_EXTENDED_BITSET,
-    HELD_KARP_ULL,
+    HELD_KAR_BITMASKING,
     HELD_KARP_UNORDERED_SET
 ]
 
@@ -82,10 +81,10 @@ ms_programs = [
     'ms_mst2approx',
     'ms_farthest_insertion',
     'ms_simulated_annealing',
+    'ms_HeldKarp_DynamicBitMasking',
     'ms_closest_insertion',
     'ms_closest_insertion_parallel',
-    'ms_HeldKarp_DynamicBitMasking',
-     'ms_HeldKarp_BitMasking',
+    'ms_HeldKarp_BitMasking',
     'ms_HeldKarp_UnorderedSet'
 ]
 
@@ -137,12 +136,21 @@ def check_same_outputs(dfs_flat: List[pd.DataFrame]):
     pass
 
 
-def check_validity(dfs_list: List[List[pd.DataFrame]]):
+def check_not_empty(dfs:  Dict[str, List[pd.DataFrame]]):
+    for k, v in dfs.items():
+        if len(v) == 0:
+            raise AssertionError(f'There are no data for {k}')
+
+
+def check_validity(dfs: Dict[str, List[pd.DataFrame]]):
     """
     Utility functions that checks whether the imported benchmark CSVs are valid
     :param dfs_list: list of list of CSVs represented as DataFrames
     """
+    dfs_list = dfs.values()
     dfs_flat: List[pd.DataFrame] = list(chain.from_iterable(dfs_list))
+
+    check_not_empty(dfs)
     check_same_n_rows(dfs_flat)
     check_same_outputs(dfs_flat)
 
@@ -511,7 +519,7 @@ if __name__ == '__main__':
     dataframes: Dict[str, List[pd.DataFrame]] = dict(generator)
 
     # is some CSV is invalid, throws an AssertionError
-    check_validity(dataframes.values())
+    check_validity(dataframes)
 
     # for each CSV, only the minimum values for the 'ms' column are retained
     # len(dataframes_min) == len(programs)
@@ -552,7 +560,7 @@ if __name__ == '__main__':
         #plot_precision_comparison([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([MST_2_APPROX, SIMULATED_ANNEALING, FARTHEST_INSERTION, CLOSEST_INSERTION])} test')
 
         # OK: HedlKarp extensions (accuracy) 
-        # plot_comparison([HELD_KARP_EXTENDED_BITSET,HELD_KARP_ULL,HELD_KARP_DYNAMICBITMASKING], dataframes_min, pred=lambda x: x['d'] <= 22, title=f'test')
+        # plot_comparison([HELD_KARP_EXTENDED_BITSET,HELD_KAR_BITMASKING,HELD_KARP_DYNAMICBITMASKING], dataframes_min, pred=lambda x: x['d'] <= 22, title=f'test')
 
         # OK: ClosestInsertion (accuracy)
         plot_precision_comparison([CLOSEST_INSERTION], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION])} (approximation error)')
