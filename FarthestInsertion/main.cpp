@@ -2,7 +2,10 @@
 
 #include "DistanceMatrix.h"
 #include "farthest_insertion_tsp.h"
+#include "parallel_executor.h"
+#include "random_generator.h"
 #include "read_file.h"
+#include "shared_utils.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -14,9 +17,21 @@ int main(int argc, char** argv) {
     auto point_reader(read_file(filename));
     auto distance_matrix = point_reader->create_distance_matrix();
 
-    // calculate the weight of TSP with Farthest Insertion Heuristic
-    const auto total_weight =
-        farthest_insertion_tsp(std::forward<decltype(distance_matrix)>(distance_matrix));
+    // Generate a random source node for the Hamiltonian cycle found with the Farthest Insertion
+    // heuristic. If you'd rather started from a fixed node (e.g. 0), just substitute the following
+    // line with `random_generator::FixedGenerator<size_t> rand_int(0);`.
+    random_generator::IntegerRandomGenerator rand_int(0, distance_matrix.size() - 1);
+
+    // calculate the weight of TSP with Farthest Insertion heuristic
+    auto solve_tsp = [&]() {
+        return farthest_insertion_tsp(distance_matrix, rand_int);
+    };
+
+    // run Farthest Insertion as many times as the number of CPU cores
+    const auto executor(executor::parallel_executor({}, std::move(solve_tsp)));
+
+    // save the best cost found
+    const int total_weight = executor.get_best_result(utils::select_best);
 
     // use std::fixed to avoid displaying numbers in scientific notation
     std::cout << std::fixed << total_weight << std::endl;

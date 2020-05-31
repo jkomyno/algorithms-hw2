@@ -3,12 +3,12 @@
 #include <algorithm>      // std::generate_n, std::min_element, std::max_element
 #include <cmath>          // std::floor
 #include <iterator>       // std::inserter
-#include <unordered_set>  // std::unordered_set
-#include <unordered_map>  // std::unordered_map
-#include <list>           // std::list
-#include <vector>         // std::vector
 #include <iterator>       // std::next, std::advance
 #include <limits>         // std::numeric_limits
+#include <list>           // std::list
+#include <unordered_map>  // std::unordered_map
+#include <unordered_set>  // std::unordered_set
+#include <vector>         // std::vector
 
 namespace utils {
     // determine length of string at compile time
@@ -89,11 +89,10 @@ namespace utils {
     // return the vertex k that doesn't belong to the partial Hamiltonian circuit that
     // maximizes or minimizes the distance δ(k, circuit) w.r.t. the given comparator.
     // get_distance is the distance function that computes the cost between 2 nodes.
-    template <typename Distance, class Comparator>
+    template <class Comparator, typename Distance>
     [[nodiscard]] size_t select_new_k(std::unordered_set<size_t>& not_visited,
                                       std::vector<size_t>& circuit,
-                                      Distance&& get_distance,
-                                      Comparator&& comparator) noexcept {
+                                      Distance&& get_distance) noexcept {
         // map that stores the minimum distance for each candidate vertex k
         std::unordered_map<size_t, double> node_min_weight_map;
         node_min_weight_map.reserve(not_visited.size());
@@ -114,7 +113,7 @@ namespace utils {
 
         // maximize or minimize distances based on comparator
         const auto it_new_k = std::max_element(node_min_weight_map.cbegin(),
-                                               node_min_weight_map.cend(), comparator);
+                                               node_min_weight_map.cend(), Comparator{});
 
         // obtain the maximum of the maximum or minimum distances δ(k, circuit)
         const size_t new_k = it_new_k->first;
@@ -122,7 +121,7 @@ namespace utils {
     }
 
     // find the arc (i, j) that minimizes the value of w(i, k) - w(k, j) - w(i, j)
-    // and add k between i and j in circuit.
+    // and add k in between i and j in circuit.
     template <typename Distance>
     void perform_best_circuit_insertion(const size_t k, std::vector<size_t>& circuit,
                                         Distance&& get_distance) {
@@ -160,8 +159,8 @@ namespace utils {
         for (size_t i = 1; i < size; ++i) {
             it_list = circuit_insertion_list.erase(it_list);
             it_list = circuit_insertion_list.insert(std::next(it_list), k);
-            int weight = utils::sum_weights_in_circuit(circuit_insertion_list.cbegin(),
-                                                       circuit_insertion_list.cend(), get_distance);
+            const int weight = utils::sum_weights_in_circuit(
+                circuit_insertion_list.cbegin(), circuit_insertion_list.cend(), get_distance);
 
             if (weight < min_weight) {
                 min_weight = weight;
