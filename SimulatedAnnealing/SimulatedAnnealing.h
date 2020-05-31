@@ -12,17 +12,19 @@ namespace simulated_annealing {
     public:
         virtual ~SolutionBase() = default;
 
+        virtual size_t feasible_size() const = 0;
+
         // returns the cost of the current solution
-        virtual int fitness() = 0;
+        [[nodiscard]] virtual int fitness() const = 0;
 
         // manipulate the current solution to create a new feasible solution
-        virtual Solution manipulate() = 0;
+        [[nodiscard]] virtual Solution manipulate() = 0;
 
         // remove the solution from the pool of feasible solutions
         virtual void destroy() = 0;
 
         // mark the current solution as a good solution
-        virtual void survives() = 0;
+        virtual void survives(Solution& current) = 0;
     };
 
     // The Solution template class must extend SolutionBase
@@ -79,6 +81,8 @@ namespace simulated_annealing {
             int best_cost = best_solution.fitness();
             size_t same_best_solution_times = 1;
 
+            size_t max_feasible_size = 0;
+
             for (size_t r = 0; r < options.restarts; ++r) {
                 // variables used for debugging
                 // TODO: remove
@@ -107,14 +111,21 @@ namespace simulated_annealing {
                     }
 
                     anneal();
-                    best_solution.survives();
 
+                    // prune the feasible solutions while keeping the best solution and the current
+                    // solution
+                    best_solution.survives(current_solution);
+
+                    // keeps track of the best solution cost found up to now, regardless of what
+                    // best_solution is
                     if (best_solution.fitness() == best_cost) {
                         ++same_best_solution_times;
                     } else {
                         best_cost = std::min({best_cost, best_solution.fitness()});
                         same_best_solution_times = 1;
                     }
+
+                    max_feasible_size = std::max(max_feasible_size, best_solution.feasible_size());
 
                     _iterations++;
                 }

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <functional>
+#include <iostream>
 #include <vector>
 
 #include "DistanceMatrix.h"
@@ -29,6 +31,12 @@ class TSPSolutionPool {
     // function used to initialize a new solution with a heuristic provided by the caller
     SolutionFactory solution_factory;
 
+    // maximum number of feasible solutions considered after every Simulated Annealing iterations
+    const size_t solutions_prune_size;
+
+    // if true, the oldest feasible solutions are discarded during pruning
+    const bool prefer_new_solutions;
+
     // real number generator in the range [0, 1)
     random_generator::RealRandomGenerator random;
 
@@ -42,7 +50,7 @@ private:
 
     // create a new initial solution starting from the heuristic initialization returned by
     // solution_factory
-    TSPSolution create();
+    [[nodiscard]] TSPSolution create();
 
     // add the pool index of solution to the unused vector
     void reclaim(const TSPSolution& solution);
@@ -51,26 +59,29 @@ private:
     std::vector<size_t>& get(size_t index);
 
     // return a random index in [start, end]
-    size_t random_index(size_t start, size_t end);
+    [[nodiscard]] size_t random_index(size_t start, size_t end);
 
     // return the total distance of the circuit
     int compute_distance(const std::vector<size_t>& circuit);
 
-    // prunes some solutions at random mantaining the current best solution. Although it reduces the
-    // simulated annealing solution space, it helps keeping the memory consumption low
-    void remove_random_solutions_except(size_t best_index);
+    // prunes every solution but the best and current solution, which are stored respectively in
+    // index 0 and 1
+    void remove_solutions_except(size_t& best_index, size_t& current_index);
 
 public:
-    TSPSolutionPool(const DistanceMatrix<int>& distance_matrix,
-                    SolutionFactory&& solution_factory) :
+    TSPSolutionPool(const DistanceMatrix<int>& distance_matrix, SolutionFactory&& solution_factory,
+                    size_t solutions_prune_size = 32, bool prefer_new_solutions = true) :
         circuit_size(distance_matrix.size()),
         distance_matrix(distance_matrix),
         solution_factory(std::move(solution_factory)),
+        solutions_prune_size(solutions_prune_size),
+        prefer_new_solutions(prefer_new_solutions),
         random(0.0, 1.0) {
+        feasible_solutions.reserve(solutions_prune_size);
     }
 
     // return the size of the graph
-    size_t size() const;
+    [[nodiscard]] size_t size() const;
 
     TSPSolution init(simulated_annealing::SimulatedAnnealingOptions& options,
                      size_t sample_pair_size, size_t sample_temperature_iterations);
@@ -86,9 +97,16 @@ public:
 private:
     size_t pool_index;
 
+    // initial fitness value of this solution. Since computing the distance of a solution path can
+    // take some time, it is computed lazily and then memoized for future TSPSolution::fitness()
+    // calls.
     int NOT_INITIALIZED = std::numeric_limits<int>::max();
+
+    // distance is mutable so that TSPSolution::fitness() is a const method.
     mutable int distance = NOT_INITIALIZED;
 
+    // manipulate the path of a solution to a feasible neighbor path called new_path.
+    // The new path found is returned.
     std::vector<size_t> manipulate_raw(const std::vector<size_t>& path,
                                        std::vector<size_t>& new_path) const noexcept;
 
@@ -109,22 +127,31 @@ public:
         return !(rhs == *this);
     }
 
+    // TODO: remove
+    size_t feasible_size() const {
+        return this->pool->feasible_solutions.size();
+    }
+
+    // return the TSP path associated with this solution
     std::vector<size_t>& circuit() const;
 
+    // manipulate the path of a solution to create a feasible neighbor path for a new solution.
+    // The new path found is returned.
     std::vector<size_t> manipulate_raw(const std::vector<size_t>& path) const noexcept;
 
-    // lazily computes the cost of the current solution
-    int fitness() override;
+    // lazily computes the cost of the current solution.
+    // Time: O(n) the first time, O(1) the next times
+    [[nodiscard]] int fitness() const override;
 
-    // manipulate the current solution to create a new feasible solution
-    TSPSolution manipulate() override;
+    // manipulate the current solution to create a new feasible neighbor solution
+    [[nodiscard]] TSPSolution manipulate() override;
 
     // remove the solution from the pool
     void destroy() override;
 
-    // mark the current solution as a good solution. A portion of the other solutions may be pruned
-    // away to spare memory
-    void survives() override;
+    // this solution is marked as the best solution, and all the other temporary solutions except
+    // the current solution are pruned away to free the memory
+    void survives(TSPSolution& current) override;
 };
 
 inline std::vector<size_t>& TSPSolutionPool::get(size_t index) {
@@ -159,16 +186,19 @@ inline int TSPSolutionPool::compute_distance(const std::vector<size_t>& circuit)
  * The first TSP solution is initialized via solution_factory (which uses the Nearest Neighbor
  * heuristic).
  * The initial annealing temperature τ_0 is determined using the approach suggested by Ben-Ameur,
- * @see https://www.researchgate.net/publication/227061666_Computing_the_Initial_Temperature_of_Simulated_Annealing.
+ * @see
+ * https://www.researchgate.net/publication/227061666_Computing_the_Initial_Temperature_of_Simulated_Annealing.
  *
  * The reheating interval ρ is determined by max{τ_0 / 4000, 100}.
  */
 inline TSPSolution TSPSolutionPool::init(simulated_annealing::SimulatedAnnealingOptions& options,
                                          size_t sample_pair_size,
                                          size_t sample_temperature_iterations) {
+    // initial solution and its cost using the user-provided heuristic
+    // (in our case, Nearest Neighbor)
     const auto [initial_path, initial_cost] = solution_factory();
 
-    auto solution = create();
+    TSPSolution solution = create();
     solution.circuit() = initial_path;
     solution.distance = initial_cost;
 
@@ -238,38 +268,71 @@ inline TSPSolution TSPSolutionPool::create() {
     return TSPSolution(*this, pool_index_to_use);
 }
 
-// TODO: find a way to efficiently reindex the spared solutions
-inline void TSPSolutionPool::remove_random_solutions_except(size_t best_index) {
-    size_t size = feasible_solutions.size();
-    size_t n_to_remove = std::min(size * 0.3, 10.0);
+inline void TSPSolutionPool::remove_solutions_except(size_t& best_index, size_t& current_index) {
+    const auto size = feasible_solutions.size();
 
-    /*
-    size_t n = size;
+    // if the feasible solutions are more than the allotted number, first shift them to maintain the
+    // newest solutions and discard the oldest solutions in the latest steps
+    if (prefer_new_solutions && size > solutions_prune_size) {
+        const size_t shift = size + 2 - solutions_prune_size;
+        std::rotate(feasible_solutions.begin(), feasible_solutions.begin() + shift,
+                    feasible_solutions.end());
 
-    // The element at the index of the current best solution is never moved.
-    // since deletion from a vector is inefficient (linear time complexity), we simply
-    // swap the items from the indexes to be removed to the end of the vector.
-    for (size_t i = 1; i <= n_to_remove; ++i) {
-        size_t index_to_remove = static_cast<size_t>(std::trunc(random() * n));
+        best_index = (size - shift + best_index) % size;
+        current_index = (size - shift + current_index) % size;
+    }
 
-        if (index_to_remove != best_index) {
+    // add the best and current circuits to the back of feasible_solutions. This means that there
+    // are two copies of the best solution and the current solution in the vector.
+    feasible_solutions.emplace_back(feasible_solutions[best_index]);
+    feasible_solutions.emplace_back(feasible_solutions[current_index]);
+
+    // shift feasible_solutions by 2 positions to the right, so that the best circuit is stored in
+    // index 0 and the current circuit is stored in index 1.
+    std::rotate(feasible_solutions.rbegin(), feasible_solutions.rbegin() + 2,
+                feasible_solutions.rend());
+
+    best_index += 2;
+    current_index += 2;
+
+    // index to the back of the feasible_solutions array
+    size_t n = size + 1;  // size + 2 - 1
+
+    // move the duplicates of the best and current circuit to the back of feasible_solutions
+    for (size_t i = 2; i < feasible_solutions.size(); ++i) {
+        if (i == best_index || i == current_index) {
+            std::swap(feasible_solutions[i], feasible_solutions[n]);
             --n;
-            std::swap(holder[index_to_remove], holder[n]);
-        } else {
-            ++i;
         }
     }
 
-    // remove the last size - n elements from holder
-    holder.resize(n);
-    */
+    // the index of the best solution now is at the front of the feasible_solutions vector
+    best_index = 0;
+
+    // the index of the current solution now is at after the front of the feasible_solutions vector
+    current_index = 1;
+
+    // if feasible_solutions is small enough, keep its original size, otherwise prune it to keep a
+    // maximum of solutions_prune_size elements
+    const size_t new_size = std::min(size, solutions_prune_size);
+    feasible_solutions.resize(new_size);
+
+    // updated unused_solution_indexes only if it has some elements
+    if (!unused_solution_indexes.empty()) {
+        // we shouldn't consider the first 2 indexes, since they are used
+        const size_t unused_indexes_size = std::min(unused_solution_indexes.size(), new_size - 2);
+
+        std::vector<size_t> new_unused_indexes(unused_indexes_size);
+        std::iota(new_unused_indexes.begin(), new_unused_indexes.end(), 2);
+        std::swap(new_unused_indexes, this->unused_solution_indexes);
+    }
 }
 
 inline std::vector<size_t>& TSPSolution::circuit() const {
     return pool->get(pool_index);
 }
 
-inline int TSPSolution::fitness() {
+inline int TSPSolution::fitness() const {
     if (distance == NOT_INITIALIZED) {
         distance = pool->compute_distance(circuit());
     }
@@ -328,6 +391,6 @@ inline void TSPSolution::destroy() {
     pool->reclaim(*this);
 }
 
-inline void TSPSolution::survives() {
-    pool->remove_random_solutions_except(this->pool_index);
+inline void TSPSolution::survives(TSPSolution& current) {
+    pool->remove_solutions_except(this->pool_index, current.pool_index);
 }

@@ -41,11 +41,22 @@
     // solves the TSP problem using Simulated Annealing starting from the solution returned by
     // initial_solution_factory
     auto solve_tsp = [&]() {
+        // maximum number of feasible solutions considered after every Simulated Annealing
+        // iterations. If the generated feasible solutions are more than this number, they are
+        // pruned away. The higher this parameter, the more RAM memory is required, but also the
+        // bigger is the hypothesis space explored. In practice, it's better to have a relatively
+        // high number for small inputs and a small number for large inputs.
+        constexpr size_t pool_solutions_prune_size = 128;
+
+        // if true, the oldest feasible solutions are discarded during pruning
+        constexpr bool prefer_new_solutions = true;
+
         // instantiate the TSP solution pool, which is responsible of keeping track of the feasible
         // solutions and initializing the best initial temperature according to the input.
         TSPSolutionPool pool(
-            std::forward<decltype(distance_matrix)>(distance_matrix),
-            std::forward<decltype(initial_solution_factory)>(initial_solution_factory));
+            distance_matrix,
+            std::forward<decltype(initial_solution_factory)>(initial_solution_factory),
+            pool_solutions_prune_size, prefer_new_solutions);
 
         // we use the default Simulated Annealing options. The initial temperature
         simulated_annealing::SimulatedAnnealingOptions options{};
@@ -70,7 +81,7 @@
     };
 
     // run Simulated Annealing as many times as the number of CPU cores
-    const auto executor(executor::parallel_executor({}, std::move(solve_tsp)));
+    const auto executor(executor::parallel_executor(1, std::move(solve_tsp)));
 
     // return the best cost found
     return executor.get_best_result(utils::select_best);
