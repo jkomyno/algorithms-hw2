@@ -562,11 +562,26 @@ if __name__ == '__main__':
     # export_dataframes_min_to_latex(dataframes_min)
 
     if IS_PLOT_ENABLED:
-        # OK: ClosestInsertion (accuracy)
-        plot_precision_comparison([CLOSEST_INSERTION_1_ROUND], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND])} (approximation error)')
-        plot_precision_comparison([CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND], dataframes_min, pred=lambda x: True, title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND])} (approximation error)')
+        # TODO: Redo charts
+        plot_precision_comparison(
+            [CLOSEST_INSERTION_1_ROUND], 
+            dataframes_min,
+            pred=lambda x: True, 
+            title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND])} (approximation error)')
+        plot_precision_comparison(
+            [CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND])} (approximation error)')
 
-        # Question 1 (accuracy and runtime)
+        # OK: Closest (1 round vs 4 rounds)
+        plot_precision_comparison(
+            [CLOSEST_INSERTION_1_ROUND, CLOSEST_INSERTION_4_PARALLEL_ROUNDS], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND, CLOSEST_INSERTION_4_PARALLEL_ROUNDS])} (approximation error)')
+
+        # TODO: Redo Question 1 (accuracy and runtime)
         plot_precision_comparison(
             [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND], 
             dataframes_min, 

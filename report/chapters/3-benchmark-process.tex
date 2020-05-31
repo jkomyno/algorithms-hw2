@@ -1,42 +1,120 @@
 \section{Benchmark}
 \label{cap:benchmark-process}
 
-Abbiamo deciso di rendere il processo di misurazione del tempo di esecuzione dei nostri algoritmi esterno al codice dei programmi sviluppati.
-Il nostro benchmark tiene quindi conto di tutto, ovvero:
+Abbiamo deciso di rendere il processo di misurazione del tempo di
+esecuzione dei nostri algoritmi esterno al codice dei programmi
+sviluppati, realizzando un script in grado di misurare i tempi di
+esecuzione. Per l'analisi dei dati invece abbiamo scritto uno script
+in Python, in grado di elaborare i risultati e produrre tabelle e
+grafici.
+
+\subsection{Misurazione}
+
+Il tempo di esecuzione dell'algoritmo, essendo esterno al codice,
+tiene conto di diversi fattori:
 
 \begin{itemize}
-    \item Tempo necessario a leggere il file di input in un container \textit{std::vector} temporaneo;
-    \item Tempo per trasformare il container temporaneo in una matrice di adiacenza;
-    \item Tempo per eseguire l'algoritmo vero e proprio per la risoluzione di TSP e restituire il risultato;
+    \item Tempo necessario a leggere il file di input in un container
+      \textit{std::vector} temporaneo;
+    \item Tempo per trasformare il container temporaneo in una matrice
+      di adiacenza;
+    \item Tempo per eseguire l'algoritmo vero e proprio per la
+      risoluzione di TSP e restituire il risultato;
 \end{itemize}
 
-\noindent TODO: PARLARE DEGLI SCRIPT DI MISURAZIONE DEI TEMPI
-
-\noindent Le colonne dei file CSV sopracitati sono le seguenti:
+\noindent Il processo di misurazione restituisce un file in formato
+CSV che riassume il risultato del benchmark. In particolare, il file
+contiene le seguenti colonne:
 
 \begin{itemize}
-    \item \textbf{ms}: tempo in millisecondi per eseguire il programma su un singolo file di input;
-    \item \textbf{output}: risultato del programma, ovvero peso dell'MST del grafo letto in input;
-    \item \textbf{n}: numero di nodi del grafo letto;
-    \item \textbf{m}: numero di archi del grafo letto;
+    \item \textbf{ms}: tempo in millisecondi per eseguire il programma
+      su un singolo file di input;
+    \item \textbf{output}: risultato del programma, ovvero peso
+      dell'MST del grafo letto in input;
+    \item \textbf{d}: dimensione del grafo di input, corrispondende al
+      numero di nodi (il numero di archi è omesso, in quanto non
+      rilevante per il problema);
+    \item \textbf{weight\textunderscore type}: tipo dei pesi del
+      grafo;
     \item \textbf{filename}: nome del file di input letto.
 \end{itemize}
 
-\noindent Per rendere i risultati del benchmark quanto più stabili e affidabili possibile, abbiamo preso le seguenti precauzioni:
+\noindent Per rendere i risultati del benchmark quanto più stabili e
+affidabili possibile, abbiamo preso le seguenti precauzioni:
 
 \begin{itemize}
-    \item Abbiamo usato sempre lo stesso computer per misurare il tempo di esecuzione dei programmi implementati;
-    \item Abbiamo chiuso tutti i programmi in foreground e disabilitato quanti più servizi possibile in background;
-    \item Abbiamo disabilitato la connessione Internet del computer scelto;
-    \item Abbiamo fatto più misurazioni in tempi differenti. Di tutte le misurazioni effettuate è poi stata scelta la minima per elaborazioni e grafici.
+    \item Abbiamo usato sempre lo stesso computer per misurare il
+      tempo di esecuzione dei programmi implementati;
+    \item Abbiamo chiuso tutti i programmi in foreground e
+      disabilitato quanti più servizi possibile in background;
+    \item Abbiamo disabilitato la connessione Internet del computer
+      scelto;
+    \item Abbiamo fatto più misurazioni in tempi differenti. Di tutte
+      le misurazioni effettuate è poi stata scelta la minima per
+      elaborazioni e grafici.
 \end{itemize}
 
-\noindent Abbiamo definito lo script Python \textit{benchmark/analysis.py} per automatizzare il processo di confronto degli algoritmi e la creazione di tabelle e grafici inseriti in questa relazione. Esso legge i file CSV generati dallo script di benchmark \textit{benchmark.sh}. \\
-
-\noindent Il computer usato per effettuare i benchmark degli algoritmi ha le seguenti caratteristiche:
+\noindent Il computer usato per effettuare i benchmark degli algoritmi
+ha le seguenti caratteristiche:
 
 \begin{itemize}
     \item \textbf{Sistema Operativo}: Windows 10 Education 64 bit;
     \item \textbf{CPU}: Intel Core i5 6600K 3.50 GHz
     \item \textbf{RAM}: 16 GB;
 \end{itemize}
+
+\subsection{Analisi}
+
+\noindent Abbiamo definito lo script Python
+\textit{benchmark/analysis.py} per automatizzare il processo di
+confronto degli algoritmi e la creazione di tabelle e grafici inseriti
+in questa relazione. Esso legge i file CSV generati dallo script di
+benchmark \textit{benchmark.sh}. \\
+
+\noindent Lo script trasforma i dati grezzi in dati manipolabili e li
+elabora estraendone i dati principali. Successivamente, questi ultimi
+sono ulteriormente analizzati per l'estrazione di informazioni sotto
+forma di grafici e tabelle. Di seguito sono riportate le fasi ad alto
+livello che lo script implementa.
+
+\begin{enumerate}
+    \item Lettura di tutti i file CSV e trasformati in DataFrames
+      (struttura dati della libreria \emph{pandas}), di facile
+      manipolazione;
+    \item Esecuzione di controlli (asserzioni) sulla forma dei dati
+      letti e sul loro significato, per assicurare che il processo
+      automatico non stia introducendo errori;
+    \item Elaborazione dei dati. In particolare vengono fusi per
+      algoritmo i benchmark in una singola tabella e per ogni riga
+      viene mantenuto il dato con il tempo di esecuzione minore. La
+      colonna degli output invece mantiene il valore mediano di tutti
+      i benchmark fusi.
+    \item Estrazione della conoscenza tramite la creazione di tabelle
+      e grafici con semplici primitive integrate nello script.
+    \label{script-phase-analysis}
+\end{enumerate}
+
+\noindent Le primitive utilizzate nella fase
+\ref{script-phase-analysis} per la creazione di tabelle e grafici
+sono:
+
+\begin{itemize}
+    \item \mintinline{python}{print_comparison(dfs_dict: Dict[str,
+        pd.DataFrame], programs: List[str])}. Crea una tabella di
+      comparativa che mostra l'errore introdotto dagli algoritmi in
+      \mintinline{python}{programs} rispetto alle soluzioni ottime.
+
+    \item \mintinline{python}{plot_precision_comparison(names:
+      List[str], dfs: Dict[str, pd.DataFrame], title: str)}. Crea un
+      grafico di mostra l'errore introdotto dagli algoritmi in
+      \mintinline{python}{names} rispetto alle soluzioni ottime.
+
+    \item \mintinline{python}{plot_runtime_comparison(names:
+      List[str], dfs: Dict[str, pd.DataFrame], title: str)}. Crea un
+      grafico di che mostra il tempo di esecuzione degli algoritmi in
+      \mintinline{python}{names}.
+    
+\end{itemize}
+
+\noindent Le funzioni sono ampiamente documentate nello script, al
+quale si rimanda per ulteriori dettagli.
