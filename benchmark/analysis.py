@@ -196,6 +196,17 @@ def get_min_at_row(dfs: List[pd.DataFrame], row: int, column: str = 'ms') -> np.
     min_index, min_value = min(enumerate(values_at_row_column), key=lambda x: x[1])
     return min_index, min_value
 
+def get_median_at_row(dfs: List[pd.DataFrame], row: int, column: str = 'output') -> np.double:
+    """
+    Return the median value of a certain column among the given list of benchmark dataframes in a certain row
+    :param dfs: list of benchmark dataframes
+    :param row: index of the row to be selected
+    :param column: column of the dataframe to be selected. Default: 'ms'
+    :return: median value of column at row
+    """
+    values_at_row_column = [df[column].loc[row] for df in dfs]
+    return np.median(values_at_row_column)
+
 
 def create_list_of_ms_at_row(dfs_list: List[pd.DataFrame], columns: List[int]) -> List[List[np.double]]:
     """
@@ -329,7 +340,9 @@ def minimize_ms_dataframes_helper(dfs: List[pd.DataFrame]) -> pd.DataFrame:
     n_rows = dfs[0].shape[0]
     for row in range(n_rows):
         min_index, _ = get_min_at_row(dfs, row, column='ms')
-        data = dfs[min_index].loc[row]
+        median_output = get_median_at_row(dfs, row, column='output')
+        data = dfs[min_index].loc[row].copy()  # need to copy to avoid side effect on original dataframe.
+        data['output'] = median_output
         min_df = min_df.append(data)
 
     return min_df.round(decimals=N_DECIMALS)
