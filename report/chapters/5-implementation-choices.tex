@@ -1,7 +1,7 @@
 \section{Scelte implementative}
 \label{cap:implementation-choices}
 
-\subsection{Rappresentazione del grafo}
+\subsection{Rappresentazione dei grafi}
 \label{sub:graph-representation}
 
 Gli algoritmi di questo homework operano su grafi pesati completamente connessi e non diretti. Ha quindi senso rappresentare ogni grafo con una Matrice di Adiacenza, dato che i grafi sono completi. In questa relazione useremo in maniera ambivalente i termini \textit{Matrice di Adiacenza} e \textit{Matrice delle distanze}, poiché i grafi sono pesati.
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
 
     // crea la matrice di distanza, usando le distanze euclidea o geodesica a seconda
     // del tipo di input
-    DistanceMatrix<int>&& distance_matrix = point_reader->create_distance_matrix();
+    DistanceMatrix<int> distance_matrix = point_reader->create_distance_matrix();
 
     // calcola il peso della soluzione TSP individuata dall'algoritmo
     const auto total_weight = ...;
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
 \noindent Il file \codeinline{main.cpp} ha la stessa struttura per ogni algoritmo, si veda il listing \ref{listing:main-cpp}. Ad alto livello, le operazioni svolte sono:
 
 \begin{enumerate}
-    \item Lettura del file di input: il file di input viene parsato, e vengono lette solo le informazioni più importanti, ovvero:
+    \item Lettura del file di input: il file di input viene parsato da \codeinline{read\_file.h}, e vengono lette solo le informazioni più importanti, ovvero:
 
     \begin{itemize}
         \item dimensione del grafo;
@@ -193,15 +193,21 @@ public:
 \label{listing:point-reader}
 \end{listing}
 
-\subsection{Strutture Dati}
+\subsection{Strutture Dati comuni}
 
 Tutte le strutture dati elencate di seguito sono definite nella cartella \textit{Shared}.
 Ove possibile, per la nomenclatura dei metodi abbiamo cercato di seguire lo stesso standard dei container STL di C++.
-Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando possibile, evitando rehashing e riallocazioni dispendiose. Questo significa che la maggior parte delle operazioni indicate con \complexityConstant{} ammortizzato siano in realtà totalmente costanti nella pratica.
+Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando possibile, evitando rehashing e riallocazioni dispendiose. Questo significa che la maggior parte delle operazioni indicate con \complexityConstant{} ammortizzato siano in realtà totalmente costanti nella pratica. \\
 
 \noindent Le strutture dati relative alle Heap e alle code di priorità necessarie per l'algoritmo di Prim sono già state ampiamente documentate nell'homework 1.
 
-\subsubsection{Rappresentazione dei vettori $\pi$ e $d[v,S]$}
+\subsection{Rappresentazioni dei grafi alternative}
+
+\noindent L'algoritmo di $2$-approssimazione basato sul calcolo del Minimum Spanning Tree fa uso di due rappresentazioni diverse per i grafi.
+\codeinline{DistanceMatrix.h} è usato per leggere il grafo in input ed eseguirne l'algoritmo di Prim (che è stato adattato dal precedente homework). \codeinline{AdjacencyMapGraph.h}, che contiene un subset definite per la Mappa di Adiacenza definita nel precedente homework, è invece usata per rappresentare il Minimum Spanning Tree all'interno di \codeinline{DFS.h}, che lo scorre per generare il vettore della visita \textit{Preorder}. Questa scelta è dovuta al fatto che l'MST non è completo come il grafo di input, e anzi contiene solo $n - 1$ archi. Una Matrice di adiacenza è quindi inutilmente costosa in termini di spazio in questo caso.
+
+\newpage
+\subsection{Rappresentazione dei circuiti parziali di Held \& Karp}
 
 L'algoritmo Held-Karp richiede esplicitamente l'uso di due vettori:
 \begin{itemize}
@@ -209,20 +215,84 @@ L'algoritmo Held-Karp richiede esplicitamente l'uso di due vettori:
     \item $\pi[v,S]$ è il predecessore di v nel cammino minimo definito come sopra.
 \end{itemize}
 
-In questo caso l'homework prevede la restituizione del peso del cammino Hamiltoniano inferiore e non il cammino stesso, il vettore $\pi[v,S]$ è stato omesso. Per poter implementare dunque il vettore $d[v,S]$ si è deciso di creare una struttura dati apposita, formata da una \textit{std::unordered\_map} dove la chiave è una coppia $(S, v)$ ed il valore della mappa è un intero che rappresenta il peso del cammino minimo che parte da 0 e termina in v, visitando tutti i nodi in S. Per rappresentare il set di nodi S si sono studiate 3 possibili soluzione descritte nella sezione \ref{cap:S-repr}. Mentre il vertice $v$ viene rappresentato da un numero di tipo \textit{size\_t}.
+\noindent Poiché l'homework richiede la restituizione del peso del cammino Hamiltoniano inferiore e non il cammino stesso, abbiamo omesso il vettore $\pi[v,S]$. \\
 
-\subsubsection{Rappresentazione del sottoinsieme di vertici S}
-\label{cap:S-repr}
-In particolare ora vogliamo concentrare la nostra attenzione alla rappresentazione in maniera efficiente dell'insieme dei nodi S da visitare. In particolare abbiamo pensato a 3 soluzioni che argomenteremo qui di seguito.
+Abbiamo rappresentato la tabella $d[v,S]$ usata dall'algoritmo di programmazione dinamica come una mappa chiave-valore, dove:
 
-\paragraph{Unordered Set}
-La prima soluzione è quella di rappresentare il set di vertici S semplicemente attraverso la struttura dati \textit{unordered\_set} offerta dalla standard library \textit{std} di C++.
+\begin{itemize}
+    \item la chiave è una coppia $(S, v)$;
+    \item il valore è il peso del cammino minimo che parte dal nodo 0 e termina in $v$, visitando tutti i nodi in $S$.
+\end{itemize}
 
-TODO: PARLARE DELL'HASHING
+\noindent Il tipo della mappa è:
 
-\paragraph{Bitmasking}
+\begin{center}
+    \mintinline{c++}{std::unordered_map<std::pair<decltype(S), size_t>, int>}
+\end{center}
 
-\noindent Una soluzione migliore per rappresentare il set di nodi S visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit). In questo caso ogni bit rappresenta la presenza o meno nel set S del vertice $i$: se il bit all'$i$-esima posizione nel numero è a 1 allora significa che il vertice $i \in S$ altrimenti no. Per fare questo è stato sufficiente dichiarare un numero \textit{unsigned long long} che nel nostro linguaggio corrisponde ad numero senza segno a 64 bit. Si consideri l'esempio in figura \ref{fig:bitmasking-example}, è possibile vedere come si può rappresentare l'insieme S attraverso i bit di un numero \textit{unsigned long long}.
+\noindent Poiché le distanze euclidea e geodesica sono approssimate a valori interi, il tipo del valore della mappa è \mintinline{c++}{int}.
+Per rappresentare il set di nodi $S$ abbiamo studiato 3 possibili soluzioni.
+
+\subsubsection{Rappresentazione del circuito parziale S}
+\label{held-karp-S-repr}
+
+Di seguito sono presentate le 3 possibili soluzioni che abbiamo individuato per rappresentare il circuito parziale $S$ dell'algoritmo di Held \& Karp. Ricordiamo che $S$ fa parte della chiave di una \mintinline{c++}{std::unordered_map}, quindi deve esistere un metodo che definisca l'hash di $S$.
+
+\paragraph{Unordered Set}\mbox{}\\
+
+\noindent La soluzione più semplice per rappresentare un insieme di vertici senza ripetizioni è usare la struttura dati \mintinline{c++}{std::unordered_set}. La tabella \ref{tab:pro-cons-unordered-set} evidenzia i pro e i contro di questo approccio. Osserviamo in particolare che lo spazio occupato per rappresentare un circuito parziale può essere compattato, il che può essere d'aiuto, visto che Held \& Karp ha un'occupazione spaziale esponenziale sulla taglia dell'input. \\
+
+\noindent Notiamo inoltre che la libreria standard non definisce alcun metodo \\ \mintinline{c++}{std::hash<std::unordered_set<T>>}, quindi è spettata a noi la definizione della \textit{hash function} per questa struttura dati. Si veda la sezione \ref{hashing} per ulteriori informazioni. TODO: aggiungere questa sezione.
+
+\begin{table}
+  \centering
+    \begin{tabular}{|c | c|}
+    \hline
+    \textbf{PRO} & \textbf{CONTRO} \\ [0.5ex]
+    \hline\hline
+    Offerta dalla libreria standard di C++ & Ha un'occupazione spaziale lineare\\
+    \hline
+    Rende evidente la non esistenza di nodi ripetuti & La libreria standard non ne definisce l'hash \\
+    \hline
+    Facile da usare &  \\
+    \hline
+  \end{tabular}
+    \caption{Analisi dei pro e contro di std::unordered\_set.}
+    \label{tab:pro-cons-unordered-set}
+\end{table}
+
+\noindent Il tipo della mappa in questo caso è:
+
+\begin{center}
+    \mintinline{c++}{std::unordered_map<std::pair<std::unordered_set<size_t>, size_t>, int>}
+\end{center}
+
+\paragraph{Tecnica bit masking}\mbox{}\\
+
+\begin{table}
+  \centering
+    \begin{tabular}{|c | c|}
+    \hline
+    \textbf{PRO} & \textbf{CONTRO} \\ [0.5ex]
+    \hline\hline
+    Massima compattezza spaziale & Complesso da usare \\
+    \hline
+    Rende evidente la non esistenza di nodi ripetuti & Supporta solo architetture a 64 bit \\
+    \hline
+    La libreria standard ne definisce l'hash & Usabile solo per grafi con $n \leq 63$ \\
+    \hline
+  \end{tabular}
+    \caption{Analisi dei pro e contro della tecnica bit masking per numeri interi senza segno.}
+    \label{tab:pro-cons-bit-masking}
+\end{table}
+
+\noindent \textbf{Premessa}: per questo metodo, abbiamo assunto che i programmi saranno eseguiti solo su architetture a 64 bit. I grafi con più di 63 nodi non possono essere rappresentati con questo metodo. \\
+
+\noindent Una soluzione migliore per rappresentare in maniera estremamente compatta il set di nodi visitati $S$ è usare un singolo numero intero senza segno a 64 bit. In questo caso, ogni bit a 1 rappresenta la presenza di un vertice $i$ nell'insieme $S$.
+Se il bit all'$i$-esima posizione nel numero vale 1, allora il vertice $i \in S$, se il bit vale invece 0 allora $i \notin S$. La tabella \ref{tab:pro-cons-bit-masking} evidenzia i pro e i contro di questo approccio. \\
+
+\noindent Nel nostro linguaggio, il tipo necessario a definire numeri interi senza segno a 64 bit è \\
+\mintinline{c++}{unsigned long long}. Si consideri l'esempio in figura \ref{fig:bitmasking-example} per vedere come è possibile rappresentare $S$ in questo modo.
 
 \begin{figure}[h]
 	\centering
@@ -231,13 +301,20 @@ TODO: PARLARE DELL'HASHING
 	\label{fig:bitmasking-example}
 \end{figure}
 
-Sfruttando questa rappresentazione dell'insieme S, le operazioni di eliminazione, aggiunta e verifica della presenza di vertici in S sono implementate sfruttando operazioni sui bit tramite tecniche di bit-shifting, operazione logiche AND, OR e NOT: operazione pressoché istantanee nel nostro linguaggio, garantendo così un complessità temporale molto bassa.
+\noindent Con questa rappresentazione chiamata \textit{bit masking}, eliminazione, aggiunta e verifica della presenza di vertici in $S$ sono implementate sfruttando operazioni $AND$, $OR$, $XOR$ bit-a-bit e bit-shifting.
+Poiché questo tipo di operazioni si traduce in una singola istruzione Assembly, manipolare $S$ tramite bit-masking è estremamente performante sia dal punto di vista temporale che spaziale. \\
 
-Un limite di tale struttura è l'impossibilità di poter rappresentare un set S che contiene più di 64 nodi, come è possibile vedere nell'esempio della figura \ref{fig:bitmasking-example} dove il vertice 66 non può essere rappresentato in questo modo.
+\noindent Un limite di tale struttura è l'impossibilità di poter rappresentare un set $S$ che contiene più di 64 nodi, come è possibile vedere nell'esempio della figura \ref{fig:bitmasking-example} dove il vertice 66 non può essere rappresentato in questo modo. Il limite di rappresentazione di $S$ in realtà scende a 63 nodi per via delle operazioni di bit-shift necessarie a manipolare il circuito parziale.
 
-\paragraph{Extended Bitmasking}
-TODO: Cambiare nome nel codice da ExtendedBitSet a DynamicBitMasking.
-Per superare il limite della rappresentazione tramite BitMasking per più di 64 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{DynamicBitMasking} che tramite un \textit{std::vector} di \textit{unsigned long long} è in grado di rappresentare qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati.
+\noindent Il tipo della mappa in questo caso è:
+
+\begin{center}
+    \mintinline{c++}{std::unordered_map<std::pair<unsigned long long, size_t>, int>}
+\end{center}
+
+\paragraph{Struttura dati ad-hoc: DynamicBitMasking}\mbox{} \\
+
+Per superare il limite della rappresentazione tramite BitMasking per più di 63 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{DynamicBitMasking} che tramite un \textit{std::vector} di \textit{unsigned long long} è in grado di rappresentare qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati.
 
 \begin{figure}[h]
 	\centering

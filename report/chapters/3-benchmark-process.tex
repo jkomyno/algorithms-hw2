@@ -31,11 +31,9 @@ contiene le seguenti colonne:
       su un singolo file di input;
     \item \textbf{output}: risultato del programma, ovvero peso
       dell'MST del grafo letto in input;
-    \item \textbf{d}: dimensione del grafo di input, corrispondende al
-      numero di nodi (il numero di archi è omesso, in quanto non
-      rilevante per il problema);
-    \item \textbf{weight\textunderscore type}: tipo dei pesi del
-      grafo;
+    \item \textbf{d}: numero di nodi del grafo di input;
+    \item \textbf{weight\textunderscore type}: tipo delle distanze del
+      grafo (\textit{EUC\_2D} o \textit{GEO}). I valori ammissibili sono descritti in \ref{sub:graph-representation};
     \item \textbf{filename}: nome del file di input letto.
 \end{itemize}
 
@@ -72,23 +70,19 @@ in questa relazione. Esso legge i file CSV generati dallo script di
 benchmark \textit{benchmark.sh}. \\
 
 \noindent Lo script trasforma i dati grezzi in dati manipolabili e li
-elabora estraendone i dati principali. Successivamente, questi ultimi
-sono ulteriormente analizzati per l'estrazione di informazioni sotto
-forma di grafici e tabelle. Di seguito sono riportate le fasi ad alto
-livello che lo script implementa.
+elabora estraendone le informazioni principali e mostrandole sotto
+forma di grafici e tabelle. Di seguito sono riportate ad alto
+livello le fasi eseguite dallo script:
 
 \begin{enumerate}
-    \item Lettura di tutti i file CSV e trasformati in DataFrames
-      (struttura dati della libreria \emph{pandas}), di facile
-      manipolazione;
-    \item Esecuzione di controlli (asserzioni) sulla forma dei dati
-      letti e sul loro significato, per assicurare che il processo
-      automatico non stia introducendo errori;
-    \item Elaborazione dei dati. In particolare vengono fusi per
-      algoritmo i benchmark in una singola tabella e per ogni riga
+    \item Lettura di tutti i file CSV e trasformazione in DataFrames \codeinline{Pandas};
+    \item Esecuzione di controlli (asserzioni) sulla struttura dei dati
+      letti e sul loro significato, per assicurare che CSV siano esenti da errori;
+    \item Elaborazione dei dati. In particolare i benchmark vengono raggruppati
+      per algoritmo in una singola tabella, e per ogni riga
       viene mantenuto il dato con il tempo di esecuzione minore. La
-      colonna degli output invece mantiene il valore mediano di tutti
-      i benchmark fusi.
+      colonna degli output invece mantiene il valore mediano tra tutti
+      i benchmark per ogni algoritmo.
     \item Estrazione della conoscenza tramite la creazione di tabelle
       e grafici con semplici primitive integrate nello script.
     \label{script-phase-analysis}
