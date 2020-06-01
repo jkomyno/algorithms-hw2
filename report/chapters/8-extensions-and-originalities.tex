@@ -53,17 +53,52 @@ Per essere ragionevolmente sicuri di partire da una buona soluzione iniziale, Ne
 
 \subsubsection{Scelta delle soluzioni vicine}
 
-Il criterio di selezione di Simulated Annealing è strettamente dipendente al problema a cui è applicato. Nel caso di TSP, abbiamo deciso di generare perturbazioni in 3 modi diversi, scelti casualmente ad ogni iterazione.
+Il criterio di selezione di Simulated Annealing è strettamente dipendente al problema a cui è applicato. Nel caso di TSP, abbiamo deciso di generare perturbazioni in 3 modi diversi ispirati alla ricerca euristica di Lin-Kernighan\footnote{\url{https://arxiv.org/pdf/1003.5330.pdf}}, di cui solo uno di essi è scelto casualmente ad ogni iterazione. \\
 
-\textbf{TODO}: presentare brevemente questi 3 modi
+\noindent Questi metodi condividono lo stesso setup iniziale, definito nella metodo \codeinline{TSPSolution::manipulate\_raw} in \codeinline{SimulatedAnnealing/TSPSolutionPool.h}:
+
+\begin{itemize}
+    \item Vengono selezionati casualmente due indici del circuito Hamiltoniano corrente $x, y$ tali che $x < y$ e che $x > 0$, $y < n - 1$;
+    \item Viene estratto un valore a caso $d \in [0, 1]$;
+    \item Se $0 < d < 0.4$, viene eseguito uno step \textit{2-opt};
+    \item Se $0.4 \leq d < 0.8$, viene eseguito uno step \textit{translate};
+    \item Se $0.8 \leq d \leq 1$, viene eseguito uno step \textit{switching}.
+\end{itemize}
+
+\noindent Chiamiamo $\pi$ il circuito Hamiltoniano attuale e $\pi'$ una perturbazione di tale circuito che preserva la proprietà di essere un circuito Hamiltoniano dello stesso insieme di nodi.
+
+\paragraph{2-opt}\mbox{}\\
+
+\begin{enumerate}
+    \item Vengono copiati i primi $x$ elementi di $\pi$ in $\pi'$;
+    \item I successivi $x$ elementi di $\pi$ sono copiati in ordine inverso;
+    \item Viene copiata l'ultima parte di $\pi$ in $\pi'$.
+\end{enumerate}
+
+\paragraph{Translate}\mbox{}\\
+
+\begin{enumerate}
+    \item Vengono copiati i primi $x$ elementi di $\pi$ in $\pi'$;
+    \item Viene copiato l'elemento $\pi[y-1]$ in $\pi'$;
+    \item Vengono copiati i successivi $y - x - 1$ elementi di $\pi$ in $\pi'$;
+    \item Viene copiata l'ultima parte di $\pi$ in $\pi'$.
+\end{enumerate}
+
+\paragraph{Swithing}\mbox{}\\
+
+\begin{enumerate}
+    \item Vengono copiati i primi $x$ elementi di $\pi$ in $\pi'$;
+    \item Viene copiato l'elemento $\pi[y-1]$ in $\pi'$;
+    \item Saltando l'elemento $\pi[x]$, vengono copiati i successivi $y - x - 2$ elementi di $\pi$ in $\pi'$;
+    \item Viene copiato l'elemento $\pi[x]$ in $\pi'$;
+    \item Viene copiata l'ultima parte di $\pi$ in $\pi'$.
+\end{enumerate}
 
 \subsubsection{Scelta della temperatura iniziale}
 
-Inizialmente avevamo fissato la temperatura inizale a $1.000.000$. Questa scelta sembrava funzionare per la maggiorparte dei dataset dell'homework, ma le performance degradavano di molto per grafi con più di 150 nodi. \\
+Inizialmente avevamo fissato la temperatura inizale a $1.000.000$. Questa scelta sembrava funzionare per la maggiorparte dei dataset dell'homework, ma ci siamo accorti che le performance degradavano di molto per grafi con più di 150 nodi. \\
 
-% TODO: aggiungere link a https://www.researchgate.net/publication/227061666_Computing_the_Initial_Temperature_of_Simulated_Annealing
-
-\noindent Abbiamo quindi adottato il metodo di inizializzazione di Ben-Ameur, che si basa sul coefficiente di accettazione iniziale $\chi{}_0$. $\chi{}_0$ rappresenta la percentuale di transizioni sfavorevoli di simulated annealing che ci aspettiamo vengano accettate alla prima iterazione dell'algoritmo. Solitamente il valore di $\chi{}_0$ è compreso nell'intervallo $[0.8, 0.\overline{99}]$. Nel nostro caso, $\chi{}_0 = 0.94$ ci ha dato i risultati medi migliori su tutti i dataset. \\
+\noindent Abbiamo quindi adottato il metodo di inizializzazione di Ben-Ameur\footnote{\url{https://www.researchgate.net/publication/227061666_Computing_the_Initial_Temperature_of_Simulated_Annealing}}, che si basa sul coefficiente di accettazione iniziale $\chi{}_0$. $\chi{}_0$ rappresenta la percentuale di transizioni sfavorevoli di simulated annealing che ci aspettiamo vengano accettate alla prima iterazione dell'algoritmo. Solitamente il valore di $\chi{}_0$ è compreso nell'intervallo $[0.8, 0.\overline{99}]$. Nel nostro caso, $\chi{}_0 = 0.94$ ci ha dato i risultati medi migliori su tutti i dataset. \\
 
 \noindent Per come abbiamo inizializzato i parametri del metodo di Ben-Ameur, grafi di dimensione più alta partiranno da una temperatura più alta, il che equivale ampliare il raggio di ricerca delle soluzioni all'aumentare della complessità dell'input.
 
@@ -195,15 +230,15 @@ dalla tabella \ref{table:closest-insertion-runtime-accuracy} e dal grafico
 \subsubsection{Osservazioni}
 
 Data la netta dualità con FarthestInsertion, è doveroso analizzare
-le differenze tra i due algoritmi. Dalla tabella 
-\ref{table:closest-farthest-insertion-runtime-accuracy} 
+le differenze tra i due algoritmi. Dalla tabella
+\ref{table:closest-farthest-insertion-runtime-accuracy}
 e dal grafico \ref{fig:closest-farthest-insertion-accuracy-error}
 è possibile notare che per quanto riguarda il runtime i due algoritmi
 sono perfettamente alla pari, infatti minimizzare o massimizzare la
 funzione $\delta (k, C)$ dal punto di vista del tempo di esecuzione
-non comporta differenze. Dal punto di vista dell'errore di 
+non comporta differenze. Dal punto di vista dell'errore di
 approssimazione invece FarthestInsertion riesce a fare mediamente
-meglio di ClosestInsertion. Da sottolineare anche il fatto che 
+meglio di ClosestInsertion. Da sottolineare anche il fatto che
 FarthestInsertion riesce ad eliminare completamente l'errore di
 approssimazione su istanze molto piccole.
 

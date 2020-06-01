@@ -1,18 +1,19 @@
 \section{Struttura del codice}
 \label{cap:code-structure}
 
-Il progetto è strutturato in un'unica soluzione Visual Studio\footnote{Una soluzione Visual Studio può essere vista come un macro-progetto che contiene più sotto-moduli.} contenente molteplici progetti, uno per ogni algoritmo implementato. Il codice di ogni progetto è contenuto nella omonima cartella. Di seguito l'elenco dei progetti realizzati.
+Il progetto è strutturato in un'unica soluzione Visual Studio\footnote{Una soluzione Visual Studio può essere vista come un macro-progetto che contiene più sotto-moduli.} contenente molteplici progetti, uno per ogni algoritmo per il Metric-TSP implementato. Il codice di ogni progetto è contenuto nella omonima cartella. Di seguito l'elenco dei progetti realizzati:
 
 \begin{itemize}
-    \item \textbf{TSP2Approximation TODO: Cambiarlo nella soluzione}
-    \item \textbf{HeldKarp}
-    \item \textbf{FarthestInsertion}
-    \item $(*)$ \textbf{SimulatedAnnleaing}
+    \item \textbf{MST2Approximation}: Implementazione dell'algoritmo di $2$-approssimazione basato sul Minimum Spanning Tree;
+    \item \textbf{HeldKarp}: Implementazione dell'algoritmo esatto Held \& Karp con timeout di esecuzione fissato a 2 minuti;
+    \item \textbf{ClosestInsertion}: Implementazione dell'algoritmo di $2$-approssimazione basato sull'euristica costruttiva Closest Insertion;
+    \item $(*)$ \textbf{FarthestInsertion}: Implementazione dell'algoritmo di $log(n)$-approssimazione basato sull'euristica costruttiva Farthest Insertion;
+    \item $(*)$ \textbf{SimulatedAnnealing}: Implementazione originale dell'algoritmo stocastico Simulated Annealing applicato al problema Metric-TSP, che utilizza l'euristica Nearest-Neighbor per generare la soluzione di partenza.
 \end{itemize}
 
 \noindent Abbiamo deciso di scegliere \textbf{Farthest Insertion} tra le euristiche costruttive elencate nell'homework.
 
-\noindent I progetti indicati con $(*)$ sono delle estensioni rispetto agli algoritmi inizialmente richiesti.
+\noindent I progetti indicati con $(*)$ sono delle estensioni o delle aggiunte rispetto ai 3 algoritmi inizialmente richiesti.
 \\
 
 \noindent La cartella \textit{Shared} contiene le strutture dati custom e alcune classi e metodi di utilità usati

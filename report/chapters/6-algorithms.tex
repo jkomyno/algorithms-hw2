@@ -2,9 +2,9 @@
 \section{Algoritmi}
 \label{cap:algorithms}
 
-\subsection{TSP 2-approssimato basato sul Minimum Spanning Tree}
+\subsection{MST2Approximation}
 
-La versione vista a lezione di questo algoritmo prevede i seguenti step:
+MST2Approximation è l'implementazione dell'algoritmo di $2$-approssimazione basato sul Minimum Spanning Tree visto a lezione. L'algoritmo prevede i seguenti step:
 
 \begin{enumerate}
     \item Selezionare un vertice radice $root$ arbitrario;
@@ -28,12 +28,12 @@ La versione vista a lezione di questo algoritmo prevede i seguenti step:
     // Step 3, 4
     DFS dfs(std::move(mst));
     const auto circuit = dfs.preorder_traversal_rec();
-    
+
     // Funzione lambda che calcola la distanza tra due vertici
     const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);
     };
-    
+
     // Step 5
     return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_distance);
 \end{minted}
@@ -47,17 +47,17 @@ La versione vista a lezione di questo algoritmo prevede i seguenti step:
 
 \begin{itemize}
     \item Abbiamo usato l'algoritmo di Prim perché è più adatto rispetto a Kruskal quando il grafo è rappresentato come matrice di adiacenza. Kruskal infatti richiede di estrarre la lista di lati ordinata in modo ascendente rispetto al peso all'inizio dell'algoritmo, mentre Prim richiede di estrarre solo la lista dei vertici. Ricordiamo che in un grafo completo vale l'equivalenza \complexityCompleteGraph{}.
-    
-    \item La coda di priorità usata dall'algoritmo di Prim è stata implementata con una Min Heap binaria.
+
+    \item La coda di priorità usata dall'algoritmo di Prim è stata implementata con una Min Heap binaria, la quale è già stata descritta in dettaglio nella relazione del primo progetto.
 \end{itemize}
 
-\subsection{Held e Karp}
+\subsection{HeldKarp}
 
-Riportiamo lo pseudocodice dell'algortimo di Held e Karp visto in classe. In particolare la funzione ricorsiva HeldKarp(v, S) si occupa di:
+Riportiamo lo pseudocodice dell'algortimo di programmazione dinamica Held \& Karp visto in classe. La funzione \codeinline{HeldKarp(S, v)} vista a lezione funziona nel seguente modo:
 
 \begin{enumerate}
-    \item Caso base: verificare se l'insieme S contenga un solo nodo, e restituire la distanza tra il nodo $v$ e 0.
-    \item Controlla se la distanza tra 0 e v, passando per tutti i nodi in S, è già stata calcolata, restituendo tale valore.
+    \item Caso base: verificare se il percorso parziale $S$ contenga un solo nodo, e restituire la distanza tra il nodo $v$ e il nodo di partenza $0$.
+    \item Controlla se la distanza tra i nodi $0$ e $v$, passando per tutti i nodi in $S$, sia già stata calcolata, restituendo tale valore.
     \item Caso ricorsivo:
     \begin{enumerate}
         \item Inizializzare le variabili in maniera opportuna.
@@ -77,17 +77,17 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
                                   DistanceMatrix<int>& distance_matrix,
                                   held_karp_dp_bits_t& C,
                                   utils::ull bits, size_t v = 0) {
-    
+
     // Step 1
     if (utils::is_singleton(bits, v)) {
         return distance_matrix.at(v, 0);
     }
 
-    // Step 2 
+    // Step 2
     if (C.count({bits, v})) {
         return C[{bits, v}];
     }
-    
+
     // Step 3a
     int min_dist = std::numeric_limits<int>::max();
     const utils::ull difference = utils::reset_bit(bits, v);
@@ -106,7 +106,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
         // Timeout scaduto: ritorna il miglior risultato ottenuto fino ad ora
         return !signal.is_expired();
     });
-    
+
     // Step 4
     C[{bits, v}] = min_dist;
     return min_dist;
@@ -125,11 +125,10 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 
 \newpage
 
-\subsection{Farthest Insertion}
+\subsection{FarthestInsertion}
 
-Farthest Insertion è un'euristica costruttiva per TSP che consente di
-approssimare la soluzione ad un fattore $\log(n)$, ulteriormente
-abbassabile fino ad un fattore $2$. La complessità asintotica di
+Farthest Insertion è un'euristica costruttiva per Metric-TSP che consente di
+approssimare la soluzione ottima ad un fattore $\log(n)$. La complessità asintotica di
 quest'euristica è $\bigO(n)$.
 
 \subsubsection{Idea}
@@ -204,7 +203,7 @@ while (!not_visited.empty()) {
 }
 
 // Restituire la somma dei pesi del circuito trovato.
-return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), 
+return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(),
                                      get_distance);
 \end{minted}
 \caption{Implementazione di Farthest Insertion. I commenti del file originale sono stati omessi per una maggiore compattezza.}

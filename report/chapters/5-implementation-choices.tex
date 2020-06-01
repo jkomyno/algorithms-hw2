@@ -29,7 +29,7 @@ int euclidean_distance(const point::point_2D& i,
 
     // distanza euclidea tra i punti i e j
     const double distance = std::sqrt(std::pow(x, 2) + std::pow(y, 2));
-    
+
     // arrotonda al valore intero più vicino
     return static_cast<int>(std::round(distance));
 }
@@ -142,19 +142,19 @@ int main(int argc, char** argv) {
 
 \begin{enumerate}
     \item Lettura del file di input: il file di input viene parsato, e vengono lette solo le informazioni più importanti, ovvero:
-    
+
     \begin{itemize}
         \item dimensione del grafo;
         \item tipo di distanza (\textit{EUC\_2D} o \textit{GEO});
         \item coordinate del grafo.
     \end{itemize}
-    
+
     \noindent Abbiamo usato la libreria di file streaming nativa di C++ (\codeinline{fstream}). Abbiamo rappresentato il tipo di distanza con l'\mintinline{c++}{enum} \codeinline{EdgeWeightType.h}, per la quale abbiamo definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>}.
-    
+
     \item I punti definiti dopo la riga \textit{NODE\_COORD\_SECTION} dei dataset di input sono letti con un'istanza polimorfica di \codeinline{PointReader.h}, che interpreta le coordinate in maniera diversa a seconda del valore assunto dall'enumerazione \codeinline{EdgeWeightType}, ovvero a seconda del tipo di distanza del file. Naturalmente, la sottoclasse \codeinline{EuclideanPointReader.h} usa la distanza Euclidea, mentre \codeinline{GeodesicPointReader.h} usa quella geodesica. Le classi dei punti letti in input sono definiti in \codeinline{point.h} (\codeinline{point\_2D} per le coordinate euclidee, \codeinline{point\_geo} per le coordinate geografiche), e per ognuno di essi è stato definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>} adeguato. Questo ci ha permesso di non avere duplicazione di codice per gestire tipi diversi di punti in input. \\
-    
+
     \noindent La label dei nodi è decrementata di 1 in questa fase di lettura.
-    
+
     \item Una volta letti i nodi, viene creata la matrice delle distanze applicando il \textit{Template Method Pattern}, usando la nozione di distanza definita dalle sottoclassi di \codeinline{PointReader.h}. Il metodo concreto \codeinline{distance(i, j)} delle sottoclassi è usato nel costruttore di \codeinline{DistanceMatrix} come \textit{higher-order function}. Si veda il listing \ref{listing:point-reader}.
 \end{enumerate}
 
@@ -178,8 +178,8 @@ public:
 
   // consuma la lista di coordinate dal file di input
   virtual void read() = 0;
-    
-  // crea la matrice delle distanze a partire dai punti letti. Usa il metodo distance 
+
+  // crea la matrice delle distanze a partire dai punti letti. Usa il metodo distance
   // implementato dalle sotto classi come funzione higher-order
   DistanceMatrix<int> create_distance_matrix() {
     using namespace std::placeholders;
@@ -216,13 +216,13 @@ In questo caso l'homework prevede la restituizione del peso del cammino Hamilton
 In particolare ora vogliamo concentrare la nostra attenzione alla rappresentazione in maniera efficiente dell'insieme dei nodi S da visitare. In particolare abbiamo pensato a 3 soluzioni che argomenteremo qui di seguito.
 
 \paragraph{Unordered Set}
-La prima soluzione è quella di rappresentare il set di vertici S semplicemente attraverso la struttura dati \textit{unordered\_set} offerta dalla standard library \textit{std} di C++.  
+La prima soluzione è quella di rappresentare il set di vertici S semplicemente attraverso la struttura dati \textit{unordered\_set} offerta dalla standard library \textit{std} di C++.
 
 TODO: PARLARE DELL'HASHING
 
 \paragraph{Bitmasking}
 
-\noindent Una soluzione migliore per rappresentare il set di nodi S visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit). In questo caso ogni bit rappresenta la presenza o meno nel set S del vertice $i$: se il bit all'$i$-esima posizione nel numero è a 1 allora significa che il vertice $i \in S$ altrimenti no. Per fare questo è stato sufficiente dichiarare un numero \textit{unsigned long long} che nel nostro linguaggio corrisponde ad numero senza segno a 64 bit. Si consideri l'esempio in figura \ref{fig:bitmasking-example}, è possibile vedere come si può rappresentare l'insieme S attraverso i bit di un numero \textit{unsigned long long}. 
+\noindent Una soluzione migliore per rappresentare il set di nodi S visitati in maniera compatta è usare un numero a 64 bit (assumendo di non considerare le architetture a 32 bit). In questo caso ogni bit rappresenta la presenza o meno nel set S del vertice $i$: se il bit all'$i$-esima posizione nel numero è a 1 allora significa che il vertice $i \in S$ altrimenti no. Per fare questo è stato sufficiente dichiarare un numero \textit{unsigned long long} che nel nostro linguaggio corrisponde ad numero senza segno a 64 bit. Si consideri l'esempio in figura \ref{fig:bitmasking-example}, è possibile vedere come si può rappresentare l'insieme S attraverso i bit di un numero \textit{unsigned long long}.
 
 \begin{figure}[h]
 	\centering
@@ -277,5 +277,5 @@ Visti i seguenti risultati si è quindi deciso di utilizzare la versione BitMask
     \item Il thread principale crea un \textit{worker thread} incaricandolo di eseguire Held-Karp sul grafo letto in input. Fa quindi partire il timeout e resta in attesa del risultato del worker thread. Tale risultato sarà disponibile da un \codeinline{std::future}.
     \item Se il worker thread termina prima dello scadere del timeout, il thread principale è immediatamente sbloccato e il risultato della funzione (restituito da \codeinline{std::future::get()}) è ritornato al chiamante.
     \item Se il timeout scade e il worker thread non ha ancora terminato l'esecuzione, il thread principale gli notifica di terminare l'esecuzione il prima possibile. Tale notifica avviene forzando la conclusione di una \codeinline{std::promise} creata dal main thread e data in input alla funzione eseguita incapsulata nella classe \codeinline{timeout\_signal}.
-    \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna la migliore soluzione individuata fino a quel momento al chiamante. 
+    \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna la migliore soluzione individuata fino a quel momento al chiamante.
 \end{itemize}
