@@ -1,0 +1,14 @@
+ms;output;d;weight_type;filename
+41;8991;52;EUC_2D;berlin52.tsp
+39;3359;14;GEO;burma14.tsp
+45;8113;150;EUC_2D;ch150.tsp
+204;41431;493;EUC_2D;d493.tsp
+1306;22648535;1000;EUC_2D;dsj1000.tsp
+39;478;51;EUC_2D;eil51.tsp
+53;47188;202;GEO;gr202.tsp
+58;158559;229;GEO;gr229.tsp
+41;25253;100;EUC_2D;kroA100.tsp
+41;25241;100;EUC_2D;kroD100.tsp
+157;59790;442;EUC_2D;pcb442.tsp
+38;7352;16;GEO;ulysses16.tsp
+39;7554;22;GEO;ulysses22.tsp
