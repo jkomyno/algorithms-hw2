@@ -66,14 +66,25 @@ namespace utils {
     }
 
     /**
-     * Return the best solution from a set of multiple solutions.
+     * Return the minimum element in a list of elements.
      * This std::min_element wrapper is necessary to force the compiler to choose the right overload
      * of a higher-order function at compile-time
      *
      * @see https://stackoverflow.com/a/36794145/6174476
      */
-    const auto select_best = [](auto&&... args) -> decltype(auto) {
+    const auto min_element = [](auto&&... args) -> decltype(auto) {
         return std::min_element(std::forward<decltype(args)>(args)...);
+    };
+
+    /**
+     * Return the maximum element in a list of elements.
+     * This std::max_element wrapper is necessary to force the compiler to choose the right overload
+     * of a higher-order function at compile-time
+     *
+     * @see https://stackoverflow.com/a/36794145/6174476
+     */
+    const auto max_element = [](auto&&... args) -> decltype(auto) {
+        return std::max_element(std::forward<decltype(args)>(args)...);
     };
 
     /**
@@ -81,18 +92,18 @@ namespace utils {
      * The result is a std::pair containing the result as first term and its cost as second term
      */
     const auto select_best_result_cost_pair = [](auto&&... args) -> decltype(auto) {
-        return select_best(args..., [](const auto& x, const auto& y) {
+        return min_element(args..., [](const auto& x, const auto& y) {
             return x.second < y.second;
         });
     };
 
     // return the vertex k that doesn't belong to the partial Hamiltonian circuit that
-    // maximizes or minimizes the distance δ(k, circuit) w.r.t. the given comparator.
+    // maximizes or minimizes the distance δ(k, circuit) w.r.t. get_best_k.
     // get_distance is the distance function that computes the cost between 2 nodes.
-    template <class Comparator, typename Distance>
+    template <class GetBestK, typename Distance>
     [[nodiscard]] size_t select_new_k(std::unordered_set<size_t>& not_visited,
-                                      std::vector<size_t>& circuit,
-                                      Distance&& get_distance) noexcept {
+                                      std::vector<size_t>& circuit, Distance&& get_distance,
+                                      GetBestK&& get_best_k) noexcept {
         // map that stores the minimum distance for each candidate vertex k
         std::unordered_map<size_t, double> node_min_weight_map;
         node_min_weight_map.reserve(not_visited.size());
@@ -111,13 +122,38 @@ namespace utils {
             node_min_weight_map[k] = min_hk_weight;
         }
 
+        // both std::min_element and std::max_element need a comparator that returns true when x < y
+        auto map_comparator = [](const auto& x, const auto& y) {
+            return x.second < y.second;
+        };
+
         // maximize or minimize distances based on comparator
-        const auto it_new_k = std::max_element(node_min_weight_map.cbegin(),
-                                               node_min_weight_map.cend(), Comparator{});
+        const auto it_new_k = get_best_k(node_min_weight_map.cbegin(), node_min_weight_map.cend(),
+                                         std::move(map_comparator));
 
         // obtain the maximum of the maximum or minimum distances δ(k, circuit)
         const size_t new_k = it_new_k->first;
         return new_k;
+    }
+
+    // return the vertex k that doesn't belong to the partial Hamiltonian circuit that
+    // maximizes the distance δ(k, circuit).
+    // get_distance is the distance function that computes the cost between 2 nodes.
+    template <typename Distance>
+    [[nodiscard]] size_t select_new_k_maximize(std::unordered_set<size_t>& not_visited,
+                                               std::vector<size_t>& circuit,
+                                               Distance&& get_distance) noexcept {
+        return select_new_k(not_visited, circuit, get_distance, utils::max_element);
+    }
+
+    // return the vertex k that doesn't belong to the partial Hamiltonian circuit that
+    // minimizes the distance δ(k, circuit).
+    // get_distance is the distance function that computes the cost between 2 nodes.
+    template <typename Distance>
+    [[nodiscard]] size_t select_new_k_minimize(std::unordered_set<size_t>& not_visited,
+                                               std::vector<size_t>& circuit,
+                                               Distance&& get_distance) noexcept {
+        return select_new_k(not_visited, circuit, get_distance, utils::min_element);
     }
 
     // find the arc (i, j) that minimizes the value of w(i, k) - w(k, j) - w(i, j)

@@ -81,8 +81,8 @@
     };
 
     // run Simulated Annealing as many times as the number of CPU cores
-    const auto executor(executor::parallel_executor(1, std::move(solve_tsp)));
+    const auto executor(executor::parallel_executor({}, std::move(solve_tsp)));
 
     // return the best cost found
-    return executor.get_best_result(utils::select_best);
+    return executor.get_best_result(utils::min_element);
 }
