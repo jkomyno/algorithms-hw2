@@ -150,7 +150,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="farthest_insertion_tsp.h" />
-    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

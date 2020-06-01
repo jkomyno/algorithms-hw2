@@ -24,9 +24,6 @@ using namespace random_generator;
     // every vertex from 0 to size-1
     std::unordered_set<size_t> not_visited = utils::generate_range_set(size);
 
-    // maximize δ(k, circuit)
-    using max_comparator = std::less<>;
-
     // Step 1: start from a random node i. Find a node j that minimizes δ(i, j) and create
     // the partial circuit (i, j, i).
     const size_t first_node = rand_int();
@@ -41,7 +38,7 @@ using namespace random_generator;
     not_visited.erase(second_node);
 
     // Step 2: find a node k not in circuit that maximizes δ(k, circuit)
-    const size_t k = utils::select_new_k<max_comparator>(not_visited, circuit, get_distance);
+    const size_t k = utils::select_new_k_maximize(not_visited, circuit, get_distance);
 
     // Step 3: insert k in between the two consecutive tour cities i, j for which such an insertion
     // causes the minimum increase in total tour length.
@@ -51,7 +48,7 @@ using namespace random_generator;
     // Step 4: repeat the insertion from step 2 until all nodes have been inserted into the circuit
     while (!not_visited.empty()) {
         // select the not visited node k that maximizes δ(k, circuit)
-        size_t new_k = utils::select_new_k<max_comparator>(not_visited, circuit, get_distance);
+        size_t new_k = utils::select_new_k_maximize(not_visited, circuit, get_distance);
         not_visited.erase(new_k);
 
         // find the arc (i, j) that minimizes the value of w(i, k) - w(k, j) - w(i, j)

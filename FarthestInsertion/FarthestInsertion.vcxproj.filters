@@ -23,8 +23,5 @@
     <ClInclude Include="farthest_insertion_tsp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
