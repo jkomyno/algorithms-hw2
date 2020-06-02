@@ -61,6 +61,7 @@ HELD_KARP_UNORDERED_SET = 'HeldKarp_UnorderedSet'
 MST_2_APPROX = 'MST2Approximation'
 FARTHEST_INSERTION_1_ROUND = 'FarthestInsertion1Round'
 FARTHEST_INSERTION_4_PARALLEL_ROUNDS = 'FarthestInsertion4ParallelRounds'
+FARTHEST_INSERTION_ALTERNATIVE = 'FarthestInsertionAlternative'
 SIMULATED_ANNEALING = 'SimulatedAnnealing'
 CLOSEST_INSERTION_1_ROUND = 'ClosestInsertion1Round'
 CLOSEST_INSERTION_4_PARALLEL_ROUNDS = 'ClosestInsertion4ParallelRounds'
@@ -70,6 +71,7 @@ programs = [
     MST_2_APPROX,
     FARTHEST_INSERTION_1_ROUND,
     FARTHEST_INSERTION_4_PARALLEL_ROUNDS,
+    FARTHEST_INSERTION_ALTERNATIVE,
     SIMULATED_ANNEALING,
     HELD_KARP_DYNAMICBITMASKING,
     CLOSEST_INSERTION_1_ROUND,
@@ -83,6 +85,7 @@ ms_programs = [
     'ms_mst2approx',
     'ms_farthest_insertion_1_round',
     'ms_farthest_insertion_4_parallel_rounds',
+    'ms_farthest_insertion_alternative',
     'ms_simulated_annealing',
     'ms_HeldKarp_DynamicBitMasking',
     'ms_closest_insertion_1_round',
@@ -562,24 +565,61 @@ if __name__ == '__main__':
     # export_dataframes_min_to_latex(dataframes_min)
 
     if IS_PLOT_ENABLED:
-        # TODO: Redo charts
+        # OK: Algorithms/ClosestInsertion
         plot_precision_comparison(
             [CLOSEST_INSERTION_1_ROUND], 
             dataframes_min,
             pred=lambda x: True, 
             title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND])} (approximation error)')
+
+        # OK: Extensions/Farthest Insertion
+        plot_precision_comparison(
+            [FARTHEST_INSERTION_1_ROUND], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([FARTHEST_INSERTION_1_ROUND])} (approximation error)')
+
+        # OK: Extensions/Farthest Insertion (Closest vs Farthest Insertion)
         plot_precision_comparison(
             [CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND], 
             dataframes_min, 
             pred=lambda x: True, 
             title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND, FARTHEST_INSERTION_1_ROUND])} (approximation error)')
 
-        # OK: Closest (1 round vs 4 rounds)
+        # OK: Extensions/Farthest Insertion (Closest vs Farthest Insertion, 4 rounds)
+        plot_precision_comparison(
+            [CLOSEST_INSERTION_4_PARALLEL_ROUNDS, FARTHEST_INSERTION_4_PARALLEL_ROUNDS], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([CLOSEST_INSERTION_4_PARALLEL_ROUNDS, FARTHEST_INSERTION_4_PARALLEL_ROUNDS])} (approximation error)')
+
+        # OK: Extensions/Rounds (ClosestInsertion 1 vs 4 rounds)
         plot_precision_comparison(
             [CLOSEST_INSERTION_1_ROUND, CLOSEST_INSERTION_4_PARALLEL_ROUNDS], 
             dataframes_min, 
             pred=lambda x: True, 
             title=f'{names_to_vs([CLOSEST_INSERTION_1_ROUND, CLOSEST_INSERTION_4_PARALLEL_ROUNDS])} (approximation error)')
+
+        # OK: Extensions/Rounds (FarthestInsertion 1 vs 4 rounds)
+        plot_precision_comparison(
+            [FARTHEST_INSERTION_1_ROUND, FARTHEST_INSERTION_4_PARALLEL_ROUNDS], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([FARTHEST_INSERTION_1_ROUND, FARTHEST_INSERTION_4_PARALLEL_ROUNDS])} (approximation error)')
+
+        # OK: Extensions/Farthest Ins Alt
+        plot_precision_comparison(
+            [FARTHEST_INSERTION_ALTERNATIVE], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([FARTHEST_INSERTION_ALTERNATIVE])} (approximation error)')
+        
+        # OK: Extensions/Farthest Ins Alt (vs First Version)
+        plot_precision_comparison(
+            [FARTHEST_INSERTION_ALTERNATIVE, FARTHEST_INSERTION_1_ROUND, FARTHEST_INSERTION_4_PARALLEL_ROUNDS], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([FARTHEST_INSERTION_ALTERNATIVE, FARTHEST_INSERTION_1_ROUND, FARTHEST_INSERTION_4_PARALLEL_ROUNDS])} (approximation error)')
 
         # TODO: Redo Question 1 (accuracy and runtime)
         plot_precision_comparison(

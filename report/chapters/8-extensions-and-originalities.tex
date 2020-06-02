@@ -1,152 +1,96 @@
 \section{Estensioni e originalità}
 \label{cap:extensions-and-originalities}
 
-Oltre alle tre implementazioni richieste dalla consegna dell'homework,
-abbiamo deciso di esplorare qualche altra estensione degli algoritmi
-per il problema del commesso viaggiatore.
+\noindent Oltre alle tre implementazioni richieste dalla consegna
+dell'homework, abbiamo deciso di esplorare qualche altra estensione
+degli algoritmi per il problema del commesso viaggiatore.\\
 
 \subsection{Farthest Insertion}
-\label{alg:farthest-insertion}
+\label{sec:farthest-insertion}
 
-Farthest Insertion è un'euristica costruttiva per Metric-TSP che consente di
-approssimare la soluzione ottima ad un fattore $\log(n)$. La complessità asintotica di
-quest'euristica è $\bigO(n^2)$.
+\noindent Farthest Insertion è una delle euristiche impiegabili per la
+risoluzione di Metric-TSP in modo approssimato. Questa euristica è
+molto simile a Closest Insertion (si veda
+\ref{sec:closest-insertion}), infatti differisce da essa solo per la
+selezione del vertice $k$ da inserire nel circuito parziale $C$.\\
 
-\subsubsection{Idea}
+\noindent In particolare, in questo caso viene scelto il vertice $k$
+non presente nel circuito $C$ che massimizza $\delta (k, C) = \min_{h
+  \in C} w(h, k)$.\\
 
-L'euristica è molto semplice e utilizza un'insieme di regole per
-scegliere il punto di partenza, il vertice da inserire ad ogni
-iterazione e la posizione in cui inserire il nuovo vertice. In
-particolare:
+\subsubsection{Implementazione}
 
-\begin{enumerate}
-    \item Inizializzazione: considera il circuito parziale composto
-      dal solo vertice $0$. Trova un vertice $j$ che minimizza $w(0,
-      j)$ e costruisci il circuito parziale $(0, j,0)$;
-    \item Selezione: trova un vertice $k$ non presente nel circuito
-      parziale $C$ che massimizza $\delta(k,C)$;
-    \label{pseudo:farthest-insertion-selection}
-    \item Inserimento: trova l’arco ${i, j}$ del circuito parziale che
-      minimizza il valore $w(i, k) + w(k, j) - w(i, j)$ e lo inserisce
-      $k$ tra $i$ e $j$;
-    \item ripete da \ref{pseudo:farthest-insertion-selection} finché
-      non ha inserito tutti i vertici nel circuito.
-\end{enumerate}
+\noindent Il codice è sostanzialmente simile a quello riportato nel
+listato \ref{listing:closest-insertion}, con la differenza che per
+Farthest Insertion si effettua la scelta del nuovo nodo con
 
-\subsubsection{Algoritmo}
+\begin{center}
+\mintinline{c++}{utils::select_new_k_maximize(not_visited, circuit, get_distance)}
+\end{center}
 
-\noindent Il listato \ref{listing:farthest-insertion} contiene la
-nostra implementazione dell'algoritmo.
+\subsubsection{Approssimazione}
 
-TODO: rimuovere il listing e mettere in evidenza solo le due linee diverse rispetto a ClosestInsertion
+\noindent Questa euristica permette di trovare una soluzione
+$\log(n)$-approssimata, ma è possibile dimostrare che il fattore di
+approssimazione può essere ulteriormente abbassato fino ad avere una
+soluzione $2$-approssimata.\\
 
-\begin{listing}[!ht]
-\begin{minted}{c++}
-// FarthestInsertion/farthest_insertion_tsp.h
+\noindent I risultati che abbiamo ottenuto con Farthest Insertionsono
+illustrati dal grafico \ref{fig:farthest-insertion-accuracy-error}.\\
 
-const size_t size = distance_matrix.size();
+\begin{figure}[H]
+    \centering
 
-// Funzione lambda per il calcolo della distanza tra due vertici
-const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
-    return distance_matrix.at(x, y);
-};
+    \includegraphics[width=0.9\textwidth]{./images/FarthestInsertion1Round__approximation_error_.png}
 
-// Insieme degli nodi ancora non visitati.
-std::unordered_set<size_t> not_visited = utils::generate_range_set(size);
+    \caption{FarthestInsertion accuracy error scaling by nodes}
+    \label{fig:farthest-insertion-accuracy-error}
+\end{figure}
 
-// Comparatore per massimizzare d(k, circuit)
-using max_comparator = std::less<>;
+\noindent \'E doveroso mostrare le differenze tra Closest Insertion e
+Farthest Insertion data la dualità delle due euristiche. Come
+illustrato dal grafico
+\ref{fig:closest-farthest-insertion-accuracy-error}, Farthest
+Insertion approssima meglio il problema introducendo meno errore.\\
 
-// Inizializzazone.
-const size_t first_node = rand_int();
-const size_t second_node = distance_matrix.get_closest_node(first_node);
+\begin{figure}[H]
+    \centering
 
-std::vector<size_t> circuit{first_node, second_node};
-circuit.reserve(size);
+    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion1Round_vs_FarthestInsertion1Round__approximation_error_.png}
 
-not_visited.erase(first_node);
-not_visited.erase(second_node);
+    \caption{ClosestInsertion vs FarthestInsertion accuracy error scaling by nodes}
+    \label{fig:closest-farthest-insertion-accuracy-error}
+\end{figure}
 
-// Selezione del nodo k che massimizza d(k, circuit).
-const size_t k = utils::select_new_k<max_comparator>(
-    not_visited, circuit, get_distance);
+\noindent Anche per l'esecuzione con più rounds (meccanismo descritto
+in \ref{sec:rounds}) il risultato è il medesimo. Si veda il grafico
+\ref{fig:closest-farthest-insertion-4-rounds-accuracy-error}.\\
 
-// Inserimento del k trovato tra due nodi i e j in modo tale da
-// minimizzare la distanza totale del cammino.
-circuit.emplace_back(k);
-not_visited.erase(k);
+\begin{figure}[H]
+    \centering
 
-// Ripetere selezione e inserimento finché tutti i nodi non sono stati inseriti.
-while (!not_visited.empty()) {
-    size_t new_k = utils::select_new_k<max_comparator>(
-        not_visited, circuit, get_distance);
-    not_visited.erase(new_k);
+    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion4ParallelRounds_vs_FarthestInsertion4ParallelRounds__approximation_error_.png}
 
-    utils::perform_best_circuit_insertion(new_k, circuit, get_distance);
-}
+    \caption{ClosestInsertion vs FarthestInsertion (4 rounds) accuracy error scaling by nodes}
+    \label{fig:closest-farthest-insertion-4-rounds-accuracy-error}
+\end{figure}
 
-// Restituire la somma dei pesi del circuito trovato.
-return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(),
-                                     get_distance);
-\end{minted}
-\caption{Implementazione di Farthest Insertion. I commenti del file originale sono stati omessi per una maggiore compattezza.}
-\label{listing:farthest-insertion}
-\end{listing}
+\subsection{Rounds (TODO: MIGLIORARE IL TITOLO)}
+\label{sec:rounds}
 
-\subsubsection{Osservazioni TODO: aggiornare}
-
-\begin{itemize}
-    \item All'algoritmo viene passata la matrice delle adiacenze e un
-      random generator per la selezione del primo nodo durante
-      l'inizializzazione. (Ulteriori dettagli in
-      \ref{sec:farthest-insertion-rounds}).
-
-    \item L'insieme \mintinline{c++}{not_visited} è utilizzato per
-      tenere traccia degli elementi presenti nel circuito Hamiltoniano
-      parziale: ogni volta che un vertice è inserito nel circuito,
-      viene rimosso dall'insieme.
-
-    \item L'operazione $\min w(i, j)$ è rappresentata dalla funzione
-    \begin{center}
-        \mintinline{c++}{get_closest_node(node)}
-    \end{center}
-    invocabile sulla matrice di adiacenza, utilizzata nella fase di
-    inizializzazione.
-
-    \item L'operazione di massimizzazione di $\delta(k, C)$ è
-      rappresentata dalla funzione
-    \begin{center}
-        \mintinline{c++}{utils::select_new_k<max_comparator>(not_visited,
-          circuit, get_distance);}
-    \end{center}
-    che sceglie il vertice $k$ che massimizza (o minimizza, in base al
-    comparatore fornito) la distanza tra $k$ ed il circuito $C$. Per
-    farlo in input riceve l'insieme dei nodi non ancora in $C$ da cui
-    scegliere $k$, $C$ e la funzione di distanza.
-
-    \item L'inserimento del vertice selezionato è effettuato in
-    \begin{center}
-        \mintinline{c++}{utils::perform_best_circuit_insertion(new_k,
-          circuit, get_distance);}
-    \end{center}
-    che sceglie la posizione di inserimento che minimizza la distanza
-    massima del circuito.
-\end{itemize}
-
-\subsubsection{Parallelismo}
-\label{sec:farthest-insertion-rounds}
-
-\noindent L'euristica prevede un'inizializzazione statica del
-problema, scegliendo sempre il primo nodo come il vertice 0. In
-realtà, scegliendo nodi diversi come sorgente le soluzioni ritornate
-dall'algoritmo potrebbero differire, e molteplici esecuzioni
+\noindent Le euristiche come Closest Insertion (descritta alla sezione
+\ref{sec:closest-insertion}) e Farthest Insertion (descritta alla
+sezione \ref{sec:farthest-insertion}) prevedono un'inizializzazione
+statica del problema, scegliendo sempre il primo nodo come il vertice
+0. In realtà, scegliendo nodi diversi come sorgente le soluzioni
+ritornate dall'algoritmo potrebbero differire, e molteplici esecuzioni
 dell'algoritmo da diverse sorgenti potrebbero produrre soluzioni più
 accurate rispetto ad una singola esecuzione.\\
 
 \noindent Abbiamo deciso di sfruttare questo fatto implementando la
 possibilità di eseguire l'algoritmo in parallelo su diversi core.\\
 
-\noindent All'algoritmo è infatti passato un
+\noindent Agli algoritmi è infatti passato un
 \mintinline{c++}{RandomGenerator} che consente di generare un numero
 casuale, rappresentante la sorgente del ciclo Hamiltoniano da
 costruire. In realtà, il random generator è fornito in diverse
@@ -159,46 +103,93 @@ implementazioni:
     \item \mintinline{c++}{FixedGenerator}, generatore del numero
       specificato al momento della creazione del generator.
 \end{itemize}
-L'inizializzazione di Farthest Insertion può quindi differire in base
-al generator fornito in input: se il generator è un
-\mintinline{c++}{FixedGenerator} allora la sorgente scelta è fissata,
-altrimenti la sorgente è scelta in modo casuale.\\
+L'inizializzazione può quindi differire in base al generator fornito
+in input: se il generator è un \mintinline{c++}{FixedGenerator} allora
+la sorgente scelta è fissata, fornendo così la versione base
+dell'algoritmo che non ha bisogno di molteplici esecuzioni per
+restituire il risultato, altrimenti la sorgente è scelta in modo
+casuale.\\
 
 \noindent Nel nostro caso abbiamo eseguito l'algoritmo prima con
 sorgente fissata a $0$ e poi con sorgente random e fissando il numero
-di istanze parallele a $4$: i risultati sono stati soddisfacenti,
-infatti come si può notare dal grafico
-\ref{fig:farthest-insertion-1-4-rounds-accuracy-error}, l'esecuzione
-multipla dell'algoritmo tende a restituire soluzioni più corrette.\\
+di istanze parallele a $4$ (numero di core disponibili): i risultati
+sono stati soddisfacenti, infatti come si può notare dai grafici
+\ref{fig:closest-insertion-1-4-rounds-accuracy-error} e
+\ref{fig:farthest-insertion-1-4-rounds-accuracy-error}, più esecuzioni
+dell'algoritmo tendono a restituire soluzioni più corrette.\\
 
-\begin{figure}[H]
+\begin{figure}[!ht]
     \centering
 
     \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion1Round_vs_ClosestInsertion4ParallelRounds__approximation_error_.png}
 
-    \caption{ClosestInsertion accuracy error scaling by nodes}
-    \label{fig:farthest-insertion-1-4-rounds-accuracy-error}
+    \caption{ClosestInsertion accuracy error scaling by nodes: 1 round vs 4 rounds}
+    \label{fig:closest-insertion-1-4-rounds-accuracy-error}
 \end{figure}
 
+\begin{figure}[!ht]
+    \centering
+
+    \includegraphics[width=0.9\textwidth]{./images/FarthestInsertion1Round_vs_FarthestInsertion4ParallelRounds__approximation_error_.png}
+
+    \caption{FarthestInsertion accuracy error scaling by nodes: 1 round vs 4 rounds}
+    \label{fig:farthest-insertion-1-4-rounds-accuracy-error}
+\end{figure}
 
 \subsection{Farthest Insertion Alternativo}
 \label{alg:farthest-insertion-alt}
 
-Il progetto \codeinline{FarthestInsertionAlternative} contiene un'implementazione alternativa dell'euristica costruttiva Farthest Insertion per risolvere il problema del TSP metrico. L'algoritmo è tratto da \textit{Cook et al.}\footnote{\url{https://onlinelibrary.wiley.com/doi/10.1002/9781118033142.ch7}} e prevede i seguenti step:
+Il progetto \codeinline{FarthestInsertionAlternative} contiene
+un'implementazione alternativa dell'euristica costruttiva Farthest
+Insertion per risolvere il problema del TSP metrico. L'algoritmo è
+tratto da \textit{Cook et al.}\footnote{\url{https://onlinelibrary.wiley.com/doi/10.1002/9781118033142.ch7}}
+e prevede i seguenti step:
 
 \begin{enumerate}
-    \item Inizializzazione: considera i due vertici $u$ e $v$ che compongono l'arco di costo maggiore;
+    \item Inizializzazione: considera i due vertici $u$ e $v$ che
+      compongono l'arco di costo maggiore;
     \item Selezione: trova un vertice $k$ non presente nel circuito
       parziale $C$ che massimizza $\delta(k,C)$;
     \label{pseudo:farthest-insertion-alt-selection}
     \item Inserimento: trova l’arco ${i, j}$ del circuito parziale che
       minimizza il valore $w(i, k) + w(k, j) - w(i, j)$ e lo inserisce
       $k$ tra $i$ e $j$;
-    \item ripete da \ref{pseudo:farthest-insertion-alt-selection} finché
-      non ha inserito tutti i vertici nel circuito.
+    \item ripete da \ref{pseudo:farthest-insertion-alt-selection}
+      finché non ha inserito tutti i vertici nel circuito.
 \end{enumerate}
 
-Rispetto all'algoritmo visto in \ref{alg:farthest-insertion}, cambia solo il primo step. La complessità resta quindi $\bigO(n^2)$.
+Rispetto all'algoritmo descritto alla sezione
+\ref{sec:farthest-insertion}, cambia solo il primo step. La
+complessità resta quindi $\bigO{n^2}$.
+
+\subsection{Approssimazione}
+
+I risultati ottenuti da questo algoritmo sono illustrati dai grafici
+\ref{fig:farthest-insertion-alt-accuracy-error} e
+\ref{fig:farthest-insertion-alt-vs-std-1-4-rounds-accuracy-error}.
+Dal secondo grafico possiamo notare che rispetto alla versione
+standard (con un solo round) questo algoritmo si comporta un po'
+meglio su taglie piccole dell'input, peggiorando invece su taglie più
+grosse, mentre in confronto alla versione con quattro round non riesce
+a competere in quasi nessun caso.
+
+\begin{figure}[!ht]
+    \centering
+
+    \includegraphics[width=0.9\textwidth]{./images/FarthestInsertionAlternative__approximation_error_.png}
+
+    \caption{FarthestInsertionAlternative accuracy error scaling by nodes}
+    \label{fig:farthest-insertion-alt-accuracy-error}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+
+    \includegraphics[width=0.9\textwidth]{./images/FarthestInsertionAlternative_vs_FarthestInsertion1Round_vs_FarthestInsertion4ParallelRounds__approximation_error_.png}
+
+    \caption{FarthestInsertionAlternative vs FarthestInsertion ``Standard'' accuracy error scaling by nodes}
+    \label{fig:farthest-insertion-alt-vs-std-1-4-rounds-accuracy-error}
+\end{figure}
 
 \subsection{TSP con Simulated Annealing}
 

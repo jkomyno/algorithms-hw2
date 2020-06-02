@@ -138,134 +138,136 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 \subsection{Closest Insertion}
 \label{sec:closest-insertion}
 
-\emph{Closest Insertion} è una delle euristiche impiegabili per la
-risoluzione problema del TSP in modo approssimato. Questa euristica
-è molto simile a \emph{Farthest Insertion} (si veda \ref{sec:farthest-insertion}),
-infatti differisce da essa solo per la selezione del vertice $k$
-da inserire nel circuito parziale $C$.
+Closest Insertion è un'euristica costruttiva per Metric-TSP che 
+consente di approssimare la soluzione ottima ad un fattore 
+$\log(n)$. La complessità asintotica di quest'euristica è 
+$\bigO{n^2}$.
 
-In particolare, in questo caso viene scelto il vertice $k$ non presente
-nel circuito $C$ che minimizza $\delta (k, C) = \min_{h \in C} w(h, k)$.
-Sostanzialmente viene scelto il vertice $k$ più vicino al ciclo $C$,
-ma che non è ancora incluso in esso.
+\subsubsection{Idea}
+
+L'euristica è molto semplice e utilizza un'insieme di regole per
+scegliere il punto di partenza, il vertice da inserire ad ogni
+iterazione e la posizione in cui inserire il nuovo vertice. In
+particolare:
+
+\begin{enumerate}
+    \item per l'inizializzazione, si considera il circuito parziale composto
+      dal solo vertice $0$; si trova un vertice $j$ che minimizza $w(0,
+      j)$ e si costruisce il circuito parziale $(0, j,0)$;
+    \item per la selezione, si trova un vertice $k$ non presente nel circuito
+      parziale $C$ che minimizza $\delta(k,C)$;
+    \label{pseudo:closest-insertion-selection}
+    \item per l'inserimento, si trova l’arco ${i, j}$ del circuito parziale che
+      minimizza il valore $w(i, k) + w(k, j) - w(i, j)$ e lo si inserisce
+      $k$ tra $i$ e $j$;
+    \item si ripete da \ref{pseudo:farthest-insertion-selection} finché
+tutti i vertici non sono stati inseriti nel circuito.
+\end{enumerate}
 
 \subsubsection{Implementazione}
 
-Il codice è sostanzialmente simile a quello riportato nel listato
-\ref{listing:farthest-insertion}, con la differenza che per
-\emph{Closest Insertion} si effettua la scelta del nuovo nodo
-con \mintinline{c++}{utils::select_new_k} passandogli come quarto
-argomento un comparatore che permette, in questo caso, di
-minimizzare $\delta (k, C)$.
+\noindent Il listato \ref{listing:closest-insertion} contiene la
+nostra implementazione dell'algoritmo.
 
 \begin{listing}[!ht]
 \begin{minted}{c++}
-// the comparator will be passed to std::max_element.
-const auto min_comparator = [](const auto& x, const auto& y) {
-    return x.second > y.second;
+// ClosestInsertion/closest_insertion_tsp.h
+
+const size_t size = distance_matrix.size();
+
+// Funzione lambda per il calcolo della distanza tra due vertici
+const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
+    return distance_matrix.at(x, y);
 };
+
+// Insieme degli nodi ancora non visitati.
+std::unordered_set<size_t> not_visited = utils::generate_range_set(size);
+
+// Inizializzazone.
+const size_t first_node = rand_int();
+const size_t second_node = distance_matrix.get_closest_node(first_node);
+
+std::vector<size_t> circuit{first_node, second_node};
+circuit.reserve(size);
+
+not_visited.erase(first_node);
+not_visited.erase(second_node);
+
+// Selezione del nodo k che minimizza d(k, circuit).
+const size_t k = utils::select_new_k_minimize(not_visited, circuit, get_distance);
+
+// Inserimento del k trovato tra due nodi i e j in modo tale da
+// minimizzare la distanza totale del cammino.
+circuit.emplace_back(k);
+not_visited.erase(k);
+
+// Ripetere selezione e inserimento finché tutti i nodi non sono stati inseriti.
+while (!not_visited.empty()) {
+    size_t new_k = utils::select_new_k<max_comparator>(
+        not_visited, circuit, get_distance);
+    not_visited.erase(new_k);
+
+    utils::perform_best_circuit_insertion(new_k, circuit, get_distance);
+}
+
+// Restituire la somma dei pesi del circuito trovato.
+return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(),
+                                     get_distance);
 \end{minted}
-\caption{Differenza di implementazione per Closest Insertion rispetto a Farthest Insertion.}
-\label{listing:closest-insertion-diff}
+\caption{Implementazione di Closest Insertion. I commenti del file originale sono stati omessi per una maggiore compattezza.}
+\label{listing:closest-insertion}
 \end{listing}
-
-\subsubsection{Approssimazione}
-
-Questa euristica permette di trovare una soluzione $\log(n)$-approssimata,
-ma è possibile dimostrare che il fattore di approssimazione può essere
-ulteriormente abbassato fino ad avere una soluzione $2$-approssimata.
-
-I risultati che abbiamo ottenuto con closest insertion sono illustrati
-dalla tabella \ref{table:closest-insertion-runtime-accuracy} e dal grafico
-\ref{fig:closest-insertion-accuracy-error}.
-
-\begin{figure}[H]
-    \centering
-
-    \begin{tabular}{lrrrr}
-    \toprule
-    \multicolumn{5}{c}{Closest Insertion} \\
-    \hline
-    Instance & Exact & Solution &   Time (ms) &   Error (\%) \\
-    \hline
-    burma14.tsp   &     3323 &       3664 &          35 &       10.26 \\
-    ulysses16.tsp &     6859 &       7054 &          36 &        2.84 \\
-    ulysses22.tsp &     7013 &       7499 &          36 &        6.93 \\
-    eil51.tsp     &      426 &        480 &          37 &       12.68 \\
-    berlin52.tsp  &     7542 &       8626 &          35 &       14.37 \\
-    kroA100.tsp   &    21282 &      24661 &          38 &       15.88 \\
-    kroD100.tsp   &    21294 &      22998 &          38 &        8    \\
-    ch150.tsp     &     6528 &       7763 &          40 &       18.92 \\
-    gr202.tsp     &    40160 &      45660 &          46 &       13.7  \\
-    gr229.tsp     &   134602 &     163597 &          52 &       21.54 \\
-    pcb442.tsp    &    50778 &      58297 &         142 &       14.81 \\
-    d493.tsp      &    35002 &      40537 &         180 &       15.81 \\
-    dsj1000.tsp   & 18659688 &   22510610 &        1127 &       20.64 \\
-    \bottomrule
-    \end{tabular}
-
-    \caption{ClosestInsertion runtime and accuracy error}
-    \label{table:closest-insertion-runtime-accuracy}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-
-    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion__approximation_error_.png}
-
-    \caption{ClosestInsertion accuracy error scaling by nodes}
-    \label{fig:closest-insertion-accuracy-error}
-\end{figure}
 
 \subsubsection{Osservazioni}
 
-Data la netta dualità con FarthestInsertion, è doveroso analizzare
-le differenze tra i due algoritmi. Dalla tabella
-\ref{table:closest-farthest-insertion-runtime-accuracy}
-e dal grafico \ref{fig:closest-farthest-insertion-accuracy-error}
-è possibile notare che per quanto riguarda il runtime i due algoritmi
-sono perfettamente alla pari, infatti minimizzare o massimizzare la
-funzione $\delta (k, C)$ dal punto di vista del tempo di esecuzione
-non comporta differenze. Dal punto di vista dell'errore di
-approssimazione invece FarthestInsertion riesce a fare mediamente
-meglio di ClosestInsertion. Da sottolineare anche il fatto che
-FarthestInsertion riesce ad eliminare completamente l'errore di
-approssimazione su istanze molto piccole.
+\begin{itemize}
+    \item All'algoritmo viene passata la matrice delle adiacenze e un
+      random generator per la selezione del primo nodo durante
+      l'inizializzazione. (Ulteriori dettagli in
+      \ref{sec:closest-insertion-rounds}).
 
-\begin{figure}[H]
+    \item L'insieme \mintinline{c++}{not_visited} è utilizzato per
+      tenere traccia degli elementi presenti nel circuito Hamiltoniano
+      parziale: ogni volta che un vertice è inserito nel circuito,
+      viene rimosso dall'insieme.
+
+    \item L'operazione $\min w(i, j)$ è rappresentata dalla funzione
+    \begin{center}
+        \mintinline{c++}{DistanceMatrix::get_closest_node(node)}
+    \end{center}
+    invocabile sulla matrice di adiacenza, utilizzata nella fase di
+    inizializzazione.
+
+    \item L'operazione di minimizzazione di $\delta(k, C)$ è
+      rappresentata dalla funzione
+    \begin{center}
+        \mintinline{c++}{utils::select_new_k_mimimize(not_visited, circuit, get_distance);}
+    \end{center}
+    che sceglie il vertice $k$ che minimizza la distanza tra $k$ 
+    ed il circuito $C$. Gli input a questa funzione sono l'insieme 
+    dei nodi non ancora in $C$ da cui scegliere $k$, $C$ e la 
+    funzione di distanza.
+
+    \item L'inserimento del vertice selezionato è effettuato in
+    \begin{center}
+        \mintinline{c++}{utils::perform_best_circuit_insertion(new_k, circuit, get_distance);}
+    \end{center}
+    che sceglie la posizione di inserimento che minimizza la distanza
+    massima del circuito.
+\end{itemize}
+
+\subsubsection{Approssimazione}
+
+L'approssimazione dell'algoritmo, come detto in precedenza, è di un
+fattore $\log(n)$ rispetto alla soluzione ottima. Il grafico
+\ref{fig:closest-insertion-1-round-accuracy-error} ne evidenzia il
+risultato.
+
+\begin{figure}[!ht]
     \centering
 
-    \begin{tabular}{lrrrrrr}
-    \toprule
-    \multicolumn{1}{c}{ } & \multicolumn{3}{c}{Closest Insertion} & \multicolumn{3}{c}{Farthest Insertion} \\
-    \hline
-    Instance & Solution &   Time (ms) &   Error (\%) & Solution &   Time (ms) &   Error (\%) \\
-    \hline
-    burma14.tsp   &     3664 &          35 &       10.26 &       3323 &          35 &        0    \\
-    ulysses16.tsp &     7054 &          36 &        2.84 &       6859 &          35 &        0    \\
-    ulysses22.tsp &     7499 &          36 &        6.93 &       7013 &          35 &        0    \\
-    eil51.tsp     &      480 &          37 &       12.68 &        439 &          36 &        3.05 \\
-    berlin52.tsp  &     8626 &          35 &       14.37 &       8118 &          36 &        7.64 \\
-    kroA100.tsp   &    24661 &          38 &       15.88 &      23373 &          36 &        9.83 \\
-    kroD100.tsp   &    22998 &          38 &        8    &      22577 &          36 &        6.03 \\
-    ch150.tsp     &     7763 &          40 &       18.92 &       6864 &          41 &        5.15 \\
-    gr202.tsp     &    45660 &          46 &       13.7  &      45211 &          46 &       12.58 \\
-    gr229.tsp     &   163597 &          52 &       21.54 &     148324 &          52 &       10.19 \\
-    pcb442.tsp    &    58297 &         142 &       14.81 &      56964 &         140 &       12.18 \\
-    d493.tsp      &    40537 &         180 &       15.81 &      39506 &         176 &       12.87 \\
-    dsj1000.tsp   & 22510610 &        1127 &       20.64 &   20599827 &        1125 &       10.4  \\
-    \bottomrule
-    \end{tabular}
+    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion1Round__approximation_error_.png}
 
-    \caption{ClosestInsertion vs FarthestInsertion runtime and accuracy error}
-    \label{table:closest-farthest-insertion-runtime-accuracy}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-
-    \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion_vs_FarthestInsertion__approximation_error_.png}
-
-    \caption{ClosestInsertion vs FarthestInsertion accuracy error scaling by nodes}
-    \label{fig:closest-farthest-insertion-accuracy-error}
+    \caption{ClosestInsertion accuracy error scaling by nodes}
+    \label{fig:closest-insertion-1-round-accuracy-error}
 \end{figure}
