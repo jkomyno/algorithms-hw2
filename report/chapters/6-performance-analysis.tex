@@ -22,7 +22,7 @@ Per leggibilità la tabella richiesta è stata suddivisa nelle tabelle
 \ref{table:closest-insertion-runtime-accuracy},
 una per algoritmo.
 
-\begin{figure}[H]
+\begin{table}[h]
     \centering
 
     \begin{tabular}{lrrrr}
@@ -47,11 +47,11 @@ una per algoritmo.
     \bottomrule
     \end{tabular}
 
-    \caption{Held \& Karp runtime and accuracy}
+    \caption{Tempo di esecuzione e errore introdotto da Held \& Karp rispetto alle istanze.}
     \label{table:held-karp-runtime-accuracy}
-\end{figure}
+\end{table}
 
-\begin{figure}[H]
+\begin{table}[h]
     \centering
 
     \begin{tabular}{lrrrr}
@@ -76,11 +76,11 @@ una per algoritmo.
     \bottomrule
     \end{tabular}
 
-    \caption{MST 2 Approximation runtime and accuracy}
+    \caption{Tempo di esecuzione e errore introdotto da MST 2 Approximation rispetto alle istanze}
     \label{table:mst2approx-runtime-accuracy}
-\end{figure}
+\end{table}
 
-\begin{figure}[H]
+\begin{table}[h]
     \centering
 
     \begin{tabular}{lrrrr}
@@ -105,9 +105,9 @@ una per algoritmo.
     \bottomrule
     \end{tabular}
 
-    \caption{Closest Insertion runtime and accuracy}
+    \caption{Tempo di esecuzione e errore introdotto da Closest Insertion rispetto alle istanze}
     \label{table:closest-insertion-runtime-accuracy}
-\end{figure}
+\end{table}
 
 Una lettura più chiara dell'errore di approssimazione è invece
 fornita dai grafici
@@ -126,7 +126,7 @@ come ci si aspettava.
 
     \includegraphics[width=0.9\textwidth]{./images/HeldKarp_vs_MST2Approximation_vs_ClosestInsertion1Round__approximation_error__limited_to_52_nodes_.png}
 
-    \caption{HeldKarp vs MST2Approximation vs ClosestInsertion accuracy error scaling by nodes (from 0 to 52 nodes)}
+    \caption{Confronto dell'errore introdotto da HeldKarp, MST2Approximatione e ClosestInsertion rispetto al numero di nodi (da 14 a 52)}
     \label{fig:heldkarp-mst2approx-closestinsertion-accuracy-error-52-nodes}
 \end{figure}
 
@@ -135,7 +135,7 @@ come ci si aspettava.
 
     \includegraphics[width=0.9\textwidth]{./images/HeldKarp_vs_MST2Approximation_vs_ClosestInsertion1Round__approximation_error__y_log_scaled_.png}
 
-    \caption{HeldKarp vs MST2Approximation vs ClosestInsertion accuracy error scaling by nodes (y log scaled)}
+    \caption{Confronto dell'errore introdotto da HeldKarp, MST2Approximation e ClosestInsertion rispetto al numero di nodi (errore in scala logaritmica)}
     \label{fig:heldkarp-mst2approx-closestinsertion-accuracy-error}
 \end{figure}
 
