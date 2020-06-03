@@ -18,7 +18,7 @@
 
     // use DFS to perform a preorder traversal of the MST
     DFS dfs(std::move(mst));
-    const auto circuit = dfs.preorder_traversal_rec();
+    const auto circuit = dfs.preorder_traversal();
 
     const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
         return distance_matrix.at(x, y);

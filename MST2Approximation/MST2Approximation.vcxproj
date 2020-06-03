@@ -149,8 +149,11 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdjacencyMapGraph.h" />
     <ClInclude Include="approx_tsp.h" />
     <ClInclude Include="BinaryHeap.h" />
+    <ClInclude Include="DFS.h" />
+    <ClInclude Include="Edge.h" />
     <ClInclude Include="Heap.h" />
     <ClInclude Include="KHeap.h" />
     <ClInclude Include="prim_binary_heap_mst.h" />

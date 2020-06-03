@@ -9,10 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MST2Approximation", "MST2Ap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C0EB85E8-4BBA-461E-A7FA-D101E8C7AE5A}"
 	ProjectSection(SolutionItems) = preProject
-		Shared\AdjacencyMapGraph.h = Shared\AdjacencyMapGraph.h
-		Shared\DFS.h = Shared\DFS.h
 		Shared\DistanceMatrix.h = Shared\DistanceMatrix.h
-		Shared\Edge.h = Shared\Edge.h
 		Shared\EdgeWeightType.h = Shared\EdgeWeightType.h
 		Shared\euclidean_distance.h = Shared\euclidean_distance.h
 		Shared\EuclideanPointReader.h = Shared\EuclideanPointReader.h

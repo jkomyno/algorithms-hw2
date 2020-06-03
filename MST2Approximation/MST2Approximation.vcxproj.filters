@@ -35,5 +35,14 @@
     <ClInclude Include="approx_tsp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DFS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjacencyMapGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Edge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
