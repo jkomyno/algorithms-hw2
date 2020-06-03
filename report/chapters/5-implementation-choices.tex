@@ -201,13 +201,15 @@ Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando poss
 
 \noindent Le strutture dati relative alle Heap e alle code di priorità necessarie per l'algoritmo di Prim sono già state ampiamente documentate nell'homework 1.
 
-\subsection{Rappresentazioni dei grafi alternative}
+\subsection{Rappresentazione alternativa dei grafi}
+\label{alternative-graph-representation}
 
 \noindent L'algoritmo di $2$-approssimazione basato sul calcolo del Minimum Spanning Tree fa uso di due rappresentazioni diverse per i grafi.
 \codeinline{DistanceMatrix.h} è usato per leggere il grafo in input ed eseguirne l'algoritmo di Prim (che è stato adattato dal precedente homework). \codeinline{AdjacencyMapGraph.h}, che contiene un subset definite per la Mappa di Adiacenza definita nel precedente homework, è invece usata per rappresentare il Minimum Spanning Tree all'interno di \codeinline{DFS.h}, che lo scorre per generare il vettore della visita \textit{Preorder}. Questa scelta è dovuta al fatto che l'MST non è completo come il grafo di input, e anzi contiene solo $n - 1$ archi. Una Matrice di adiacenza è quindi inutilmente costosa in termini di spazio in questo caso.
 
 \newpage
 \subsection{Rappresentazione dei circuiti parziali di Held \& Karp}
+\label{held-karp-repr-S}
 
 L'algoritmo Held-Karp richiede esplicitamente l'uso di due vettori:
 \begin{itemize}
@@ -244,7 +246,7 @@ Di seguito sono presentate le 3 possibili soluzioni che abbiamo individuato per 
 
 \noindent Notiamo inoltre che la libreria standard non definisce alcun metodo \\ \mintinline{c++}{std::hash<std::unordered_set<T>>}, quindi è spettata a noi la definizione della \textit{hash function} per questa struttura dati. Si veda la sezione \ref{hashing} per ulteriori informazioni. TODO: aggiungere questa sezione.
 
-\begin{table}
+\begin{table}[h]
   \centering
     \begin{tabular}{|c | c|}
     \hline
@@ -269,7 +271,15 @@ Di seguito sono presentate le 3 possibili soluzioni che abbiamo individuato per 
 
 \paragraph{Tecnica bit masking}\mbox{}\\
 
-\begin{table}
+\noindent \textbf{Premessa}: per questo metodo, abbiamo assunto che i programmi saranno eseguiti solo su architetture a 64 bit. I grafi con più di 63 nodi non possono essere rappresentati con questo metodo. \\
+
+\noindent Una soluzione migliore per rappresentare in maniera estremamente compatta il set di nodi visitati $S$ è usare un singolo numero intero senza segno a 64 bit. In questo caso, ogni bit a 1 rappresenta la presenza di un vertice $i$ nell'insieme $S$.
+Se il bit all'$i$-esima posizione nel numero vale 1, allora il vertice $i \in S$, se il bit vale invece 0 allora $i \notin S$. La tabella \ref{tab:pro-cons-bit-masking} evidenzia i pro e i contro di questo approccio. \\
+
+\noindent Nel nostro linguaggio, il tipo necessario a definire numeri interi senza segno a 64 bit è \\
+\mintinline{c++}{unsigned long long}. Si consideri l'esempio in figura \ref{fig:bitmasking-example} per vedere come è possibile rappresentare $S$ in questo modo.
+
+\begin{table}[h]
   \centering
     \begin{tabular}{|c | c|}
     \hline
@@ -285,14 +295,6 @@ Di seguito sono presentate le 3 possibili soluzioni che abbiamo individuato per 
     \caption{Analisi dei pro e contro della tecnica bit masking per numeri interi senza segno.}
     \label{tab:pro-cons-bit-masking}
 \end{table}
-
-\noindent \textbf{Premessa}: per questo metodo, abbiamo assunto che i programmi saranno eseguiti solo su architetture a 64 bit. I grafi con più di 63 nodi non possono essere rappresentati con questo metodo. \\
-
-\noindent Una soluzione migliore per rappresentare in maniera estremamente compatta il set di nodi visitati $S$ è usare un singolo numero intero senza segno a 64 bit. In questo caso, ogni bit a 1 rappresenta la presenza di un vertice $i$ nell'insieme $S$.
-Se il bit all'$i$-esima posizione nel numero vale 1, allora il vertice $i \in S$, se il bit vale invece 0 allora $i \notin S$. La tabella \ref{tab:pro-cons-bit-masking} evidenzia i pro e i contro di questo approccio. \\
-
-\noindent Nel nostro linguaggio, il tipo necessario a definire numeri interi senza segno a 64 bit è \\
-\mintinline{c++}{unsigned long long}. Si consideri l'esempio in figura \ref{fig:bitmasking-example} per vedere come è possibile rappresentare $S$ in questo modo.
 
 \begin{figure}[h]
 	\centering
@@ -314,7 +316,7 @@ Poiché questo tipo di operazioni si traduce in una singola istruzione Assembly,
 
 \paragraph{Struttura dati ad-hoc: DynamicBitMasking}\mbox{} \\
 
-Per superare il limite della rappresentazione tramite BitMasking per più di 63 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{DynamicBitMasking} che tramite un \textit{std::vector} di \textit{unsigned long long} è in grado di rappresentare qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati.
+Per superare il limite della rappresentazione tramite BitMasking per più di 63 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{DynamicBitMasking} definita in \codeinline{HeldKarp/DynamicBitMasking.h} che tramite un \mintinline{c++}{std::vector<unsigned long long>} rappresenta un qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati.
 
 \begin{figure}[h]
 	\centering
@@ -323,19 +325,29 @@ Per superare il limite della rappresentazione tramite BitMasking per più di 63 
 	\label{fig:DynamicBitMasking-example}
 \end{figure}
 
-\paragraph{Confronto tra unordered\_set, BitMasking ed DynamicBitMasking}
-In questo paragrafo vogliamo mettere a confronto le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte. Nella grafico riportato in figura \ref{fig:UnorderedvsDynamicBitMasking} abbiamo voluto mettere a confronto i tempi esatti dell'esecuzione delle 3 varianti proposte con grafi a 14, 16 e 22 nodi.
+\noindent Il tipo della mappa in questo caso è:
+
+\begin{center}
+    \mintinline{c++}{std::unordered_map<std::pair<DynamicBitMasking, size_t>, int>}
+\end{center}
+
+\subsubsection{Confronto tra std::unordered\_set, bit masking e DynamicBitMasking}
+
+In questa sezione mostriamo un confronto tra le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte. Nel grafico riportato in figura \ref{fig:UnorderedvsDynamicBitMasking} abbiamo comparato i tempi d'esecuzione di HeldKarp (senza timeout) con le 3 strutture dati descritte nella sezione \ref{held-karp-repr-S}.
+Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulysses16} e \codeinline{ulysses22}, aventi rispettivamente 14, 16, e 22 nodi.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\textwidth]{./images/unorderedSet vs BitMasking.png}
-	\caption{Confronto dei tempi di esecuzione di Held-Karp al crescere del numero di nodi usando unordered\_set, BitMasking ed DynamicBitMasking. I dataset usati per il confronto sono \codeinline{burma14}, \codeinline{ulysses16} e \codeinline{ulysses22}.}
+	\caption{Confronto dei tempi di esecuzione di Held-Karp al crescere del numero di nodi usando unordered\_set, BitMasking ed DynamicBitMasking. I dataset usati per il confronto sono \codeinline{burma14}, \codeinline{ulysses16} e \codeinline{ulysses22}. Si noti che l'asse delle ordinate è in scala logaritmica.}
 	\label{fig:UnorderedvsDynamicBitMasking}
 \end{figure}
 
-Come è possibili notare, l'implementazione più veloce risulta essere il BitMasking a 64 bit, in quanto utilizzando un solo numero per rappresentare i nodi in S, l'overhead è inferiore rispetto alle operazioni da svolgere per DynamicBitMasking che deve calcolarsi la posizione del bit all'interno di più numeri. In ogni caso DynamicBitMasking è in grado di svolgere egregiamente il suo lavoro, avendo un tempo di esecuzione molto inferiore rispetto alla soluzione semplice con unordered\_set.
+\noindent Com'era prevedibile, l'implementazione più veloce risulta essere l'applicazione della tecnica \textit{bit masking} che manipola un singolo numero intero senza segno a 64 bit; l'overhead delle operazioni in questo caso è infatti minimo, come minima è l'occupazione spaziale ($S$ ha un'uccupazione costante di 8 byte). \\
 
-Visti i seguenti risultati si è quindi deciso di utilizzare la versione BitMasking a 64 bit per i grafi con meno di 64 nodi e la versione DynamicBitMasking per i grafi con più di 64 nodi.
+\noindent \mintinline{c++}{std::unordered_set<size_t>}, al contrario, ha i tempi più esecuzioni più elevati, almeno un ordine di grandezza più lunghi rispetto alla struttura dati realizzata ad-hoc, DynamicBitMasking. \\
+
+\noindent Visti i risultati sperimentali, abbiamo quindi deciso di usare bit-masking a 64 bit per implementare l'algoritmo di Held \& Karp con grafi aventi meno di 64 nodi, e DynamicBitMasking per eseguire Held \& Karp su grafi di dimensioni maggiori.
 
 \subsection{Timeout}
 
