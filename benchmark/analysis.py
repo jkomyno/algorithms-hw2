@@ -555,11 +555,11 @@ if __name__ == '__main__':
     if IS_TABLE_ENABLED:
         # compare multiple programs to show potential improvements
 
-        # Question 1 (complete and splitted, more readable).
-        print_comparison(dataframes_min, [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND])
+        # OK: Analysis/Question 1 (complete and splitted, more readable).
+        print_comparison(dataframes_min, [HELD_KARP, MST_2_APPROX, CLOSEST_INSERTION_1_ROUND])
         print_comparison(dataframes_min, [HELD_KARP])
         print_comparison(dataframes_min, [MST_2_APPROX])
-        print_comparison(dataframes_min, [FARTHEST_INSERTION_1_ROUND])
+        print_comparison(dataframes_min, [CLOSEST_INSERTION_1_ROUND])
 
     # export minimized in-memory CSV files to LaTeX tables (they will still require some manual work tho)
     # export_dataframes_min_to_latex(dataframes_min)
@@ -621,16 +621,18 @@ if __name__ == '__main__':
             pred=lambda x: True, 
             title=f'{names_to_vs([FARTHEST_INSERTION_ALTERNATIVE, FARTHEST_INSERTION_1_ROUND, FARTHEST_INSERTION_4_PARALLEL_ROUNDS])} (approximation error)')
 
-        # TODO: Redo Question 1 (accuracy and runtime)
+        # OK: Analysis/Question 1 (the three limited to 52 nodes)
         plot_precision_comparison(
-            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND], 
+            [HELD_KARP, MST_2_APPROX, CLOSEST_INSERTION_1_ROUND], 
             dataframes_min, 
             pred=lambda x: x['d'] <= 52, 
-            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND])} (approximation error, limited to 52 nodes)', 
+            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, CLOSEST_INSERTION_1_ROUND])} (approximation error, limited to 52 nodes)', 
             y_log=False)
+
+        # OK: Analysis/Question 1 (the three log y scaled)
         plot_precision_comparison(
-            [HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND], 
+            [HELD_KARP, MST_2_APPROX, CLOSEST_INSERTION_1_ROUND], 
             dataframes_min, 
             pred=lambda x: True, 
-            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, FARTHEST_INSERTION_1_ROUND])} (approximation error, y log scaled)', 
+            title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, CLOSEST_INSERTION_1_ROUND])} (approximation error, y log scaled)', 
             y_log=True)

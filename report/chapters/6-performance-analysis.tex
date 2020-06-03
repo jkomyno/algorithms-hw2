@@ -2,6 +2,7 @@
 \label{cap:performance-analysis}
 
 \subsection{Domanda \#1}
+\label{sec:question-1}
 
 \begin{displayquote}
 Eseguite i tre algoritmi che avete implementato (Held-Karp,
@@ -18,7 +19,7 @@ interessanti.
 Per leggibilità la tabella richiesta è stata suddivisa nelle tabelle
 \ref{table:held-karp-runtime-accuracy},
 \ref{table:mst2approx-runtime-accuracy},
-\ref{table:farthest-insertion-runtime-accuracy},
+\ref{table:closest-insertion-runtime-accuracy},
 una per algoritmo.
 
 \begin{figure}[H]
@@ -30,19 +31,19 @@ una per algoritmo.
     \hline
     Instance & Exact & Solution &   Time (ms) &   Error (\%) \\
     \hline
-    burma14.tsp   &     3323 &       3323 &          94 &        0    \\
-    ulysses16.tsp &     6859 &       6859 &         393 &        0    \\
-    ulysses22.tsp &     7013 &       7013 &       75295 &        0    \\
-    eil51.tsp     &      426 &        986 &      126289 &      131.46 \\
-    berlin52.tsp  &     7542 &      17441 &      126570 &      131.25 \\
-    kroA100.tsp   &    21282 &     167464 &      128452 &      686.88 \\
-    kroD100.tsp   &    21294 &     149007 &      128377 &      599.76 \\
-    ch150.tsp     &     6528 &      48362 &      128392 &      640.84 \\
-    gr202.tsp     &    40160 &      55127 &      128389 &       37.27 \\
-    gr229.tsp     &   134602 &     176922 &      128344 &       31.44 \\
-    pcb442.tsp    &    50778 &     512263 &      128303 &      908.83 \\
-    d493.tsp      &    35002 &     321918 &      128277 &      819.71 \\
-    dsj1000.tsp   & 18659688 &  546816520 &      128450 &     2830.47 \\
+    burma14.tsp   &     3323 &   3323           &          94 &        0    \\
+    ulysses16.tsp &     6859 &   6859           &         393 &        0    \\
+    ulysses22.tsp &     7013 &   7013           &       75295 &        0    \\
+    eil51.tsp     &      426 &    986           &      126289 &      131.46 \\
+    berlin52.tsp  &     7542 &  17441           &      126570 &      131.25 \\
+    kroA100.tsp   &    21282 & 167464           &      128452 &      686.88 \\
+    kroD100.tsp   &    21294 & 149007           &      128377 &      599.76 \\
+    ch150.tsp     &     6528 &  48362           &      128392 &      640.84 \\
+    gr202.tsp     &    40160 &  55127           &      128389 &       37.27 \\
+    gr229.tsp     &   134602 & 176922           &      128344 &       31.44 \\
+    pcb442.tsp    &    50778 & 512263           &      128303 &      908.83 \\
+    d493.tsp      &    35002 & 321918           &      128277 &      819.71 \\
+    dsj1000.tsp   & 18659688 &      5.46817e+08 &      128450 &     2830.47 \\
     \bottomrule
     \end{tabular}
 
@@ -59,19 +60,19 @@ una per algoritmo.
     \hline
     Instance & Exact & Solution &   Time (ms) &   Error (\%) \\
     \hline
-    burma14.tsp   &     3323 &       4258 &          33 &       28.14 \\
-    ulysses16.tsp &     6859 &       7857 &          35 &       14.55 \\
-    ulysses22.tsp &     7013 &       8377 &          36 &       19.45 \\
-    eil51.tsp     &      426 &        563 &          36 &       32.16 \\
-    berlin52.tsp  &     7542 &      10402 &          36 &       37.92 \\
-    kroA100.tsp   &    21282 &      30032 &          36 &       41.11 \\
-    kroD100.tsp   &    21294 &      28467 &          36 &       33.69 \\
-    ch150.tsp     &     6528 &       9116 &          34 &       39.64 \\
-    gr202.tsp     &    40160 &      52967 &          38 &       31.89 \\
-    gr229.tsp     &   134602 &     178434 &          37 &       32.56 \\
-    pcb442.tsp    &    50778 &      74254 &          42 &       46.23 \\
-    d493.tsp      &    35002 &      45669 &          44 &       30.48 \\
-    dsj1000.tsp   & 18659688 &   25703578 &          69 &       37.75 \\
+    burma14.tsp   &     3323 &   4258           &          33 &       28.14 \\
+    ulysses16.tsp &     6859 &   7857           &          35 &       14.55 \\
+    ulysses22.tsp &     7013 &   8377           &          36 &       19.45 \\
+    eil51.tsp     &      426 &    563           &          36 &       32.16 \\
+    berlin52.tsp  &     7542 &  10402           &          36 &       37.92 \\
+    kroA100.tsp   &    21282 &  30032           &          36 &       41.11 \\
+    kroD100.tsp   &    21294 &  28467           &          36 &       33.69 \\
+    ch150.tsp     &     6528 &   9116           &          34 &       39.64 \\
+    gr202.tsp     &    40160 &  52967           &          38 &       31.89 \\
+    gr229.tsp     &   134602 & 178434           &          37 &       32.56 \\
+    pcb442.tsp    &    50778 &  74254           &          42 &       46.23 \\
+    d493.tsp      &    35002 &  45669           &          44 &       30.48 \\
+    dsj1000.tsp   & 18659688 &      2.57036e+07 &          69 &       37.75 \\
     \bottomrule
     \end{tabular}
 
@@ -88,30 +89,30 @@ una per algoritmo.
     \hline
     Instance & Exact & Solution &   Time (ms) &   Error (\%) \\
     \hline
-    burma14.tsp   &     3323 &       3323 &          35 &        0    \\
-    ulysses16.tsp &     6859 &       6859 &          35 &        0    \\
-    ulysses22.tsp &     7013 &       7013 &          35 &        0    \\
-    eil51.tsp     &      426 &        439 &          35 &        3.05 \\
-    berlin52.tsp  &     7542 &       8118 &          36 &        7.64 \\
-    kroA100.tsp   &    21282 &      23373 &          36 &        9.83 \\
-    kroD100.tsp   &    21294 &      22577 &          36 &        6.03 \\
-    ch150.tsp     &     6528 &       6864 &          41 &        5.15 \\
-    gr202.tsp     &    40160 &      45211 &          46 &       12.58 \\
-    gr229.tsp     &   134602 &     148324 &          52 &       10.19 \\
-    pcb442.tsp    &    50778 &      56964 &         140 &       12.18 \\
-    d493.tsp      &    35002 &      39506 &         176 &       12.87 \\
-    dsj1000.tsp   & 18659688 &   20599827 &        1109 &       10.4  \\
+    burma14.tsp   &     3323 &   3511.5         &          35 &        5.67 \\
+    ulysses16.tsp &     6859 &   7377           &          37 &        7.55 \\
+    ulysses22.tsp &     7013 &   7703.5         &          36 &        9.85 \\
+    eil51.tsp     &      426 &    487           &          36 &       14.32 \\
+    berlin52.tsp  &     7542 &   9047           &          37 &       19.95 \\
+    kroA100.tsp   &    21282 &  25842           &          37 &       21.43 \\
+    kroD100.tsp   &    21294 &  25230           &          36 &       18.48 \\
+    ch150.tsp     &     6528 &   8072           &          40 &       23.65 \\
+    gr202.tsp     &    40160 &  48011           &          46 &       19.55 \\
+    gr229.tsp     &   134602 & 158933           &          68 &       18.08 \\
+    pcb442.tsp    &    50778 &  60235.5         &         141 &       18.63 \\
+    d493.tsp      &    35002 &  41870.5         &         175 &       19.62 \\
+    dsj1000.tsp   & 18659688 &      2.27984e+07 &        1110 &       22.18 \\
     \bottomrule
     \end{tabular}
 
-    \caption{Farthest Insertion runtime and accuracy}
-    \label{table:farthest-insertion-runtime-accuracy}
+    \caption{Closest Insertion runtime and accuracy}
+    \label{table:closest-insertion-runtime-accuracy}
 \end{figure}
 
 Una lettura più chiara dell'errore di approssimazione è invece
 fornita dai grafici
-\ref{fig:heldkarp-mst2approx-farthestinsertion-accuracy-error-52-nodes}
- e \ref{fig:heldkarp-mst2approx-farthestinsertion-accuracy-error}.
+\ref{fig:heldkarp-mst2approx-closestinsertion-accuracy-error-52-nodes}
+ e \ref{fig:heldkarp-mst2approx-closestinsertion-accuracy-error}.
 \'E possibile notare come nel
 secondo grafico l'errore di approssimazione di HeldKarp diventi
 praticamente impredicibile, tendendo comunque a crescere con la
@@ -123,19 +124,19 @@ come ci si aspettava.
 \begin{figure}[H]
     \centering
 
-    \includegraphics[width=0.9\textwidth]{./images/HeldKarp_vs_MST2Approximation_vs_FarthestInsertion__approximation_error__limited_to_52_nodes_.png}
+    \includegraphics[width=0.9\textwidth]{./images/HeldKarp_vs_MST2Approximation_vs_ClosestInsertion1Round__approximation_error__limited_to_52_nodes_.png}
 
-    \caption{HeldKarp vs MST2Approximation vs FarthestInsertion accuracy error scaling by nodes (from 0 to 52 nodes)}
-    \label{fig:heldkarp-mst2approx-farthestinsertion-accuracy-error-52-nodes}
+    \caption{HeldKarp vs MST2Approximation vs ClosestInsertion accuracy error scaling by nodes (from 0 to 52 nodes)}
+    \label{fig:heldkarp-mst2approx-closestinsertion-accuracy-error-52-nodes}
 \end{figure}
 
 \begin{figure}[H]
     \centering
 
-    \includegraphics[width=0.9\textwidth]{./images/HeldKarp_vs_MST2Approximation_vs_FarthestInsertion__approximation_error__y_log_scaled_.png}
+    \includegraphics[width=0.9\textwidth]{./images/HeldKarp_vs_MST2Approximation_vs_ClosestInsertion1Round__approximation_error__y_log_scaled_.png}
 
-    \caption{HeldKarp vs MST2Approximation vs FarthestInsertion accuracy error scaling by nodes (y log scaled)}
-    \label{fig:heldkarp-mst2approx-farthestinsertion-accuracy-error}
+    \caption{HeldKarp vs MST2Approximation vs ClosestInsertion accuracy error scaling by nodes (y log scaled)}
+    \label{fig:heldkarp-mst2approx-closestinsertion-accuracy-error}
 \end{figure}
 
 Il grafico che mostra i tempi di esecuzione non è stato inserito
