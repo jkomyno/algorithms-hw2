@@ -7,7 +7,7 @@
 MST2Approximation è l'implementazione dell'algoritmo di $2$-approssimazione basato sul Minimum Spanning Tree visto a lezione. L'algoritmo prevede i seguenti step:
 
 \begin{enumerate}
-    \item Selezionare un vertice radice $root$ arbitrario;
+    \item Selezionare un vertice radice $root$ arbitrario, ad esempio 0;
     \item Ricavare l'MST del grafo in input a partire da $root$, utilizzando ad esempio l'algoritmo di Prim;
     \item Eseguire una visita pre-order dell'MST ricavato al passo precedente;
     \item Aggiungere la radice $root$ pre-order alla fine della lista ritornata dalla visita pre-order.
@@ -20,24 +20,20 @@ MST2Approximation è l'implementazione dell'algoritmo di $2$-approssimazione bas
 \begin{minted}{c++}
 // MST2Approximation/approx_tsp.h
 
-// Step 1
-random_generator::IntegerRandomGenerator random(0, distance_matrix.size() - 1);
-const size_t root = random();
+// Step 1, 2
+std::vector<Edge> mst(mst::prim_binary_heap_mst(distance_matrix, 0));
 
-// Step 2
-std::vector<Edge> mst(mst::prim_binary_heap_mst(distance_matrix, root));
-
-// Step 3, 4
+// Step 3
 DFS dfs(std::move(mst));
-const auto circuit = dfs.preorder_traversal();
+const auto preorder = dfs.preorder_traversal();
 
 // Funzione lambda che calcola la distanza tra due vertici
 const auto get_distance = [&distance_matrix](const size_t x, const size_t y) {
     return distance_matrix.at(x, y);
 };
 
-// Step 5
-return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_distance);
+// Step 4, 5
+return utils::sum_weights_as_circuit(preorder.cbegin(), preorder.cend(), get_distance);
 \end{minted}
 \caption{Implementazione di TSP 2-approssimato. I commenti del file originale sono stati omessi per una maggiore compattezza.}
 \label{listing:tsp2approx}
@@ -63,15 +59,15 @@ return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_dista
 // Shared/DFS.h
 
 void preorder_traversal_rec(size_t v, std::unordered_set<size_t>& visited,
-                            std::vector<size_t>& circuit) const {
+                            std::vector<size_t>& path) const {
   visited.insert(v);
-  circuit.push_back(v);
+  path.push_back(v);
 
   for (const auto& [u, _] : adjacency_map.adjacent_vertexes(v)) {
     // se un nodo adiacente non è stato visitato, viene visitato
     // ricorsivamente
     if (!visited.count(u)) {
-      preorder_traversal_rec(u, visited, circuit);
+      preorder_traversal_rec(u, visited, path);
     }
   }
 }
@@ -160,7 +156,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
     \item Abbiamo voluto riportare qui la versione con BitMasking a 64 bit, la versione con DynamicBitMasking è simile. Il controllo su quale delle due implementazioni usare è fatto prima di lanciare la funzione di ricorsione appropriata.\\
 \end{itemize}
 
-\newpage
+%\newpage
 
 \subsection{Closest Insertion}
 \label{sec:closest-insertion}

@@ -371,3 +371,33 @@ Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulys
     \item Se il timeout scade e il worker thread non ha ancora terminato l'esecuzione, il thread principale gli notifica di terminare l'esecuzione il prima possibile. Tale notifica avviene forzando la conclusione di una \codeinline{std::promise} creata dal main thread e data in input alla funzione eseguita incapsulata nella classe \codeinline{timeout\_signal}.
     \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna al chiamante la migliore soluzione individuata fino a quel momento.
 \end{itemize}
+
+\subsection{Hash per il set S in Held \& Karp}
+\label{hashing}
+
+Come spiegato in sezione \ref{held-karp-S-repr}, poiché l'insieme di nodi $S$ visitati da Held \& Karp fa parte della chiave di
+una \mintinline{c++}{std::unordered_map}, è necessario che il tipo che rappresenta $S$ abbia una \textit{funzione hash} di supporto. \\
+
+\noindent La funzione hash custom per \mintinline{c++}{DynamicBitMasking} e per \mintinline{c++}{std::unordered_set} si è ispirata alla funzione hash di \mintinline{python}{frozenset} definita nel progetto \codeinline{CPython}.
+I dettagli della funzione sono riportati come commento in \codeinline{HeldKarp/hash.h}, ma i punti focali sono:
+
+\begin{itemize}
+    \item l'hash di partenza è un numero primo molto alto moltiplicato per un fattore dipendente da \abs{$S$};
+    \item l'hash è commutativo: attraversamenti in ordini diversi di un insieme $S$ fissato danno risultato alla stessa hash;
+    \item l'hash dei singoli elementi di $S$ è combinata con l'hash precedente in modo da ottenere una forte dispersione numerica, usando sia operazioni \codeinline{XOR} che moltiplicazioni per numeri primi alti e diversi tra loro, la cui rappresentazione in bit è non regolare.
+\end{itemize}
+
+\noindent L'unica differenza tra la funzione hash di \mintinline{c++}{DynamicBitMasking} e per \mintinline{c++}{std::unordered_set} è il tipo (e di conseguenza l'iteratore)
+usato per attraversare $\forall x \in S$ nell'espressione:
+
+\begin{center}
+    \mintinline{c++}{for (const auto& x : S) { ... } }
+\end{center}
+
+\noindent Abbiamo fatto un test delle collisioni\footnote{\url{https://godbolt.org/z/xdZJKX}} di questa hash function custom, dove abbiamo comparato il numero di collisioni ottenute con una semplice \codeinline{XOR}-based hash
+rispetto ad una hash function definita come sopra.
+Come input, abbiamo usato tutte le possibili combinazioni da 1 a 16 elementi, con numeri da 0 a 15 (che rappresentano nodi di un grafo). \\
+
+\noindent L'hash function banale ottiene solo 16 hash univoche e ben 32752 collisioni, mentre l'hash function più complessa citata sopra ottiene 32768
+hash univoche senza alcuna collisione. \\
+
