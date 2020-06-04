@@ -382,7 +382,7 @@ una \mintinline{c++}{std::unordered_map}, è necessario che il tipo che rapprese
 I dettagli della funzione sono riportati come commento in \codeinline{HeldKarp/hash.h}, ma i punti focali sono:
 
 \begin{itemize}
-    \item l'hash di partenza è un numero primo molto alto moltiplicato per un fattore dipendente da \abs{$S$};
+    \item l'hash di partenza è un numero primo molto alto moltiplicato per un fattore dipendente da $\abs{S}$;
     \item l'hash è commutativo: attraversamenti in ordini diversi di un insieme $S$ fissato danno risultato alla stessa hash;
     \item l'hash dei singoli elementi di $S$ è combinata con l'hash precedente in modo da ottenere una forte dispersione numerica, usando sia operazioni \codeinline{XOR} che moltiplicazioni per numeri primi alti e diversi tra loro, la cui rappresentazione in bit è non regolare.
 \end{itemize}

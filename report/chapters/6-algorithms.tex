@@ -95,8 +95,8 @@ Riportiamo lo pseudocodice dell'algortimo di programmazione dinamica Held \& Kar
 \noindent La nostra implementazione usa due diverse strutture dati per rappresentare il sottoinsieme $S$ tra quelle viste in \ref{held-karp-S-repr}:
 
 \begin{itemize}
-    \item \mintinline{c++}{unsigned long long} manipolati tramite bit masking se il grafo in input ha meno di 64 nodi;
-    \item \mintinline{c++}{DynamicBitMask} altrimenti.
+    \item \mintinline{c++}{unsigned long long} manipolati tramite BitMasking se il grafo in input ha meno di 64 nodi;
+    \item \mintinline{c++}{DynamicBitMasking} altrimenti.
 \end{itemize}
 
 \noindent Il listato \ref{listing:held-karp} contiene la nostra implementazione dell'algoritmo, step per step.
