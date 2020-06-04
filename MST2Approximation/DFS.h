@@ -12,14 +12,14 @@ class DFS {
 
     // recursive preorder traversal implementation
     void preorder_traversal_rec(size_t v, std::unordered_set<size_t>& visited,
-                                std::vector<size_t>& circuit) const {
+                                std::vector<size_t>& preorder) const {
         visited.insert(v);
-        circuit.push_back(v);
+        preorder.push_back(v);
 
         for (const auto& [u, _] : adjacency_map.adjacent_vertexes(v)) {
             // if an adjacent node hasn't been visited, visit it recursively
             if (!visited.count(u)) {
-                preorder_traversal_rec(u, visited, circuit);
+                preorder_traversal_rec(u, visited, preorder);
             }
         }
     }
@@ -38,11 +38,11 @@ public:
         std::unordered_set<size_t> visited;
         visited.reserve(n);
 
-        std::vector<size_t> circuit;
-        circuit.reserve(n);
+        std::vector<size_t> preorder;
+        preorder.reserve(n);
 
-        preorder_traversal_rec(0, visited, circuit);
+        preorder_traversal_rec(0, visited, preorder);
 
-        return circuit;
+        return preorder;
     }
 };

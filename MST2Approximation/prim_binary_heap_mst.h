@@ -10,7 +10,7 @@
 
 namespace mst {
     std::vector<Edge> prim_binary_heap_mst(const DistanceMatrix<int>& distance_matrix,
-                                           const size_t root) noexcept {
+                                           const size_t root = 0) noexcept {
         auto vertexes = distance_matrix.get_vertexes();
 
         const size_t n_stop = vertexes.size() - 1;
