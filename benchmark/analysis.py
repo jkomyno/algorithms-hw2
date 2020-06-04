@@ -636,3 +636,11 @@ if __name__ == '__main__':
             pred=lambda x: True, 
             title=f'{names_to_vs([HELD_KARP, MST_2_APPROX, CLOSEST_INSERTION_1_ROUND])} (approximation error, y log scaled)', 
             y_log=True)
+
+        # OK: Analysis/Question 1 (runtime, mst, heuristic log y scaled)
+        plot_comparison(
+            [MST_2_APPROX, CLOSEST_INSERTION_1_ROUND], 
+            dataframes_min, 
+            pred=lambda x: True, 
+            title=f'{names_to_vs([MST_2_APPROX, CLOSEST_INSERTION_1_ROUND])} (runtime, y log scaled)', 
+            y_log=True)
