@@ -77,14 +77,6 @@ public:
         init(std::forward<Distance>(distance));
     }
 
-    // this constructor reads an arbitrary square matrix in input.
-    // This can be useful for debugging purposes.
-    // TODO: remove this constructor before submitting the project.
-    DistanceMatrix(std::initializer_list<T>&& debug_matrix) noexcept :
-        n_vertexes(static_cast<size_t>(std::sqrt(static_cast<double>(debug_matrix.size())))),
-        data(std::move(debug_matrix)) {
-    }
-
     // return number of rows/columns of the matrix
     [[nodiscard]] size_t size() const noexcept {
         return n_vertexes;

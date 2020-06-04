@@ -12,8 +12,6 @@ namespace simulated_annealing {
     public:
         virtual ~SolutionBase() = default;
 
-        virtual size_t feasible_size() const = 0;
-
         // returns the cost of the current solution
         [[nodiscard]] virtual int fitness() const = 0;
 
@@ -81,15 +79,7 @@ namespace simulated_annealing {
             int best_cost = best_solution.fitness();
             size_t same_best_solution_times = 1;
 
-            size_t max_feasible_size = 0;
-
             for (size_t r = 0; r < options.restarts; ++r) {
-                // variables used for debugging
-                // TODO: remove
-                size_t _iterations = 0;
-                size_t _reheats = 0;
-                double _final_temperature = 0;
-
                 size_t i = 0;
                 for (; i < options.annealing_steps &&
                        (temperature > options.stop_temperature &&
@@ -98,7 +88,6 @@ namespace simulated_annealing {
                     if ((i + 1) % options.get_reheat_interval() == 0) {
                         temperature =
                             options.get_init_temperature() * options.reheat_factor / (10 * (i + 1));
-                        _reheats++;
                     }
 
                     for (size_t j = 0; j < options.steady_steps; ++j) {
@@ -124,13 +113,7 @@ namespace simulated_annealing {
                         best_cost = std::min({best_cost, best_solution.fitness()});
                         same_best_solution_times = 1;
                     }
-
-                    max_feasible_size = std::max(max_feasible_size, best_solution.feasible_size());
-
-                    _iterations++;
                 }
-
-                _final_temperature = temperature;
 
                 temperature = options.get_init_temperature();
             }

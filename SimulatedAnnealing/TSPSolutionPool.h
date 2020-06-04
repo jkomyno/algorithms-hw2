@@ -127,11 +127,6 @@ public:
         return !(rhs == *this);
     }
 
-    // TODO: remove
-    size_t feasible_size() const {
-        return this->pool->feasible_solutions.size();
-    }
-
     // return the TSP path associated with this solution
     std::vector<size_t>& circuit() const;
 
