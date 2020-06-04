@@ -346,17 +346,17 @@ Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulys
 	\label{fig:UnorderedvsDynamicBitMasking}
 \end{figure}
 
-\noindent Com'era prevedibile, l'implementazione più veloce risulta essere l'applicazione della tecnica \textit{bit masking} che manipola un singolo numero intero senza segno a 64 bit; l'overhead delle operazioni in questo caso è infatti minimo, come minima è l'occupazione spaziale ($S$ ha un'uccupazione costante di 8 byte). \\
+\noindent Com'era prevedibile, l'implementazione più veloce risulta essere l'applicazione della tecnica \textit{bit masking} che manipola un singolo numero intero senza segno a 64 bit; l'overhead delle operazioni in questo caso è infatti minimo, come minima è l'occupazione spaziale ($S$ ha un'occupazione costante di 8 byte). \\
 
-\noindent \mintinline{c++}{std::unordered_set<size_t>}, al contrario, ha i tempi più esecuzioni più elevati, almeno un ordine di grandezza più lunghi rispetto alla struttura dati realizzata ad-hoc, DynamicBitMasking. \\
+\noindent \mintinline{c++}{std::unordered_set<size_t>}, al contrario, ha tempi di esecuzione più elevati, almeno un ordine di grandezza superiore rispetto alla struttura dati realizzata ad-hoc con DynamicBitMasking. \\
 
-\noindent Visti i risultati sperimentali, abbiamo quindi deciso di usare bit-masking a 64 bit per implementare l'algoritmo di Held \& Karp con grafi aventi meno di 64 nodi, e DynamicBitMasking per eseguire Held \& Karp su grafi di dimensioni maggiori.
+\noindent Visti i risultati sperimentali, abbiamo quindi deciso di usare BitMasking a 64 bit per implementare l'algoritmo di Held \& Karp con grafi aventi meno di 64 nodi, e DynamicBitMasking per eseguire Held \& Karp su grafi di dimensioni maggiori.
 
 \subsection{Timeout per Held \& Karp}
 
-\noindent L'algoritmo di Held-Karp ha complessità temporale \complexityHeldKarpTime{}, quindi i tempi di esecuzione \textit{esplodono} anche solo per grafi con poche decine di nodi. Come richiesto dall'homework, all'algoritmo di Held-Karp è assegnato un timeout di esecuzione $T$. Abbiamo fissato il valore di $T$ a 2 minuti, per mantenere la RAM occupata sotto controllo (anche la complessità spaziale dell'algoritmo è esponenziale).\\
+\noindent L'algoritmo di Held \& Karp ha complessità temporale \complexityHeldKarpTime{}, quindi i tempi di esecuzione \textit{esplodono} anche solo per grafi con poche decine di nodi. Come richiesto dall'homework, all'algoritmo di Held \& Karp è assegnato un timeout di esecuzione $T$. Abbiamo fissato il valore di $T$ a 2 minuti, per mantenere la RAM occupata sotto controllo (anche la complessità spaziale dell'algoritmo è esponenziale).\\
 
-\noindent La nostra implementazione di Held-Karp, quindi:
+\noindent La nostra implementazione di Held \& Karp, quindi:
 
 \begin{enumerate}
     \item Ritorna la soluzione esatta se i suoi tempi di esecuzione sono inferiori a 2 minuti, senza aspettare lo scadere del timeout;
@@ -366,7 +366,7 @@ Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulys
 \noindent C++17 non fornisce soluzione \textit{out-of-the-box} ad alto livello per eseguire funzioni con un limite di tempo. Abbiamo quindi implementato un meccanismo di questo tipo in \codeinline{Shared/timeout.h}, il cui funzionamento ad alto livello è il seguente:
 
 \begin{itemize}
-    \item Il thread principale crea un \textit{worker thread} incaricandolo di eseguire Held-Karp sul grafo letto in input. Fa quindi partire il timeout e resta in attesa del risultato del worker thread. Tale risultato sarà disponibile da un \codeinline{std::future}.
+    \item Il thread principale crea un \textit{worker thread} incaricandolo di eseguire Held \& Karp sul grafo letto in input. Fa quindi partire il timeout e resta in attesa del risultato del worker thread. Tale risultato sarà disponibile da un \codeinline{std::future}.
     \item Se il worker thread termina prima dello scadere del timeout, il thread principale è immediatamente sbloccato e il risultato della funzione (restituito da \codeinline{std::future::get()}) è ritornato al chiamante.
     \item Se il timeout scade e il worker thread non ha ancora terminato l'esecuzione, il thread principale gli notifica di terminare l'esecuzione il prima possibile. Tale notifica avviene forzando la conclusione di una \codeinline{std::promise} creata dal main thread e data in input alla funzione eseguita incapsulata nella classe \codeinline{timeout\_signal}.
     \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna al chiamante la migliore soluzione individuata fino a quel momento.

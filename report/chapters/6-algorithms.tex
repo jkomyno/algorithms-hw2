@@ -167,7 +167,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 
 Closest Insertion è un'euristica costruttiva per Metric-TSP che
 consente di approssimare la soluzione ottima ad un fattore
-$\log(n)$. La complessità asintotica di quest'euristica è
+2. La complessità asintotica di quest'euristica è
 $\bigO{n^2}$.
 
 \subsubsection{Idea}
@@ -285,8 +285,7 @@ return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_dista
 
 \subsubsection{Approssimazione}
 
-L'approssimazione dell'algoritmo, come detto in precedenza, è di un
-fattore $\log(n)$ rispetto alla soluzione ottima. Il grafico
+L'algoritmo, come detto in precedenza, è un algoritmo di 2-approssimazione. Il grafico
 \ref{fig:closest-insertion-1-round-accuracy-error} ne evidenzia il
 risultato.
 
