@@ -69,7 +69,7 @@ int geodesic_distance(const point::point_geo& i,
 
 \noindent I risultati del calcolo delle distanze (\textit{EUC\_2D} o \textit{GEO} a seconda del dataset di input) sono inseriti nella posizione corrispondente della Matrice delle Distanze.
 Una volta calcolate le distanze, le coordinate originali non sono mantenute: non sono infatti necessarie ai fini della rappresentazione del grafo e del calcolo della soluzione di TSP.
-Nella figura \ref{fig:distancematrix-example} è possbile vedere un esempio di una conversione di un grafo di esempio rappresentato da cordinate EUC\_2D nella sua matrice delle distanze.
+Nella figura \ref{fig:distancematrix-example} è possbile vedere un esempio di una conversione di un grafo di esempio rappresentato da cordinate EUC\_2D nella sua matrice delle distanze. \\
 
 \begin{figure}[h]
 	\centering
@@ -175,7 +175,7 @@ protected:
 public:
   PointReader(std::fstream& file, size_t dimension) :
     file(file), dimension(dimension) { }
-  
+
   // distruttore virtual poiché PointReader è una classe base
   virtual ~PointReader() = default;
 
