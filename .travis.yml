@@ -69,7 +69,8 @@ jobs:
       before_deploy:
         # prepare release folder
         - exes=(*.out)
-        - args=("HeldKarp" "MST2Approximation" "Shared" "tsp_dataset" "README.md"
+        - args=("benchmark" "ClosestInsertion" "FarthestInsertion" "FarthestInsertionAlternative"
+                "HeldKarp" "MST2Approximation" "Shared" "SimulatedAnnealing" "tsp_dataset" "README.md"
                 "Makefile" "HW2.sln" "${csvs[@]}" "${exes[@]}")
         - tar -czf ./algorithms-hw2.tar.gz "${args[@]}"
         - export DEPLOY_PACKAGE=./algorithms-hw2.tar.gz
