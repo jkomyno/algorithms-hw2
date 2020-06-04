@@ -16,7 +16,8 @@ Potete aggiungere altra informazione alla tabella che ritenete
 interessanti.
 \end{displayquote}
 
-Per leggibilità la tabella richiesta è stata suddivisa nelle tabelle
+\noindent Per leggibilità la tabella richiesta è stata suddivisa nelle
+tabelle
 \ref{table:held-karp-runtime-accuracy},
 \ref{table:mst2approx-runtime-accuracy},
 \ref{table:closest-insertion-runtime-accuracy},
@@ -85,7 +86,7 @@ una per algoritmo.
 
     \begin{tabular}{lrrrr}
     \toprule
-    \multicolumn{2}{c}{ } & \multicolumn{3}{c}{Farthest Insertion} \\
+    \multicolumn{2}{c}{ } & \multicolumn{3}{c}{Closest Insertion} \\
     \hline
     Instance & Exact & Solution &   Time (ms) &   Error (\%) \\
     \hline
@@ -109,7 +110,7 @@ una per algoritmo.
     \label{table:closest-insertion-runtime-accuracy}
 \end{table}
 
-Una lettura più chiara dell'errore di approssimazione è invece
+\noindent Una lettura più chiara dell'errore di approssimazione è invece
 fornita dai grafici
 \ref{fig:heldkarp-mst2approx-closestinsertion-accuracy-error-52-nodes}
  e \ref{fig:heldkarp-mst2approx-closestinsertion-accuracy-error}.
@@ -139,11 +140,24 @@ come ci si aspettava.
     \label{fig:heldkarp-mst2approx-closestinsertion-accuracy-error}
 \end{figure}
 
-Il grafico che mostra i tempi di esecuzione non è stato inserito
-in quanto ritenuto veramente poco informativo: HeldKarp va in
-timeout dopo i ventidue nodi (con il timeout fissato a due minuti),
-mentre gli altri due algoritmi terminano in poco più di un secondo
-su grafi di mille nodi.
+\noindent Il grafico che mostra i tempi di esecuzione per tutti e tre
+gli algoritmi non è stato riportato, in quanto ritenuto veramente poco
+informativo: HeldKarp va in timeout dopo i ventidue nodi (con il
+timeout fissato a due minuti), mentre il meno efficiente degli altri
+termina in poco più di un secondo sul grafo più grande. \'E stato
+inserito quindi il grafico
+\ref{fig:mst2approx-closestinsertion-runtime} per confrontare il
+runtime di MST2Approximation e ClosestInsertion, che conferma
+l'efficienza di MST2Approximation.
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics[width=0.9\textwidth]{./images/MST2Approximation_vs_ClosestInsertion1Round__runtime__y_log_scaled_.png}
+
+    \caption{Confronto dei tempi di esecuzione per MST2Approximation e ClosestInsertion rispetto al numero di nodi (runtime in scala logaritmica)}
+    \label{fig:mst2approx-closestinsertion-runtime}
+\end{figure}
 
 \subsection{Domanda \#2}
 \label{sec:question-2}
@@ -156,12 +170,36 @@ approssimazione? Quale dei tre algoritmi che avete implementato è
 più efficiente?
 \end{displayquote}
 
-
 \noindent Gli algoritmi che abbiamo deciso di analizzare, come scritto
 nella sezione \ref{sec:question-1}, sono HeldKarp, MST2Approximation e
 ClosestInsertion. I dati riportati dalle tabelle e dai grafici sono di
 facile lettura. Di seguito sono riportate alcune osservazioni sui
-risultati ottenuti.
+risultati ottenuti. \\
+
+\noindent L'algoritmo migliore dal punto di vista dell'errore di
+approssimazione è ClosestInsertion. Dai dati raccolti, infatti,
+l'algoritmo riesce a fare sempre meglio di HeldKarp e di
+MST2Approximation. Inoltre, l'errore introdotto è relativamente basso:
+anche per input piuttosto gradi esso rimane costante intorno al 20\%
+circa rispetto alla soluzione ottima. \\
+
+\noindent L'algoritmo più efficiente dal punto di vista del tempo di
+esecuzione è invece MST2Approximation.  Quest'ultimo introduce un
+errore di approssimazione non trascurabile anche su taglie piccole
+dell'input, ma ciò compensa con il tempo di esecuzione dell'algoritmo
+che, per dare un'idea, è inferiore ai 100 millisecondi sul grafo più
+grande testato. L'approssimazione introdotta, a parte l'oscillazione
+iniziale, rimane pressoché costante, intorno al 30/40\% di errore
+rispetto alla soluzione ottima. Tutto sommato, data la semplicità
+dell'algoritmo, i risultati sono soddisfacenti.
+
+\noindent ClosestInsertion, anche se non è l'algoritmo più efficiente
+dei tre, ha ottimi tempi di runtime, infatti fino a 200 nodi il tempo
+di esecuzione rimane confrontabile con quello di MST2Approximation,
+mentre per input più grossi invece il tempo cresce fino ad arrivare a
+poco più di 1 secondo per il grafo con 1000 nodi.
+
+\paragraph{Osservazioni}
 
 \begin{itemize}
     \item L'algoritmo di HeldKarp, anche per taglie piccole dell'input
@@ -175,29 +213,6 @@ risultati ottenuti.
       si verifichi per via della distribuzione dei nodi e quindi del
       valore che gli archi assumono, mi rimane un evento limitato, tra
       l'altro a due istanze la cui sorgente di dati è la stessa. \\
-
-    \item L'algoritmo MST2Approximation introduce un errore di
-      approssimazione non trascurabile anche su taglie piccole
-      dell'input, ma ciò compensa con il tempo di esecuzione
-      dell'algoritmo. Per dare un'idea, il tempo di esecuzione
-      migliore di MST2Approximation sul grafo di 1000 nodi è di 69
-      millisecondi, il chè rende questo algoritmo il più efficiente
-      tra i tre confrontati. L'approssimazione introdotta, a parte
-      l'oscillazione iniziale, rimane pressoché costante, intorno al
-      30/40\% di errore rispetto alla soluzione ottima. Tutto sommato,
-      data la semplicità dell'algoritmo, i risultati sono soddisfacenti. \\
-
-    \item L'algoritmo ClosestInsertion che implementa l'euristica
-      costruttiva è il vincitore dei nostri benchmark per quanto
-      riguarda l'errore di approssimazione. Dai dati raccolti,
-      l'algoritmo è in grado di fare sempre meglio di HeldKarp e di
-      MST2Approximation. Inoltre l'errore introdotto è relativamente
-      basso, infatti, anche per input piuttosto gradi l'errore rimane
-      costante intorno al 20\% circa. L'algoritmo ha anche ottimi
-      tempi di runtime, fino a 200 nodi il tempo di esecuzione rimane
-      confrontabile con quello di MST2Approx, per input più grossi
-      invece il tempo cresce fino ad arrivare a più di 1 secondo per
-      il grafo con 1000 nodi. \\
 
     \item Nella sezione \ref{cap:extensions-and-originalities} abbiamo
       descritto altri algoritmi per la risoluzione di TSP che abbiamo

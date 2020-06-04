@@ -90,10 +90,10 @@ Riportiamo lo pseudocodice dell'algortimo di programmazione dinamica Held \& Kar
     \item Caso ricorsivo:
     \begin{enumerate}
         \item Step a: Inizializza la distanza minima a $\infty$ e considera $S \setminus {v}$.
-        \item Step b: Scansiona tutti i nodi in $S \setminus {v}$, calcolando ricorsivamente la distanza. Se la distanza trovata è inferiore a quelle precedentemente ricavate, viene sostituita.
+        \item Step b: Scansiona tutti i nodi $u$ in $S \setminus {v} = A$, calcolando ricorsivamente la distanza a partire da $u$ e passando per tutti i vertici in $A$. Se la distanza trovata è inferiore a quelle precedentemente ricavate, viene sostituita.
         \item Step c: Verifica se il timeout è scaduto. In caso positivo, effettua l'unrolling prematuro dello stack di ricorsione e ritorna il miglior risultato ottenuto fino a questo punto.
+        \item Step d: Ritorna la distanza minima calcolata del circuito parziale $S$.
     \end{enumerate}
-    \item Step d: Ritorna la distanza minima calcolata del circuito parziale $S$.
 \end{enumerate}
 
 \noindent La nostra implementazione usa due diverse strutture dati per rappresentare il sottoinsieme $S$ tra quelle viste in \ref{held-karp-S-repr}:
@@ -167,7 +167,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 
 Closest Insertion è un'euristica costruttiva per Metric-TSP che
 consente di approssimare la soluzione ottima ad un fattore
-$\log(n)$. La complessità asintotica di quest'euristica è
+2. La complessità asintotica di quest'euristica è
 $\bigO{n^2}$.
 
 \subsubsection{Idea}
@@ -251,19 +251,19 @@ return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_dista
     \item All'algoritmo viene passata la matrice delle adiacenze e un
       random generator per la selezione del primo nodo durante
       l'inizializzazione. (Ulteriori dettagli in
-      \ref{sec:closest-insertion-rounds}).
+      \ref{sec:rounds}).\\
 
     \item L'insieme \mintinline{c++}{not_visited} è utilizzato per
       tenere traccia degli elementi presenti nel circuito Hamiltoniano
       parziale: ogni volta che un vertice è inserito nel circuito,
-      viene rimosso dall'insieme.
+      viene rimosso dall'insieme.\\
 
     \item L'operazione $\min w(i, j)$ è rappresentata dalla funzione
     \begin{center}
         \mintinline{c++}{DistanceMatrix::get_closest_node(node)}
     \end{center}
     invocabile sulla matrice di adiacenza, utilizzata nella fase di
-    inizializzazione.
+    inizializzazione.\\
 
     \item L'operazione di minimizzazione di $\delta(k, C)$ è
       rappresentata dalla funzione
@@ -273,20 +273,19 @@ return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_dista
     che sceglie il vertice $k$ che minimizza la distanza tra $k$
     ed il circuito $C$. Gli input a questa funzione sono l'insieme
     dei nodi non ancora in $C$ da cui scegliere $k$, $C$ e la
-    funzione di distanza.
+    funzione di distanza.\\
 
     \item L'inserimento del vertice selezionato è effettuato in
     \begin{center}
         \mintinline{c++}{utils::perform_best_circuit_insertion(new_k, circuit, get_distance);}
     \end{center}
     che sceglie la posizione di inserimento che minimizza la distanza
-    massima del circuito.
+    massima del circuito.\\
 \end{itemize}
 
 \subsubsection{Approssimazione}
 
-L'approssimazione dell'algoritmo, come detto in precedenza, è di un
-fattore $\log(n)$ rispetto alla soluzione ottima. Il grafico
+L'algoritmo, come detto in precedenza, è un algoritmo di 2-approssimazione. Il grafico
 \ref{fig:closest-insertion-1-round-accuracy-error} ne evidenzia il
 risultato.
 
