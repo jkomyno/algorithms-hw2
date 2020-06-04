@@ -1,5 +1,7 @@
 # Algorithms-HW2
 
+[![Build Status](https://travis-ci.com/jkomyno/algorithms-hw2.svg?token=jkozECYTHDjAbqyyzwJB&branch=master)](https://travis-ci.com/jkomyno/algorithms-hw2)
+
 > Travelling Salesman Problem with Held & Karp, approximated and heuristic 
 > algorithms.
 
