@@ -74,20 +74,17 @@ in \ref{sec:rounds}) il risultato è il medesimo. Si veda il grafico
     \label{fig:closest-farthest-insertion-4-rounds-accuracy-error}
 \end{figure}
 
-\subsection{Rounds (TODO: MIGLIORARE IL TITOLO)}
+\subsection{Round paralleli di algoritmi euristici sequenziali}
 \label{sec:rounds}
 
-\noindent Le euristiche come Closest Insertion (descritta alla sezione
+\noindent Le euristiche costruttive come Closest Insertion (descritta alla sezione
 \ref{sec:closest-insertion}) e Farthest Insertion (descritta alla
 sezione \ref{sec:farthest-insertion}) prevedono un'inizializzazione
-statica del problema, scegliendo sempre il primo nodo come il vertice
-0. In realtà, scegliendo nodi diversi come sorgente le soluzioni
-ritornate dall'algoritmo potrebbero differire, e molteplici esecuzioni
-dell'algoritmo da diverse sorgenti potrebbero produrre soluzioni più
-accurate rispetto ad una singola esecuzione.\\
+deterministica del problema, scegliendo sempre il vertice
+$0$ come primo nodo. Tuttavia, dando la possibilità di scegliere nodi sorgenti diversi, le soluzioni ritornati dall'algoritmo potrebbero differire e molteplici esecuzioni dell'algoritmo con nodi di partenza diversi scelti arbitrariamente potrebbero produrre soluzioni più
+accurate rispetto ad una singola esecuzione partendo da un nodo fissato.\\
 
-\noindent Abbiamo deciso di sfruttare questo fatto implementando la
-possibilità di eseguire l'algoritmo in parallelo su diversi core.\\
+\noindent Abbiamo deciso di sfruttare questo fatto eseguendo più volte in parallelo l'algoritmo sequenziale con nodo iniziale casuale, e restituendo la migliore soluzione tra quelle ottenute. \\
 
 \noindent Agli algoritmi è infatti passato un
 \mintinline{c++}{RandomGenerator} che consente di generare un numero
@@ -102,7 +99,8 @@ implementazioni:
     \item \mintinline{c++}{FixedGenerator}, generatore del numero
       specificato al momento della creazione del generator.
 \end{itemize}
-L'inizializzazione può quindi differire in base al generator fornito
+
+\noindent L'inizializzazione può quindi differire in base al generator fornito
 in input: se il generator è un \mintinline{c++}{FixedGenerator} allora
 la sorgente scelta è fissata, fornendo così la versione base
 dell'algoritmo che non ha bisogno di molteplici esecuzioni per
@@ -111,7 +109,7 @@ casuale.\\
 
 \noindent Nel nostro caso abbiamo eseguito l'algoritmo prima con
 sorgente fissata a $0$ e poi con sorgente random e fissando il numero
-di istanze parallele a $4$ (numero di core disponibili): i risultati
+di istanze parallele a $4$ (numero di core disponibili): i risultati dell'esecuzione parallela con nodi di partenza casuali
 sono stati soddisfacenti, infatti come si può notare dai grafici
 \ref{fig:closest-insertion-1-4-rounds-accuracy-error} e
 \ref{fig:farthest-insertion-1-4-rounds-accuracy-error}, più esecuzioni

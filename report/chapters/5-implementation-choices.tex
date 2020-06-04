@@ -206,7 +206,7 @@ public:
 \label{alternative-graph-representation}
 
 \noindent L'algoritmo di $2$-approssimazione basato sul calcolo del Minimum Spanning Tree fa uso di due rappresentazioni diverse per i grafi.
-\codeinline{DistanceMatrix.h} è usato per leggere il grafo in input ed eseguirne l'algoritmo di Prim (che è stato adattato dal precedente homework). \codeinline{AdjacencyMapGraph.h}, che contiene un subset definite per la Mappa di Adiacenza definita nel precedente homework, è invece usata per rappresentare il Minimum Spanning Tree all'interno di \codeinline{DFS.h}, che lo scorre per generare il vettore della visita \textit{Preorder}. Questa scelta è dovuta al fatto che l'MST non è denso come il grafo di input, e anzi contiene solo $n - 1$ archi. Una rappresentazione matriciale è quindi inutilmente costosa in termini di spazio in questo caso.
+\codeinline{DistanceMatrix.h} è usato per leggere il grafo in input ed eseguirne l'algoritmo di Prim (che è stato adattato dal precedente homework). \codeinline{AdjacencyMapGraph.h}, che contiene un subset definite per la Mappa di Adiacenza definita nel precedente homework, è invece usata per rappresentare il Minimum Spanning Tree all'interno di \codeinline{DFS.h}, che lo scorre per generare il vettore della visita \textit{pre-order}. Questa scelta è dovuta al fatto che l'MST non è denso come il grafo di input, e anzi contiene solo $n - 1$ archi. Una rappresentazione matriciale è quindi inutilmente costosa in termini di spazio in questo caso.
 
 \newpage
 \subsection{Rappresentazione dei circuiti parziali di Held \& Karp}
