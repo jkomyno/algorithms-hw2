@@ -16,8 +16,8 @@ tiene conto di diversi fattori:
 \begin{itemize}
     \item Tempo necessario a leggere il file di input in un container
       \textit{std::vector} temporaneo;
-    \item Tempo per trasformare il container temporaneo in una matrice
-      di adiacenza;
+    \item Tempo per trasformare il container temporaneo in una Matrice
+      delle Distanze;
     \item Tempo per eseguire l'algoritmo vero e proprio per la
       risoluzione di TSP e restituire il risultato;
 \end{itemize}
@@ -29,11 +29,11 @@ contiene le seguenti colonne:
 \begin{itemize}
     \item \textbf{ms}: tempo in millisecondi per eseguire il programma
       su un singolo file di input;
-    \item \textbf{output}: risultato del programma, ovvero peso
-      del TSP calcolato sul grafo dato in input;
+    \item \textbf{output}: risultato del programma, ovvero il peso
+      del circuito Hamiltoniano (ottimo o approssimato) individuato sul grafo dato in input;
     \item \textbf{d}: numero di nodi del grafo di input;
     \item \textbf{weight\textunderscore type}: tipo delle distanze del
-      grafo (\textit{EUC\_2D} o \textit{GEO}). I valori ammissibili sono descritti in \ref{sub:graph-representation};
+      grafo (\textit{EUC\_2D} o \textit{GEO}), i cui valori ammissibili sono descritti in \hyperref[sub:graph-representation]{Rappresentazione del Grafo};
     \item \textbf{filename}: nome del file di input letto.
 \end{itemize}
 

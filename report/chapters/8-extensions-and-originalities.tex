@@ -19,20 +19,20 @@ non presente nel circuito $C$ che massimizza $\delta (k, C) = \min_{h
 
 \subsubsection{Implementazione}
 
-\noindent Il codice è sostanzialmente simile a quello riportato nel
+\noindent Il codice è sostanzialmente identico a quello riportato nel
 listato \ref{listing:closest-insertion}, con la differenza che per
-Farthest Insertion si effettua la scelta del nuovo nodo con
+Farthest Insertion si effettua la scelta del nuovo nodo con:
 
 \begin{center}
 \mintinline{c++}{utils::select_new_k_maximize(not_visited, circuit, get_distance)}
 \end{center}
 
-\subsubsection{Approssimazione}
+% \subsubsection{Approssimazione}
 
-\noindent Questa euristica permette di trovare una soluzione
-$\log(n)$-approssimata, ma è possibile dimostrare che il fattore di
-approssimazione può essere ulteriormente abbassato fino ad avere una
-soluzione $2$-approssimata.\\
+% \noindent Questa euristica permette di trovare una soluzione
+% $\log(n)$-approssimata, ma è possibile dimostrare che il fattore di
+% approssimazione può essere ulteriormente abbassato fino ad avere una
+% soluzione $2$-approssimata.\\
 
 \noindent I risultati che abbiamo ottenuto con Farthest Insertionsono
 illustrati dal grafico \ref{fig:farthest-insertion-accuracy-error}.\\
@@ -157,7 +157,7 @@ e prevede i seguenti step:
       finché non ha inserito tutti i vertici nel circuito.
 \end{enumerate}
 
-Rispetto all'algoritmo descritto alla sezione
+\noindent Rispetto all'algoritmo descritto alla sezione
 \ref{sec:farthest-insertion}, cambia solo il primo step. La
 complessità resta quindi $\bigO{n^2}$.
 
@@ -310,7 +310,7 @@ L'ampiezza degli intervalli di \textit{reheating} è fissata e data dalla seguen
 Uno dei punti di forza di Simulated Annealing è che, se si applica Random Restart, l'algoritmo è banalmente parallelizzabile.
 Random Restart consiste nel lanciare un algoritmo di ricerca stocastico (nel nostro caso, Simulated Annealing) un certo numero di volte, restituendo solamente la migliore soluzione trovata. \\
 
-\noindent Abbiamo definito la classe di utilità \codeinline{parallel\_executor} in \codeinline{SimulatedAnnealing/parallel.h}, la quale si occupa di eseguire una funzione \textit{higher-order} su un certo numero di thread paralleli e di selezionare la migliore soluzione ottenuta. Essa è stata utilizzata per eseguire in parallelo molteplici istanze indipendenti di Simulated Annealing. In particolare, il numero di istanze eseguite in parallelo è par al numero di core fisici della CPU del computer di esecuzione.
+\noindent Abbiamo definito la classe di utilità \codeinline{parallel\_executor} in \codeinline{Shared/parallel.h}, la quale si occupa di eseguire una funzione \textit{higher-order} su un certo numero di thread paralleli e di selezionare la migliore soluzione ottenuta. Essa è stata utilizzata per eseguire in parallelo molteplici istanze indipendenti di Simulated Annealing. In particolare, il numero di istanze eseguite in parallelo è par al numero di core fisici della CPU del computer di esecuzione.
 
 \subsubsection{Steady Steps}
 
@@ -328,5 +328,6 @@ Random Restart consiste nel lanciare un algoritmo di ricerca stocastico (nel nos
     \item \textbf{Miglior soluzione ripetuta}: la ricerca si ferma se la miglior soluzione individuata non cambia per un certo numero di iterazioni consecutive. Noi consideriamo fino a $150$ ripetizioni consecutive della stessa migliore soluzione prima di dichiarare la convergenza.
 \end{itemize}
 
+TODO: formulare meglio la frase
 \noindent Tutte le condizioni elencate sopra sono "in OR", ovvero l'algoritmo termina non appena si verifica almeno una delle condizioni di convergenza.
 

@@ -48,11 +48,11 @@ return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_dista
 \subsubsection{Osservazioni}
 
 \begin{itemize}
-    \item Abbiamo usato l'algoritmo di Prim perché è più adatto rispetto a Kruskal quando il grafo è rappresentato come matrice di adiacenza. Kruskal infatti richiede di estrarre la lista di lati ordinata in modo ascendente rispetto al peso all'inizio dell'algoritmo, mentre Prim richiede di estrarre solo la lista dei vertici. Ricordiamo che in un grafo completo vale l'equivalenza \complexityCompleteGraph{}.
+    \item Abbiamo usato l'algoritmo di Prim per eseguire il calcolo del Minimum Spanning Tree. Esso è infatti più adatto rispetto a Kruskal quando il grafo è rappresentato come Matrice della Distanze. Kruskal richiede di estrarre la lista di lati ordinata in modo ascendente rispetto al peso all'inizio dell'algoritmo, mentre Prim necessita solo della lista dei vertici. Ricordiamo che in un grafo completo vale l'equivalenza \complexityCompleteGraph{}.
 
     \item La coda di priorità usata dall'algoritmo di Prim è stata implementata con una Min Heap binaria, la quale è già stata descritta in dettaglio nella relazione del primo progetto.
     
-    \item Come notato nella sezione \hyperref[alternative-graph-representation]{Rappresentazione alternativa dei grafi}, l'albero di copertura minimo è rappresentato come Mappa di Adiacenza all'interno di \codeinline{Shared/DFS.h}.
+    \item Come notato nella sezione \hyperref[alternative-graph-representation]{Rappresentazione alternativa del grafo: caso MST}, l'albero di copertura minimo è rappresentato come Mappa di Adiacenza all'interno di \codeinline{Shared/DFS.h}.
     
     \item Il metodo \mintinline{c++}{DFS::preorder_traversal} invoca al suo interno il metodo ricorsivo \\
     \mintinline{c++}{DFS::preorder_traversal_rec}. Il listato \ref{listing:dfs} contiene la definizione di tale metodo.

@@ -1,10 +1,10 @@
 \section{Scelte implementative}
 \label{cap:implementation-choices}
 
-\subsection{Rappresentazione dei grafi}
+\subsection{Rappresentazione del grafo}
 \label{sub:graph-representation}
 
-Gli algoritmi di questo homework operano su grafi pesati completamente connessi e non diretti. Ha quindi senso rappresentare ogni grafo con una Matrice di Adiacenza, dato che i grafi sono completi. In questa relazione useremo in maniera ambivalente i termini \textit{Matrice di Adiacenza} e \textit{Matrice delle distanze}, poiché i grafi sono pesati.
+Gli algoritmi di questo homework operano su grafi pesati completamente connessi e non diretti. Ha quindi senso rappresentare ogni grafo con una Matrice di Adiacenza, dato che i grafi sono completi. In questa relazione useremo in maniera ambivalente i termini \textit{Matrice di Adiacenza} e \textit{Matrice delle Distanze}, poiché i grafi sono pesati.
 
 \noindent I dataset contenenti i grafi di input sono in formato standard \textbf{TSPLIB } e riportano le coordinate 2D dei nodi del grafo in due possibili formati:
 
@@ -13,7 +13,7 @@ Gli algoritmi di questo homework operano su grafi pesati completamente connessi 
     \item \textbf{GEO}: le coordinate rappresentano la latidudine e la longitudine di ogni punto. Il calcolo della distanza tra due punti in questo caso è più complesso, e richiede una conversione preliminari in radianti. Tale conversione avviene nel costruttore della classe \codeinline{point\_geo}, definita nel file \codeinline{Shared/point.h}.
 \end{itemize}
 
-La formula usata per il calcolo della distanza euclidea è mostrata nel listing \ref{listing:euclidean-distance}, mentre la formula usata per calcolare la distanza geodesica è illustrata nel listing \ref{listing:geodesic-distance}. Si noti che tali distanze non sono esatte, ma seguono i criteri di approssimazione a distanze intere definiti nella specifica dell'homework.
+\noindent La formula usata per il calcolo della distanza euclidea è mostrata nel listing \ref{listing:euclidean-distance}, mentre la formula usata per calcolare la distanza geodesica è illustrata nel listing \ref{listing:geodesic-distance}. Si noti che tali distanze seguono i criteri di approssimazione a distanze intere definiti nella specifica dell'homework.
 
 \begin{listing}[!ht]
 \begin{minted}{c++}
@@ -74,7 +74,7 @@ Nella figura \ref{fig:distancematrix-example} è possbile vedere un esempio di u
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images/Distance Matrix.png}
-	\caption{Grafo di esempio rappresentato con Matrice delle distanze}
+	\caption{Grafo di esempio in uno spazio Euclideo rappresentato con Matrice delle distanze.}
 	\label{fig:distancematrix-example}
 \end{figure}
 
@@ -151,17 +151,19 @@ int main(int argc, char** argv) {
 
     \noindent Abbiamo usato la libreria di file streaming nativa di C++ (\codeinline{fstream}). Abbiamo rappresentato il tipo di distanza con l'\mintinline{c++}{enum} \codeinline{EdgeWeightType.h}, per la quale abbiamo definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>}.
 
-    \item I punti definiti dopo la riga \textit{NODE\_COORD\_SECTION} dei dataset di input sono letti con un'istanza polimorfica di \codeinline{PointReader.h}, che interpreta le coordinate in maniera diversa a seconda del valore assunto dall'enumerazione \codeinline{EdgeWeightType}, ovvero a seconda del tipo di distanza del file. Naturalmente, la sottoclasse \codeinline{EuclideanPointReader.h} usa la distanza Euclidea, mentre \codeinline{GeodesicPointReader.h} usa quella geodesica. Le classi dei punti letti in input sono definiti in \codeinline{point.h} (\codeinline{point\_2D} per le coordinate euclidee, \codeinline{point\_geo} per le coordinate geografiche), e per ognuno di essi è stato definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>} adeguato. Questo ci ha permesso di non avere duplicazione di codice per gestire tipi diversi di punti in input. \\
+    \item I punti definiti dopo la riga \codeinline{NODE\_COORD\_SECTION} dei dataset di input sono letti con un'istanza polimorfica di \codeinline{PointReader.h}, che interpreta le coordinate in maniera diversa a seconda del valore assunto dall'enumerazione \codeinline{EdgeWeightType}, ovvero a seconda del tipo di distanza del file. Naturalmente, la sottoclasse \codeinline{EuclideanPointReader.h} usa la distanza Euclidea, mentre \codeinline{GeodesicPointReader.h} usa quella geodesica. Le classi dei punti letti in input sono definiti in \codeinline{point.h} (\codeinline{point\_2D} per le coordinate euclidee, \codeinline{point\_geo} per le coordinate geografiche), e per ognuno di essi è stato definito l'operatore di lettura \mintinline{c++}{std::istream& operator>>} adeguato. Questo ci ha permesso di non avere duplicazione di codice per gestire tipi diversi di punti in input. \\
 
     \noindent La label dei nodi è decrementata di 1 in questa fase di lettura.
 
     \item Una volta letti i nodi, viene creata la matrice delle distanze applicando il \textit{Template Method Pattern}, usando la nozione di distanza definita dalle sottoclassi di \codeinline{PointReader.h}. Il metodo concreto \codeinline{distance(i, j)} delle sottoclassi è usato nel costruttore di \codeinline{DistanceMatrix} come \textit{higher-order function}. Si veda il listing \ref{listing:point-reader}.
 \end{enumerate}
 
-Tutti i file citati qui sopra sono nella cartella \textit{Shared} del progetto consegnato.
+\noindent Tutti i file citati qui sopra sono nella cartella \textit{Shared} del progetto consegnato e sono corredati di ulteriori commenti esplicativi.
 
 \begin{listing}[!ht]
 \begin{minted}{c++}
+// Shared/PointReader.h
+
 class PointReader {
 protected:
   std::fstream& file;
@@ -173,7 +175,8 @@ protected:
 public:
   PointReader(std::fstream& file, size_t dimension) :
     file(file), dimension(dimension) { }
-
+  
+  // distruttore virtual poiché PointReader è una classe base
   virtual ~PointReader() = default;
 
   // consuma la lista di coordinate dal file di input
@@ -189,44 +192,41 @@ public:
   }
 };
 \end{minted}
-\caption{Definizione parziale di \codeinline{PointReader.h} che evidenza la creazione della matrice delle distanze del grafo letto.}
+\caption{Definizione parziale di \codeinline{Shared/PointReader.h} che evidenza la creazione della matrice delle distanze del grafo letto.}
 \label{listing:point-reader}
 \end{listing}
 
-\subsection{Strutture Dati comuni}
+%\subsection{Strutture Dati comuni}
 
-Tutte le strutture dati elencate di seguito sono definite nella cartella \textit{Shared}.
-Ove possibile, per la nomenclatura dei metodi abbiamo cercato di seguire lo stesso standard dei container STL di C++.
-Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando possibile, evitando rehashing e riallocazioni dispendiose. Questo significa che la maggior parte delle operazioni indicate con \complexityConstant{} ammortizzato siano in realtà totalmente costanti nella pratica. \\
+%Tutte le strutture dati elencate di seguito sono definite nella cartella \textit{Shared}.
+%Ove possibile, per la nomenclatura dei metodi abbiamo cercato di seguire lo stesso standard dei container STL di C++.
+%Inoltre, le strutture dati usate sono sempre pre-allocate in memoria quando possibile, evitando rehashing e riallocazioni dispendiose. Questo significa che la maggior parte delle operazioni indicate con \complexityConstant{} ammortizzato siano in realtà totalmente costanti nella pratica. \\
 
-\noindent Le strutture dati relative alle Heap e alle code di priorità necessarie per l'algoritmo di Prim sono già state ampiamente documentate nell'homework 1.
-
-\subsection{Rappresentazione alternativa dei grafi}
+\subsection{Rappresentazione alternativa del grafo: caso MST}
 \label{alternative-graph-representation}
 
 \noindent L'algoritmo di $2$-approssimazione basato sul calcolo del Minimum Spanning Tree fa uso di due rappresentazioni diverse per i grafi.
-\codeinline{DistanceMatrix.h} è usato per leggere il grafo in input ed eseguirne l'algoritmo di Prim (che è stato adattato dal precedente homework). \codeinline{AdjacencyMapGraph.h}, che contiene un subset definite per la Mappa di Adiacenza definita nel precedente homework, è invece usata per rappresentare il Minimum Spanning Tree all'interno di \codeinline{DFS.h}, che lo scorre per generare il vettore della visita \textit{Preorder}. Questa scelta è dovuta al fatto che l'MST non è completo come il grafo di input, e anzi contiene solo $n - 1$ archi. Una Matrice di adiacenza è quindi inutilmente costosa in termini di spazio in questo caso.
+\codeinline{DistanceMatrix.h} è usato per leggere il grafo in input ed eseguirne l'algoritmo di Prim (che è stato adattato dal precedente homework). \codeinline{AdjacencyMapGraph.h}, che contiene un subset definite per la Mappa di Adiacenza definita nel precedente homework, è invece usata per rappresentare il Minimum Spanning Tree all'interno di \codeinline{DFS.h}, che lo scorre per generare il vettore della visita \textit{Preorder}. Questa scelta è dovuta al fatto che l'MST non è denso come il grafo di input, e anzi contiene solo $n - 1$ archi. Una rappresentazione matriciale è quindi inutilmente costosa in termini di spazio in questo caso.
 
 \newpage
 \subsection{Rappresentazione dei circuiti parziali di Held \& Karp}
-\label{held-karp-repr-S}
 
 L'algoritmo Held-Karp richiede esplicitamente l'uso di due vettori:
 \begin{itemize}
-    \item $d[v,S]$ è il peso del cammino minimo che parte da 0 e termina in v, visitando tutti i nodi in S;
-    \item $\pi[v,S]$ è il predecessore di v nel cammino minimo definito come sopra.
+    \item $d[v,S]$ è il peso del cammino minimo che parte dal nodo $0$ e termina in $v$, visitando tutti i nodi nell'insieme $S$;
+    \item $\pi[v,S]$ è il predecessore di $v$ nel cammino minimo definito come sopra.
 \end{itemize}
 
 \noindent Poiché l'homework richiede la restituizione del peso del cammino Hamiltoniano inferiore e non il cammino stesso, abbiamo omesso il vettore $\pi[v,S]$. \\
 
-Abbiamo rappresentato la tabella $d[v,S]$ usata dall'algoritmo di programmazione dinamica come una mappa chiave-valore, dove:
+\noindent Abbiamo rappresentato la tabella $d[v,S]$ usata dall'algoritmo di programmazione dinamica come una mappa chiave-valore, dove:
 
 \begin{itemize}
     \item la chiave è una coppia $(S, v)$;
     \item il valore è il peso del cammino minimo che parte dal nodo 0 e termina in $v$, visitando tutti i nodi in $S$.
 \end{itemize}
 
-\noindent Il tipo della mappa è:
+\noindent In \codeinline{C++}, il tipo per rappresentare la mappa corrispondente a $d[v,S]$ è:
 
 \begin{center}
     \mintinline{c++}{std::unordered_map<std::pair<decltype(S), size_t>, int>}
@@ -242,9 +242,9 @@ Di seguito sono presentate le 3 possibili soluzioni che abbiamo individuato per 
 
 \paragraph{Unordered Set}\mbox{}\\
 
-\noindent La soluzione più semplice per rappresentare un insieme di vertici senza ripetizioni è usare la struttura dati \mintinline{c++}{std::unordered_set}. La tabella \ref{tab:pro-cons-unordered-set} evidenzia i pro e i contro di questo approccio. Osserviamo in particolare che lo spazio occupato per rappresentare un circuito parziale può essere compattato, il che può essere d'aiuto, visto che Held \& Karp ha un'occupazione spaziale esponenziale sulla taglia dell'input. \\
+\noindent La soluzione più semplice per rappresentare un insieme di vertici senza ripetizioni è usare la struttura dati \mintinline{c++}{std::unordered_set}. La tabella \ref{tab:pro-cons-unordered-set} evidenzia i pro e i contro di questo approccio. Osserviamo in particolare che lo spazio occupato per rappresentare un circuito parziale può essere compattato, il che può essere d'aiuto a limitare la RAM occupata, visto che Held \& Karp ha un'occupazione spaziale esponenziale sulla taglia dell'input. \\
 
-\noindent Notiamo inoltre che la libreria standard non definisce alcun metodo \\ \mintinline{c++}{std::hash<std::unordered_set<T>>}, quindi è spettata a noi la definizione della \textit{hash function} per questa struttura dati. Si veda la sezione \ref{hashing} per ulteriori informazioni. TODO: aggiungere questa sezione.
+\noindent Notiamo inoltre che la libreria standard non definisce alcun metodo \\ \mintinline{c++}{std::hash<std::unordered_set<T>>}, quindi è spettata a noi la definizione della \textit{hash function} per questa struttura dati. Si veda la sezione \ref{hashing} per ulteriori informazioni.
 
 \begin{table}[h]
   \centering
@@ -263,7 +263,7 @@ Di seguito sono presentate le 3 possibili soluzioni che abbiamo individuato per 
     \label{tab:pro-cons-unordered-set}
 \end{table}
 
-\noindent Il tipo della mappa in questo caso è:
+\noindent Il tipo della mappa che rappresenta $d[v,S]$ in questo caso è:
 
 \begin{center}
     \mintinline{c++}{std::unordered_map<std::pair<std::unordered_set<size_t>, size_t>, int>}
@@ -303,8 +303,9 @@ Se il bit all'$i$-esima posizione nel numero vale 1, allora il vertice $i \in S$
 	\label{fig:bitmasking-example}
 \end{figure}
 
-\noindent Con questa rappresentazione chiamata \textit{bit masking}, eliminazione, aggiunta e verifica della presenza di vertici in $S$ sono implementate sfruttando operazioni $AND$, $OR$, $XOR$ bit-a-bit e bit-shifting.
-Poiché questo tipo di operazioni si traduce in una singola istruzione Assembly, manipolare $S$ tramite bit-masking è estremamente performante sia dal punto di vista temporale che spaziale. \\
+\noindent Con questa rappresentazione chiamata \textit{bit masking}, eliminazione, aggiunta e verifica della presenza di vertici in $S$ sono implementate sfruttando operazioni \codeinline{AND}, \codeinline{OR}, \codeinline{XOR}, bit-a-bit e bit-shifting (\mintinline{c++}{<<}). \\
+
+\noindent Poiché questo tipo di operazioni si traduce in una singola istruzione Assembly, manipolare l'insieme $S$ tramite bit-masking è estremamente performante sia dal punto di vista temporale che spaziale. \\
 
 \noindent Un limite di tale struttura è l'impossibilità di poter rappresentare un set $S$ che contiene più di 64 nodi, come è possibile vedere nell'esempio della figura \ref{fig:bitmasking-example} dove il vertice 66 non può essere rappresentato in questo modo. Il limite di rappresentazione di $S$ in realtà scende a 63 nodi per via delle operazioni di bit-shift necessarie a manipolare il circuito parziale.
 
@@ -316,7 +317,9 @@ Poiché questo tipo di operazioni si traduce in una singola istruzione Assembly,
 
 \paragraph{Struttura dati ad-hoc: DynamicBitMasking}\mbox{} \\
 
-Per superare il limite della rappresentazione tramite BitMasking per più di 63 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se il set S può raggiungere cardinalità più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. Per fare questo abbiamo dichiarato un'apposita classe chiamata \textit{DynamicBitMasking} definita in \codeinline{HeldKarp/DynamicBitMasking.h} che tramite un \mintinline{c++}{std::vector<unsigned long long>} rappresenta un qualunque set S. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati.
+\noindent Per superare il limite della rappresentazione tramite BitMasking per più di 63 nodi si è pensato di estendere l'idea del BitMasking non più ad un solo numero, ma a più numeri. In questo modo se l'insieme $S$ può raggiungere dimensioni più grandi di 64 nodi è possibile rappresentarlo con più di un numero, dove il primo numero rappresenta i primi 64 nodi, il secondo i successivi 64 nodi e così via. \\
+
+\noindent Abbiamo dunque creato un'apposita classe definita in \codeinline{HeldKarp/DynamicBitMasking.h} che,  tramite un \mintinline{c++}{std::vector<unsigned long long>}, rappresenta un insieme $S$ di qualunque dimensione. In questo modo, data una posizione di un bit $i$, è sufficiente ricavarsi l'indice del vettore dove risiede il numero che contiene il bit $i$ (tramite la divisione intera di $i$ con 64) e la posizione del bit all'interno del numero (tramite il resto della divisione di $i$ con 64). Nell'esempio raffigurato in figura \ref{fig:DynamicBitMasking-example} è possibile vedere come lo stesso set S visto nell'esempio precedente ora possa essere rappresentato tramite questa nuova struttura dati. \\
 
 \begin{figure}[h]
 	\centering
@@ -333,7 +336,7 @@ Per superare il limite della rappresentazione tramite BitMasking per più di 63 
 
 \subsubsection{Confronto tra std::unordered\_set, bit masking e DynamicBitMasking}
 
-In questa sezione mostriamo un confronto tra le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte. Nel grafico riportato in figura \ref{fig:UnorderedvsDynamicBitMasking} abbiamo comparato i tempi d'esecuzione di HeldKarp (senza timeout) con le 3 strutture dati descritte nella sezione \ref{held-karp-repr-S}.
+In questa sezione mostriamo un confronto tra le performance in termini di complessità spaziali e temporali delle 3 soluzioni proposte. Nel grafico riportato in figura \ref{fig:UnorderedvsDynamicBitMasking} abbiamo comparato i tempi d'esecuzione di HeldKarp (senza timeout) con le 3 strutture dati descritte nella sezione \ref{held-karp-S-repr}.
 Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulysses16} e \codeinline{ulysses22}, aventi rispettivamente 14, 16, e 22 nodi.
 
 \begin{figure}[h]
@@ -349,7 +352,7 @@ Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulys
 
 \noindent Visti i risultati sperimentali, abbiamo quindi deciso di usare bit-masking a 64 bit per implementare l'algoritmo di Held \& Karp con grafi aventi meno di 64 nodi, e DynamicBitMasking per eseguire Held \& Karp su grafi di dimensioni maggiori.
 
-\subsection{Timeout}
+\subsection{Timeout per Held \& Karp}
 
 \noindent L'algoritmo di Held-Karp ha complessità temporale \complexityHeldKarpTime{}, quindi i tempi di esecuzione \textit{esplodono} anche solo per grafi con poche decine di nodi. Come richiesto dall'homework, all'algoritmo di Held-Karp è assegnato un timeout di esecuzione $T$. Abbiamo fissato il valore di $T$ a 2 minuti, per mantenere la RAM occupata sotto controllo (anche la complessità spaziale dell'algoritmo è esponenziale).\\
 
@@ -366,5 +369,5 @@ Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulys
     \item Il thread principale crea un \textit{worker thread} incaricandolo di eseguire Held-Karp sul grafo letto in input. Fa quindi partire il timeout e resta in attesa del risultato del worker thread. Tale risultato sarà disponibile da un \codeinline{std::future}.
     \item Se il worker thread termina prima dello scadere del timeout, il thread principale è immediatamente sbloccato e il risultato della funzione (restituito da \codeinline{std::future::get()}) è ritornato al chiamante.
     \item Se il timeout scade e il worker thread non ha ancora terminato l'esecuzione, il thread principale gli notifica di terminare l'esecuzione il prima possibile. Tale notifica avviene forzando la conclusione di una \codeinline{std::promise} creata dal main thread e data in input alla funzione eseguita incapsulata nella classe \codeinline{timeout\_signal}.
-    \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna la migliore soluzione individuata fino a quel momento al chiamante.
+    \item Quando la funzione eseguita si accorge che il tempo a disposizione è scaduto, interrompe la ricorsione e ritorna al chiamante la migliore soluzione individuata fino a quel momento.
 \end{itemize}
