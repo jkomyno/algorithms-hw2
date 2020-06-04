@@ -44,14 +44,16 @@ return utils::sum_weights_as_circuit(preorder.cbegin(), preorder.cend(), get_dis
 \subsubsection{Osservazioni}
 
 \begin{itemize}
-    \item Abbiamo usato l'algoritmo di Prim per eseguire il calcolo del Minimum Spanning Tree. Esso è infatti più adatto rispetto a Kruskal quando il grafo è rappresentato come Matrice della Distanze. Kruskal richiede di estrarre la lista di lati ordinata in modo ascendente rispetto al peso all'inizio dell'algoritmo, mentre Prim necessita solo della lista dei vertici. Ricordiamo che in un grafo completo vale l'equivalenza \complexityCompleteGraph{}.
+    \item Abbiamo usato l'algoritmo di Prim per eseguire il calcolo del Minimum Spanning Tree. Esso è infatti più adatto rispetto a Kruskal quando il grafo è rappresentato come Matrice della Distanze. Kruskal richiede di estrarre la lista di lati ordinata in modo ascendente rispetto al peso all'inizio dell'algoritmo, mentre Prim necessita solo della lista dei vertici. Ricordiamo che in un grafo completo vale l'equivalenza \complexityCompleteGraph{}. \\
 
-    \item La coda di priorità usata dall'algoritmo di Prim è stata implementata con una Min Heap binaria, la quale è già stata descritta in dettaglio nella relazione del primo progetto.
+    \item La coda di priorità usata dall'algoritmo di Prim è stata implementata con una Min Heap binaria, la quale è già stata descritta in dettaglio nella relazione del primo progetto. \\
 
-    \item Come notato nella sezione \hyperref[alternative-graph-representation]{Rappresentazione alternativa del grafo: caso MST}, l'albero di copertura minimo è rappresentato come Mappa di Adiacenza all'interno di \codeinline{Shared/DFS.h}.
+    \item Come notato nella sezione \hyperref[alternative-graph-representation]{Rappresentazione alternativa del grafo: caso MST}, l'albero di copertura minimo è rappresentato come Mappa di Adiacenza all'interno di \codeinline{Shared/DFS.h}. \\
 
     \item Il metodo \mintinline{c++}{DFS::preorder_traversal} invoca al suo interno il metodo ricorsivo \\
-    \mintinline{c++}{DFS::preorder_traversal_rec}. Il listato \ref{listing:dfs} contiene la definizione di tale metodo.
+    \mintinline{c++}{DFS::preorder_traversal_rec}. Il listato \ref{listing:dfs} contiene la definizione di tale metodo. \\
+
+    \item Il metodo ha tempo di esecuzione \complexityMSTTwpApproxTime{}, poiché l'MST è costruito in \complexityPrimTime{} e la visita preorder avviene in \complexityDFSPreorderTime{}.
 \end{itemize}
 
 \begin{listing}[!ht]
@@ -154,6 +156,8 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 
 \begin{itemize}
     \item Abbiamo voluto riportare qui la versione con BitMasking a 64 bit, la versione con DynamicBitMasking è simile. Il controllo su quale delle due implementazioni usare è fatto prima di lanciare la funzione di ricorsione appropriata.\\
+    \item \codeinline{signal} è il timeout descritto nella sezione \hyperref[sub:timeout]{Timeout per Held \& Karp}. \\
+    \item L'algoritmo ha tempo di esecuzione \complexityHeldKarpTime{} e occupazione spaziale \complexityHeldKarpSpace{}.
 \end{itemize}
 
 %\newpage
@@ -163,8 +167,7 @@ int held_karp_tsp_rec_bits_helper(timeout::timeout_signal& signal,
 
 Closest Insertion è un'euristica costruttiva per Metric-TSP che
 consente di approssimare la soluzione ottima ad un fattore
-2. La complessità asintotica di quest'euristica è
-$\bigO{n^2}$.
+2.
 
 \subsubsection{Idea}
 
@@ -277,13 +280,12 @@ return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_dista
     \end{center}
     che sceglie la posizione di inserimento che minimizza la distanza
     massima del circuito.\\
+
+    \item ClosestInsertion ha complessità temporale \complexityHeuristicInsertionTime{}. \\
+
+    \item Il grafico
+\ref{fig:closest-insertion-1-round-accuracy-error} mette in relazione i dataset (individuati univocamente per numero di nodi) con l'errore percentuale di approssimazione rispetto alla soluzione esatta.
 \end{itemize}
-
-\subsubsection{Approssimazione}
-
-L'algoritmo, come detto in precedenza, è un algoritmo di 2-approssimazione. Il grafico
-\ref{fig:closest-insertion-1-round-accuracy-error} ne evidenzia il
-risultato.
 
 \begin{figure}[!ht]
     \centering

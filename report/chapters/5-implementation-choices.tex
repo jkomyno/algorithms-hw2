@@ -353,6 +353,7 @@ Come input, abbiamo considerato i dataset \codeinline{burma14}, \codeinline{ulys
 \noindent Visti i risultati sperimentali, abbiamo quindi deciso di usare BitMasking a 64 bit per implementare l'algoritmo di Held \& Karp con grafi aventi meno di 64 nodi, e DynamicBitMasking per eseguire Held \& Karp su grafi di dimensioni maggiori.
 
 \subsection{Timeout per Held \& Karp}
+\label{sub:timeout}
 
 \noindent L'algoritmo di Held \& Karp ha complessità temporale \complexityHeldKarpTime{}, quindi i tempi di esecuzione \textit{esplodono} anche solo per grafi con poche decine di nodi. Come richiesto dall'homework, all'algoritmo di Held \& Karp è assegnato un timeout di esecuzione $T$. Abbiamo fissato il valore di $T$ a 2 minuti, per mantenere la RAM occupata sotto controllo (anche la complessità spaziale dell'algoritmo è esponenziale).\\
 

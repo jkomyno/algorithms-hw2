@@ -2,7 +2,7 @@
 \label{cap:extensions-and-originalities}
 
 \noindent Oltre alle tre implementazioni richieste dalla consegna
-dell'homework, abbiamo deciso di esplorare qualche altro algoritmo per il problema del commesso viaggiatore negli spazi metrici.\\
+dell'homework, abbiamo deciso di esplorare qualche altro algoritmo per il problema del commesso viaggiatore negli spazi metrici.
 
 \subsection{Farthest Insertion}
 \label{sec:farthest-insertion}
@@ -11,10 +11,8 @@ dell'homework, abbiamo deciso di esplorare qualche altro algoritmo per il proble
 risoluzione di Metric-TSP in modo approssimato. Questa euristica è
 molto simile a Closest Insertion (si veda
 \ref{sec:closest-insertion}), infatti differisce da essa solo per la
-selezione del vertice $k$ da inserire nel circuito parziale $C$.\\
-
-\noindent In particolare, in questo caso viene scelto il vertice $k$
-non presente nel circuito $C$ che massimizza $\delta (k, C)$.\\
+selezione del vertice $k$ da inserire nel circuito parziale $C$. In particolare, in Farthest Insertion viene scelto il vertice $k$
+non presente nel circuito $C$ che massimizza $\delta (k, C)$.
 
 \subsubsection{Implementazione}
 
@@ -45,7 +43,7 @@ illustrati dal grafico \ref{fig:farthest-insertion-accuracy-error}.\\
     \label{fig:farthest-insertion-accuracy-error}
 \end{figure}
 
-\noindent \'E doveroso mostrare le differenze tra Closest Insertion e
+\noindent È doveroso mostrare le differenze tra Closest Insertion e
 Farthest Insertion data la dualità delle due euristiche. Come
 illustrato dal grafico
 \ref{fig:closest-farthest-insertion-accuracy-error}, Farthest
@@ -56,12 +54,12 @@ Insertion approssima meglio il problema introducendo meno errore.\\
 
     \includegraphics[width=0.9\textwidth]{./images/ClosestInsertion1Round_vs_FarthestInsertion1Round__approximation_error_.png}
 
-    \caption{Confronto dell'errore introdotto da ClosestInsertion e FarthestInsertion rispetto al numero di nodi}
+    \caption{Confronto dell'errore introdotto da Closest Insertion e Farthest Insertion rispetto al numero di nodi}
     \label{fig:closest-farthest-insertion-accuracy-error}
 \end{figure}
 
-\noindent Anche per l'esecuzione con più rounds (meccanismo descritto
-in \ref{sec:rounds}) il risultato è il medesimo. Si veda il grafico
+\noindent Anche per l'esecuzione con più round paralleli (meccanismo descritto
+in \ref{sec:rounds}), nonostante il grafico evidenzi un leggero cambiamento dei dati, Farthest Insertion continua ad essere migliore. Si veda il grafico
 \ref{fig:closest-farthest-insertion-4-rounds-accuracy-error}.\\
 
 \begin{figure}[H]
@@ -101,7 +99,7 @@ implementazioni:
 
 \noindent L'inizializzazione può quindi differire in base al generator fornito
 in input: se il generator è un \mintinline{c++}{FixedGenerator} allora
-la sorgente scelta è fissata, fornendo così la versione base
+la sorgente scelta è fissata (come mostrato a lezione), fornendo così la versione base
 dell'algoritmo che non ha bisogno di molteplici esecuzioni per
 restituire il risultato, altrimenti la sorgente è scelta in modo
 casuale.\\
@@ -156,17 +154,15 @@ e prevede i seguenti step:
 
 \noindent Rispetto all'algoritmo descritto alla sezione
 \ref{sec:farthest-insertion}, cambia solo il primo step. La
-complessità resta quindi $\bigO{n^2}$.
+complessità resta quindi $\bigO{n^2}$. \\
 
-\subsection{Approssimazione}
-
-I risultati ottenuti da questo algoritmo sono illustrati dai grafici
+\noindent I risultati ottenuti da questo algoritmo sono illustrati dai grafici
 \ref{fig:farthest-insertion-alt-accuracy-error} e
 \ref{fig:farthest-insertion-alt-vs-std-1-4-rounds-accuracy-error}.
 Dal secondo grafico possiamo notare che rispetto alla versione
 standard (con un solo round) questo algoritmo si comporta un po'
 meglio su taglie piccole dell'input, peggiorando invece su taglie più
-grosse, mentre in confronto alla versione con quattro round non riesce
+grosse, mentre nella versione a 4 round (eseguiti su una CPU quad core in parallelo) è l'algoritmo che commette meno errori in 5 casi su 12.
 a competere in quasi nessun caso.
 
 \begin{figure}[!ht]
@@ -183,7 +179,7 @@ a competere in quasi nessun caso.
 
     \includegraphics[width=0.9\textwidth]{./images/FarthestInsertionAlternative_vs_FarthestInsertion1Round_vs_FarthestInsertion4ParallelRounds__approximation_error_.png}
 
-    \caption{Confronto dell'errore introdotto da FarthestInsertionAlternative e FarthestInsertion ``Standard'' rispetto al numero di nodi}
+    \caption{Confronto dell'errore introdotto da FarthestInsertionAlternative e FarthestInsertion ``standard'' rispetto al numero di nodi}
     \label{fig:farthest-insertion-alt-vs-std-1-4-rounds-accuracy-error}
 \end{figure}
 
