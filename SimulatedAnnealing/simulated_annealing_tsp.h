@@ -30,7 +30,7 @@
         const auto executor(executor::sequential_executor({trials}, [&]() {
             const auto result = nearest_neighbor_heuristic_tsp(distance_matrix, rand_int);
             const auto result_cost =
-                utils::sum_weights_in_circuit(result.cbegin(), result.cend(), get_distance);
+                utils::sum_weights_as_circuit(result.cbegin(), result.cend(), get_distance);
 
             return std::make_pair(result, result_cost);
         }));

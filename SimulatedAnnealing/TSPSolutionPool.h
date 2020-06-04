@@ -176,7 +176,7 @@ inline int TSPSolutionPool::compute_distance(const std::vector<size_t>& circuit)
         return distance_matrix.at(x, y);
     };
 
-    return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_distance);
+    return utils::sum_weights_as_circuit(circuit.cbegin(), circuit.cend(), get_distance);
 }
 
 // @param sample_size size n of R, a sample of 2n randomly generated solutions

@@ -50,7 +50,7 @@ namespace utils {
     // cbegin and cend are the iterators of the container used to store the circuit.
     // get_distance is the distance function that computes the cost between 2 nodes.
     template <typename It, typename Distance>
-    [[nodiscard]] int sum_weights_in_circuit(const It& cbegin, const It& cend,
+    [[nodiscard]] int sum_weights_as_circuit(const It& cbegin, const It& cend,
                                              Distance&& get_distance) {
         int total_weight = 0;
         auto it_prev = cbegin;
@@ -179,7 +179,7 @@ namespace utils {
         // w(0,3) + w(3,4) + w(4,1) + w(1,0).
         auto it_list = circuit_insertion_list.begin();
         it_list = circuit_insertion_list.insert(it_list, k);
-        const int first_weight = utils::sum_weights_in_circuit(
+        const int first_weight = utils::sum_weights_as_circuit(
             circuit_insertion_list.cbegin(), circuit_insertion_list.cend(), get_distance);
 
         // keep track of the minimum weight
@@ -195,7 +195,7 @@ namespace utils {
         for (size_t i = 1; i < size; ++i) {
             it_list = circuit_insertion_list.erase(it_list);
             it_list = circuit_insertion_list.insert(std::next(it_list), k);
-            const int weight = utils::sum_weights_in_circuit(
+            const int weight = utils::sum_weights_as_circuit(
                 circuit_insertion_list.cbegin(), circuit_insertion_list.cend(), get_distance);
 
             if (weight < min_weight) {

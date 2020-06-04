@@ -58,5 +58,5 @@ using namespace random_generator;
     }
 
     // return the weights in the circuit
-    return utils::sum_weights_in_circuit(circuit.cbegin(), circuit.cend(), get_distance);
+    return utils::sum_weights_as_circuit(circuit.cbegin(), circuit.cend(), get_distance);
 }
