@@ -157,6 +157,7 @@
     <ClInclude Include="Heap.h" />
     <ClInclude Include="KHeap.h" />
     <ClInclude Include="prim_binary_heap_mst.h" />
+    <ClInclude Include="sum_weights.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

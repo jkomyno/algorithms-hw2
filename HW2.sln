@@ -24,7 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C0EB85
 		Shared\read_file.h = Shared\read_file.h
 		Shared\sequential_executor.h = Shared\sequential_executor.h
 		Shared\shared_utils.h = Shared\shared_utils.h
-		Shared\sum_weights.h = Shared\sum_weights.h
 		Shared\timeout.h = Shared\timeout.h
 	EndProjectSection
 EndProject
